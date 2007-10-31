@@ -1,5 +1,5 @@
 EXPORTS
-	DllMain
+    DllMain
     WlxNegotiate                        
     WlxInitialize                       
     WlxDisplaySASNotice                 
@@ -19,4 +19,3 @@ EXPORTS
     WlxGetConsoleSwitchCredentials      
     WlxReconnectNotify                  
     WlxDisconnectNotify                 
-    DebugGINA                           

@@ -588,17 +588,3 @@ VOID WINAPI WlxDisconnectNotify( PVOID pWlxContext)
     pfWlxDisconnectNotify(pWlxContext);
 }
 
-
-// used for interactive debugging outside of WinLogon
-void WINAPI DebugGINA()
-{
-#ifdef _DEBUG
-    DWORD d;
-    BOOL result = WlxNegotiate(WLX_VERSION_1_3, &d);
-    if (!result) return;
-    void* pWlxContext;
-    result = WlxInitialize(0, 0, 0, 0, &pWlxContext);
-    if (!result) return;
-    WlxDisplaySASNotice(pWlxContext);
-#endif
-}
