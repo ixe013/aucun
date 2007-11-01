@@ -332,6 +332,16 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
 
 BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID pWinlogonFunctions, PVOID * pWlxContext)
 {
+	/*
+	STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+	CreateProcess(L"C:\\Program Files\\Tools\\Dbgview.exe", 0, 0, 0, TRUE, 0, 0, 0, &si, &pi);
+
+    CloseHandle( pi.hProcess );
+    CloseHandle( pi.hThread );
+	//*/
+
 	OutputDebugStringW(L"BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID pWinlogonFunctions, PVOID * pWlxContext)\n");
 
     //
@@ -451,7 +461,7 @@ int WINAPI WlxWkstaLockedSAS(PVOID pWlxContext, DWORD dwSasType)
 		   if(((PWLX_DISPATCH_VERSION_1_4) g_pWinlogon)->WlxMessageBox(WinlogonHandle, 0, L"Voulez-vous faire la passe du grand chef (et ainsi débarrer la session sans vous authentifier ?)", L"UnlockGina", MB_YESNO|MB_ICONQUESTION) == IDYES)
 		   {
 			OutputDebugStringW(L"Pass-passe !!!. \n"); 
-           result = WLX_SAS_ACTION_LOGOFF;
+           result = WLX_SAS_ACTION_UNLOCK_WKSTA;
 		   }
 			count = 0;
         }
