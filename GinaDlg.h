@@ -17,4 +17,4 @@
 //
 // Function prototypes.
 //
-void HookWlxDialogBoxParam (PVOID pWinlogonFunctions, DWORD dwWlxVersion);
+void HookWlxDialogBoxParam(PVOID pWinlogonFunctions, DWORD dwWlxVersion);

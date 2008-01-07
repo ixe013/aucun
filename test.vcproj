@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
-	Name="AnyUserCanUnlockNowGina"
-	ProjectGUID="{D818D87C-2DFB-47CE-8944-49A220F2F365}"
-	RootNamespace="RemoteUnlockGina"
+	Version="8,00"
+	Name="test"
+	ProjectGUID="{F1F2E1B6-B42F-46C9-A778-47E77EFA8A6C}"
+	RootNamespace="test"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -19,7 +19,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
 			>
 			<Tool
@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -60,12 +60,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib"
-				OutputFile="$(OutDir)\aucun.dll"
+				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib"
 				LinkIncremental="2"
-				ModuleDefinitionFile="$(SolutionDir)\GinaHook.def"
+				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -97,7 +96,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -118,7 +117,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -136,12 +135,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib"
-				OutputFile="$(OutDir)\aucun.dll"
+				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib"
 				LinkIncremental="1"
-				ModuleDefinitionFile="$(SolutionDir)\GinaHook.def"
+				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -181,19 +179,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\GinaDlg.c"
-				>
-			</File>
-			<File
-				RelativePath=".\GinaHook.c"
-				>
-			</File>
-			<File
-				RelativePath=".\GinaHook.Def"
-				>
-			</File>
-			<File
 				RelativePath=".\Settings.c"
+				>
+			</File>
+			<File
+				RelativePath=".\test.cpp"
 				>
 			</File>
 			<File
@@ -206,18 +196,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\GinaDlg.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GinaHook.h"
-				>
-			</File>
-			<File
-				RelativePath=".\resource.h"
-				>
-			</File>
 			<File
 				RelativePath=".\Settings.h"
 				>
@@ -232,10 +210,6 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-			<File
-				RelativePath=".\AnyUserCanUnlockNowGina.rc"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>
