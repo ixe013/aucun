@@ -4,39 +4,23 @@
 
 #define MAX_GROUPNAME 512
 
-#ifdef DEBUG
-void ErrorExit(DWORD dw) 
-{ 
-	wchar_t buf[2048];
-	LPVOID lpMsgBuf;
-
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-		FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL,
-		dw,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR) &lpMsgBuf,
-		0, NULL );
-
-	wsprintf(buf, L"failed with error %d: %s", dw, lpMsgBuf); 
-	OutputDebugString(buf);
-
-	LocalFree(lpMsgBuf);
-}
-#endif
 
 EXTERN BOOLEAN ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password)
 {
 	BOOLEAN result = FALSE;
 	HANDLE token = 0;
 
-	wchar_t buf[MAX_GROUPNAME];
+	wchar_t allowed[MAX_GROUPNAME] = L"";
+	wchar_t banned[MAX_GROUPNAME] = L"";
 
-	if (SUCCEEDED(GetAllowedGroupName(buf, sizeof buf)))
+	//Banned (blacklisted) group is optional
+	GetBannedGroupName(banned, sizeof banned);
+
+	if(SUCCEEDED(GetAllowedGroupName(allowed, sizeof allowed)))
 	{
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
-		if (LogonUserEx(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token, 0, 0, 0, 0))
+		//if (LogonUserEx(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token, 0, 0, 0, 0))
+		if (LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token))
 		{
 			SECURITY_IMPERSONATION_LEVEL sil;
 			DWORD cbsil = sizeof sil;
@@ -49,7 +33,16 @@ EXTERN BOOLEAN ShouldUnlockForUser(const wchar_t *domain, const wchar_t *usernam
 				//Change to an impersonation token
 				if(DuplicateToken(token, SecurityIdentification, &imptoken))
 				{
-					if(UsagerEstDansGroupe(imptoken, buf) == S_OK)
+					if(*banned)
+					{
+						if(UsagerEstDansGroupe(imptoken, banned) == S_OK)
+						{
+							*allowed = 0; //Banned group takes precedence over allowed group
+							              //a terminated allowed buffer is used here as a flag
+						}
+					}
+
+					if(*allowed && UsagerEstDansGroupe(imptoken, allowed) == S_OK)
 					{
 						result = TRUE;
 					}

@@ -105,8 +105,8 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 			username = wcsstr(rawusername, L"\\");
 
 			//C'est peut-etre une notation avec une arobas
-			if(!username)
-				username = wcsstr(rawusername, L"@");
+			//if(!username)
+			//	username = wcsstr(rawusername, L"@");
 
 			if(username)
 			{
@@ -127,6 +127,8 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 					EndDialog(hwndDlg, IDOK);
 					bResult = TRUE;
 				}
+
+				SecureZeroMemory(password, sizeof password);
 			}
 		}
 	}

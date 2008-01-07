@@ -14,5 +14,6 @@
 #define MAX_PASSWORD 512
 
 EXTERN HRESULT GetAllowedGroupName(wchar_t *group, DWORD size);
+EXTERN HRESULT GetBannedGroupName(wchar_t *group, DWORD size);
 
 #endif

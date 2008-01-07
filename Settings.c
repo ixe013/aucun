@@ -1,7 +1,8 @@
 #include <windows.h>
 #include "settings.h"
 
-HRESULT GetAllowedGroupName(wchar_t *group, DWORD size)
+
+HRESULT GetGroupName(const wchar_t *name, wchar_t *group, DWORD size)
 {
    HRESULT result = E_FAIL;
    DWORD type;
@@ -11,7 +12,7 @@ HRESULT GetAllowedGroupName(wchar_t *group, DWORD size)
 
    RegOpenKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Paralint.com\\Aucun", &reg);
 
-   if (RegQueryValueEx(reg, L"GroupName", 0, &type, (LPBYTE)group, &returnedsize) == ERROR_SUCCESS)
+   if (RegQueryValueEx(reg, name, 0, &type, (LPBYTE)group, &returnedsize) == ERROR_SUCCESS)
    {
       if ((type == REG_SZ) && (returnedsize < size))
       {
@@ -22,5 +23,15 @@ HRESULT GetAllowedGroupName(wchar_t *group, DWORD size)
    RegCloseKey(reg);
 
    return result;
+}
+
+HRESULT GetAllowedGroupName(wchar_t *group, DWORD size)
+{
+	return GetGroupName(L"GroupName", group, size);
+}
+
+HRESULT GetBannedGroupName(wchar_t *group, DWORD size)
+{
+	return GetGroupName(L"BannedGroupName", group, size);
 }
 

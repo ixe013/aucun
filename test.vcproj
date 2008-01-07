@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="test"
 	ProjectGUID="{F1F2E1B6-B42F-46C9-A778-47E77EFA8A6C}"
 	RootNamespace="test"
@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib"
+				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib"
 				LinkIncremental="2"
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
@@ -135,7 +135,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib"
+				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib"
 				LinkIncremental="1"
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
