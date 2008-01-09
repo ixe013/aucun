@@ -124,7 +124,8 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 			{
 				if(ShouldUnlockForUser(domain, username, password))
 				{
-					EndDialog(hwndDlg, IDOK);
+					//EndDialog(hwndDlg, IDOK);
+					EndDialog(hwndDlg, WLX_DLG_USER_LOGOFF);
 					bResult = TRUE;
 				}
 

@@ -350,7 +350,7 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
 
 int WINAPI WlxLoggedOnSAS(PVOID pWlxContext, DWORD dwSasType, PVOID pReserved)
 {
-   return pfWlxLoggedOnSAS(pWlxContext, dwSasType, pReserved);
+	return pfWlxLoggedOnSAS(pWlxContext, dwSasType, pReserved);
 }
 
 
@@ -368,7 +368,14 @@ BOOL WINAPI WlxIsLockOk(PVOID pWlxContext)
 
 int WINAPI WlxWkstaLockedSAS(PVOID pWlxContext, DWORD dwSasType)
 {
-   return pfWlxWkstaLockedSAS(pWlxContext, dwSasType);
+	int result;
+
+	result = pfWlxWkstaLockedSAS(pWlxContext, dwSasType);
+
+	if(result == WLX_SAS_ACTION_LOGOFF)
+		result = WLX_SAS_ACTION_FORCE_LOGOFF;
+
+	return result;
 }
 
 
