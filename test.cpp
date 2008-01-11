@@ -34,8 +34,8 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	if(argc > 1) for(int i=1; i<argc; ++i)
 	{
-		wchar_t user[MAX_USERNAME];
-		wchar_t domain[MAX_DOMAIN];
+//		wchar_t user[MAX_USERNAME];
+//		wchar_t domain[MAX_DOMAIN];
 		wchar_t passwd[MAX_PASSWORD];
 
 		HANDLE token = 0;

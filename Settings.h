@@ -13,7 +13,9 @@
 #define MAX_USERNAME 512
 #define MAX_PASSWORD 512
 
-EXTERN HRESULT GetAllowedGroupName(wchar_t *group, DWORD size);
-EXTERN HRESULT GetBannedGroupName(wchar_t *group, DWORD size);
+EXTERN HRESULT GetGroupName(const wchar_t *key, wchar_t *group, DWORD size);
+
+EXTERN const wchar_t* gUnlockGroupName;
+EXTERN const wchar_t* gForceLogoffGroupName;
 
 #endif

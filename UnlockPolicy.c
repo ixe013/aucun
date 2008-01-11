@@ -5,18 +5,19 @@
 #define MAX_GROUPNAME 512
 
 
-EXTERN BOOLEAN ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password)
+EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password)
 {
-	BOOLEAN result = FALSE;
+	int result = eLetMSGINAHandleIt; //secure by default
 	HANDLE token = 0;
 
-	wchar_t allowed[MAX_GROUPNAME] = L"";
-	wchar_t banned[MAX_GROUPNAME] = L"";
+	wchar_t unlock[MAX_GROUPNAME] = L"";
+	wchar_t logoff[MAX_GROUPNAME] = L"";
 
-	//Banned (blacklisted) group is optional
-	GetBannedGroupName(banned, sizeof banned);
+	GetGroupName(gUnlockGroupName, unlock, sizeof unlock);
+	GetGroupName(gForceLogoffGroupName, logoff, sizeof logoff);
 
-	if(SUCCEEDED(GetAllowedGroupName(allowed, sizeof allowed)))
+	//Do we have anything to work with ?
+	if(*unlock || *logoff)
 	{
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
 		//if (LogonUserEx(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token, 0, 0, 0, 0))
@@ -33,18 +34,13 @@ EXTERN BOOLEAN ShouldUnlockForUser(const wchar_t *domain, const wchar_t *usernam
 				//Change to an impersonation token
 				if(DuplicateToken(token, SecurityIdentification, &imptoken))
 				{
-					if(*banned)
+					if(UsagerEstDansGroupe(imptoken, logoff) == S_OK)
 					{
-						if(UsagerEstDansGroupe(imptoken, banned) == S_OK)
-						{
-							*allowed = 0; //Banned group takes precedence over allowed group
-							              //a terminated allowed buffer is used here as a flag
-						}
+						result = eForceLogoff;
 					}
-
-					if(*allowed && UsagerEstDansGroupe(imptoken, allowed) == S_OK)
+					else if(UsagerEstDansGroupe(imptoken, unlock) == S_OK)
 					{
-						result = TRUE;
+						result = eUnlock;
 					}
 
 					CloseHandle(imptoken);

@@ -104,9 +104,11 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 
 			username = wcsstr(rawusername, L"\\");
 
-			//C'est peut-etre une notation avec une arobas
+			//For some reason, LogonUser does not accept the UPN notation. I parse it.
 			//if(!username)
+			//{
 			//	username = wcsstr(rawusername, L"@");
+			//}
 
 			if(username)
 			{
@@ -122,11 +124,20 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 
 			if (*username && *password)
 			{
-				if(ShouldUnlockForUser(domain, username, password))
+				switch(ShouldUnlockForUser(domain, username, password))
 				{
-					//EndDialog(hwndDlg, IDOK);
-					EndDialog(hwndDlg, WLX_DLG_USER_LOGOFF);
+				case eForceLogoff:
+					//Might help with house keeping, instead of EndDialog
+					PostMessage(hwndDlg, WLX_WM_SAS, WLX_SAS_TYPE_USER_LOGOFF, 0);
 					bResult = TRUE;
+					break;
+				case eUnlock:
+					EndDialog(hwndDlg, IDOK);
+					bResult = TRUE;
+					break;
+				case eLetMSGINAHandleIt: 
+					//Most of the time, we end up here with nothing to do
+					break;
 				}
 
 				SecureZeroMemory(password, sizeof password);

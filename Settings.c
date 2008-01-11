@@ -1,6 +1,10 @@
 #include <windows.h>
 #include "settings.h"
 
+const wchar_t* gUnlockGroupName = L"unlock";
+const wchar_t* gForceLogoffGroupName = L"force logoff";
+const wchar_t* gExcludedGroupName = L"excluded";
+
 
 HRESULT GetGroupName(const wchar_t *name, wchar_t *group, DWORD size)
 {
@@ -10,7 +14,7 @@ HRESULT GetGroupName(const wchar_t *name, wchar_t *group, DWORD size)
 
    HKEY reg;
 
-   RegOpenKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Paralint.com\\Aucun", &reg);
+   RegOpenKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Paralint.com\\Aucun\\Groups", &reg);
 
    if (RegQueryValueEx(reg, name, 0, &type, (LPBYTE)group, &returnedsize) == ERROR_SUCCESS)
    {
@@ -23,15 +27,5 @@ HRESULT GetGroupName(const wchar_t *name, wchar_t *group, DWORD size)
    RegCloseKey(reg);
 
    return result;
-}
-
-HRESULT GetAllowedGroupName(wchar_t *group, DWORD size)
-{
-	return GetGroupName(L"GroupName", group, size);
-}
-
-HRESULT GetBannedGroupName(wchar_t *group, DWORD size)
-{
-	return GetGroupName(L"BannedGroupName", group, size);
 }
 

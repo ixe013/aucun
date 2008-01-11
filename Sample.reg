@@ -1,6 +1,10 @@
 REGEDIT4
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun]
-"GroupName"="My domain\\The unlockers"
-"BannedGroupName"="Administrators"
+[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Groups]
+"Unlock"="My domain\\The unlockers"
+"Excluded"="Administrators"
+"Force logoff"="My domain\\The unloggers"
 
+[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Notice]
+"Caption"="Security warning"
+"Text"="A custom unlogging software is installed. It could allow someone to unlock your workstation and impersonate you."
