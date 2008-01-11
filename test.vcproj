@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib"
+				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib secur32.lib"
 				LinkIncremental="2"
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
@@ -135,7 +135,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib"
+				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib secur32.lib"
 				LinkIncremental="1"
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
@@ -179,6 +179,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\debug.c"
+				>
+			</File>
+			<File
 				RelativePath=".\Settings.c"
 				>
 			</File>
@@ -196,6 +200,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\debug.h"
+				>
+			</File>
 			<File
 				RelativePath=".\Settings.h"
 				>

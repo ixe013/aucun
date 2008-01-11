@@ -12,10 +12,12 @@
 #define MAX_DOMAIN  512
 #define MAX_USERNAME 512
 #define MAX_PASSWORD 512
+#define MAX_GROUPNAME 512
 
 EXTERN HRESULT GetGroupName(const wchar_t *key, wchar_t *group, DWORD size);
 
 EXTERN const wchar_t* gUnlockGroupName;
 EXTERN const wchar_t* gForceLogoffGroupName;
+EXTERN const wchar_t* gExcludedGroupName;
 
 #endif

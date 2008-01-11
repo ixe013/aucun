@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "settings.h"
 #include "unlockpolicy.h"
+#include "debug.h"
 
 
 void ErrorExit(DWORD dw) 
@@ -29,9 +30,40 @@ void ErrorExit(DWORD dw)
 	LocalFree(lpMsgBuf);
 }
 
+BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	SetLastError(0);
+	*((HWND *)lParam) = hwnd;
+	return FALSE;
+}
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	{
+		DWORD pid, tid;
+		HANDLE process, token;
+		LUID luid;
+		HWND hWnd = 0;
+
+		EnumDesktopWindows(GetThreadDesktop(GetCurrentThreadId()), EnumWindowsProc, (LPARAM)&hWnd);
+
+		if(GetLastError() == 0)
+		{
+
+			tid = GetWindowThreadProcessId(hWnd, &pid);
+			process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+			if(OpenProcessToken(process, TOKEN_QUERY, &token))
+			{
+				GetLUIDFromToken(token, &luid);
+				OutputGetSessionUserName(&luid);
+
+				CloseHandle(token);
+			}
+
+			CloseHandle(process);
+		}
+	}
+
 	if(argc > 1) for(int i=1; i<argc; ++i)
 	{
 //		wchar_t user[MAX_USERNAME];
@@ -45,18 +77,17 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			//if(ShouldUnlockForUser(L"HYDRO-YN4PUBYPI", argv[i], passwd))
 			//if(ShouldUnlockForUser(domain, user, passwd))
-			if(ShouldUnlockForUser(L"", argv[i], passwd))
+			switch(ShouldUnlockForUser(L"", argv[i], passwd))
 			{
-				wprintf(L"You are in\n");
-			}
-			else
-			{
-				ErrorExit(GetLastError());
-				wprintf(L"You are OUT\n");
-
+			case eLetMSGINAHandleIt: wprintf(L"eLetMSGINAHandleIt\n"); break;
+			case eUnlock: wprintf(L"eUnlock\n"); break;
+			case eForceLogoff: wprintf(L"eForceLogoff\n"); break;
 			}
 		}
-
+		else
+		{
+			break;
+		}
 	}
 
 

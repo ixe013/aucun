@@ -2,7 +2,6 @@
 #include "Settings.h"
 #include "UnlockPolicy.h"
 
-#define MAX_GROUPNAME 512
 
 
 EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password)
@@ -13,8 +12,8 @@ EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, c
 	wchar_t unlock[MAX_GROUPNAME] = L"";
 	wchar_t logoff[MAX_GROUPNAME] = L"";
 
-	GetGroupName(gUnlockGroupName, unlock, sizeof unlock);
-	GetGroupName(gForceLogoffGroupName, logoff, sizeof logoff);
+	GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock);
+	GetGroupName(gForceLogoffGroupName, logoff, sizeof logoff / sizeof *logoff);
 
 	//Do we have anything to work with ?
 	if(*unlock || *logoff)

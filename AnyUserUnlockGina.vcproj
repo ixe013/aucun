@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib"
+				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib Secur32.lib"
 				OutputFile="$(OutDir)\aucun.dll"
 				LinkIncremental="2"
 				ModuleDefinitionFile="$(SolutionDir)\GinaHook.def"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib"
+				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib Secur32.lib"
 				OutputFile="$(OutDir)\aucun.dll"
 				LinkIncremental="1"
 				ModuleDefinitionFile="$(SolutionDir)\GinaHook.def"
@@ -181,6 +181,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\debug.c"
+				>
+			</File>
+			<File
 				RelativePath=".\GinaDlg.c"
 				>
 			</File>
@@ -206,6 +210,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\debug.h"
+				>
+			</File>
 			<File
 				RelativePath=".\GinaDlg.h"
 				>

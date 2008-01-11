@@ -21,6 +21,7 @@
 
 #include "Ginahook.h"
 #include "GinaDlg.h"
+#include "debug.h"
 
 //
 // Location of the real MSGINA.
@@ -80,6 +81,14 @@ static PFWLXREMOVESTATUSMESSAGE   pfWlxRemoveStatusMessage  = NULL;
 static PWLXGETCONSOLESWITCHCREDENTIALS pfWlxGetConsoleSwitchCredentials = NULL;
 static PWLXRECONNECTNOTIFY pfWlxReconnectNotify  = NULL;
 static PWLXDISCONNECTNOTIFY pfWlxDisconnectNotify = NULL;
+
+typedef struct
+{
+	wchar_t mUserName[512];
+	PVOID mOriginalContext;
+} MyGinaContext;
+
+static MyGinaContext gMyGinaContext = {0};
 
 //
 // Hook into the real MSGINA.
@@ -305,6 +314,7 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
 
 BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID pWinlogonFunctions, PVOID * pWlxContext)
 {
+	BOOL result;
    //
    // Save pointer to dispatch table.
    //
@@ -326,7 +336,16 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
    //
    HookWlxDialogBoxParam(g_pWinlogon, g_dwVersion);
 
-   return pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, pWlxContext);
+   
+   /*
+   //Hook the context
+   result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, &gMyGinaContext.mOriginalContext);
+	*pWlxContext = &gMyGinaContext;
+	/*/
+   result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, pWlxContext);
+   //*/
+
+   return result;
 }
 
 
@@ -369,6 +388,28 @@ BOOL WINAPI WlxIsLockOk(PVOID pWlxContext)
 int WINAPI WlxWkstaLockedSAS(PVOID pWlxContext, DWORD dwSasType)
 {
 	int result;
+
+	/*
+	{
+		HWND clipwnd;
+		DWORD pid, tid;
+		HANDLE process, token;
+		LUID luid;
+
+		clipwnd = GetClipboardOwner();
+		tid = GetWindowThreadProcessId(clipwnd, &pid);
+		process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+		if(OpenProcessToken(process, TOKEN_QUERY, &token))
+		{
+			GetLUIDFromToken(token, &luid);
+			OutputGetSessionUserName(&luid);
+
+			CloseHandle(token);
+		}
+
+		CloseHandle(process);
+	}
+	//*/
 
 	result = pfWlxWkstaLockedSAS(pWlxContext, dwSasType);
 
