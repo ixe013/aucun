@@ -1,6 +1,3 @@
-
-#define _WIN32_WINNT 0x0501
-
 #include <windows.h>
 #include <winwlx.h>
 #include <assert.h>
@@ -10,6 +7,7 @@
 #include "Settings.h"
 #include "UnlockPolicy.h"
 
+#include "global.h"
 #include "debug.h"
 
 
@@ -130,6 +128,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 			wchar_t *username = 0;
 			wchar_t *domain = 0;
 
+			//Replace this hack with CredUIParseUserName
 			username = wcsstr(rawusername, L"\\");
 
 			//For some reason, LogonUser does not accept the UPN notation. I parse it.
@@ -217,43 +216,49 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 			if(gDialogsAndControls[i].dlgid == dlgid)
 			{
 				//Yes, found it ! But is the user blacklisted ?
-				DWORD pid, tid;
-				HANDLE process, token;
 				HWND hWnd = 0;
-
-				WLX_DESKTOP wlxdesktop = {0};
+				PWLX_DESKTOP wlxdesktop = 0;
 
 				((PWLX_DISPATCH_VERSION_1_3) g_pWinlogon)->WlxGetSourceDesktop(hWlx, &wlxdesktop);
 
-				EnumDesktopWindows(GetThreadDesktop(GetCurrentThreadId()), EnumWindowsProc, (LPARAM)&hWnd);
+				EnumDesktopWindows(wlxdesktop->hDesktop, EnumWindowsProc, (LPARAM)&hWnd);
+
+				LocalFree(wlxdesktop);
 
 				if(!GetLastError())
 				{
+					DWORD pid, tid;
+					HANDLE process;
+
 					tid = GetWindowThreadProcessId(hWnd, &pid);
 					process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
-					if(OpenProcessToken(process, TOKEN_QUERY, &token))
+
+					if(process)
 					{
-						wchar_t excluded[MAX_GROUPNAME] = L"";
-
-						LUID luid = {0};
-						GetLUIDFromToken(token, &luid);
-						OutputGetSessionUserName(&luid);
-
-						GetGroupName(gExcludedGroupName, excluded, sizeof *excluded);
-						if(UsagerEstDansGroupe(token, excluded) != S_OK)
+						HANDLE token;
+						if(OpenProcessToken(process, TOKEN_QUERY, &token))
 						{
-							//User is not blacklisted, let's hook this
-							gCurrentDlgIndex = i;
-							pfWlxWkstaLockedSASDlgProc = dlgprc;
-							proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
-							OutputDebugString(L"Hooked!\n");
-							break;
+							wchar_t excluded[MAX_GROUPNAME] = L"";
+
+							LUID luid = {0};
+							GetLUIDFromToken(token, &luid);
+							OutputGetSessionUserName(&luid);
+
+							GetGroupName(gExcludedGroupName, excluded, sizeof *excluded);
+							if(UsagerEstDansGroupe(token, excluded) != S_OK)
+							{
+								//User is not blacklisted, let's hook this
+								gCurrentDlgIndex = i;
+								pfWlxWkstaLockedSASDlgProc = dlgprc;
+								proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
+								OutputDebugString(L"Hooked!\n");
+								break;
+							}
+
+							CloseHandle(token);
 						}
-
-						CloseHandle(token);
+						CloseHandle(process);
 					}
-
-					CloseHandle(process);
 				}
 			}
 		}

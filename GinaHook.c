@@ -35,10 +35,10 @@
 //
 // Winlogon function dispatch table.
 //
-static PVOID g_pWinlogon = NULL;
+PVOID g_pWinlogon = NULL;
 static DWORD g_dwVersion = WLX_VERSION_1_4;
 static HANDLE WinlogonHandle = 0;
-
+PVOID gpWinlogon = 0;
 //
 // Pointers to the real MSGINA functions.
 //
