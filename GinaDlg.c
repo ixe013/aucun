@@ -2,6 +2,7 @@
 #include <winwlx.h>
 #include <assert.h>
 #include <lm.h>
+#include <string.h>
 
 #include "Ginahook.h"
 #include "Settings.h"
@@ -34,7 +35,6 @@ static const int nbDialogsAndControlsID = sizeof gDialogsAndControls / sizeof *g
 // Pointers to redirected functions.
 //
 
-static PWLX_MESSAGE_BOX pfWlxMessageBox = NULL;
 static PWLX_DIALOG_BOX_PARAM pfWlxDialogBoxParam = NULL;
 
 static int gCurrentDlgIndex = -1;
@@ -61,10 +61,6 @@ void HookWlxDialogBoxParam(PVOID pWinlogonFunctions, DWORD dwWlxVersion)
 	//WlxDialogBoxParam
 	pfWlxDialogBoxParam = ((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxDialogBoxParam;
 	((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxDialogBoxParam = MyWlxDialogBoxParam;
-
-	//WlxMessageBox
-	pfWlxMessageBox = ((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxMessageBox;
-	((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxMessageBox = MyWlxMessageBox;
 }
 
 BOOLEAN GetDomainUsernamePassword(HWND hwndDlg, wchar_t *domain, int nbdomain, wchar_t *username, int nbusername, wchar_t *password, int nbpassword)
@@ -183,13 +179,83 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 //Stupid helper function to get the first window sent to us
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
-	//Any window will do.
+	BOOL result = TRUE;
+	wchar_t buf[512];
+	wsprintf(buf, L"Enun Window 0x%08X ", hwnd);
+
+	OutputDebugString(buf);
+
 	*((HWND *)lParam) = hwnd;
 
-	//We fail simply because we don't need to iterate over every single window. 
-	SetLastError(0); 
+	//Any visible window will do.
+	if(IsWindowVisible(hwnd))
+	{
+		//We fail simply because we don't need to iterate over every single window. 
+		OutputDebugString(L"is visible\n");
 
-	return FALSE;
+		SetLastError(0); 
+
+
+		result = FALSE;
+	}
+	else OutputDebugString(L"is not visible\n");
+
+	return result;
+}
+
+
+
+BOOL CALLBACK EnumWindowsProcFindVisible(HWND hwnd, LPARAM lParam)
+{
+	static int nbhidden = 0;
+	BOOL result = TRUE;
+	wchar_t buf[512];
+	wsprintf(buf, L"    Enun Window 0x%08p ", hwnd);
+	OutputDebugString(buf);
+
+	//Any visible window will do.
+	if(IsWindowVisible(hwnd))
+	{
+		//We fail simply because we don't need to iterate over every single window. 
+		OutputDebugString(L"is visible\n");
+
+		*((HWND*)lParam) = hwnd;
+
+		SetLastError(0); 
+
+		result = FALSE;
+	}
+	else 
+	{
+		OutputDebugString(L"is not visible\n");
+	}
+
+	return result;
+}
+
+
+BOOL CALLBACK EnumDesktopProc(LPTSTR lpszDesktop, LPARAM lParam)
+{
+	HDESK desktop;
+	wchar_t buf[512];
+
+	wsprintf(buf, L"  Desktop %s\n", lpszDesktop);
+	OutputDebugString(buf);
+
+	//No need to enumerate Winlogon desktop windows
+	if(_wcsicmp(L"Winlogon", lpszDesktop))
+	{
+		//A real desktop, usually "Default"
+		desktop = OpenDesktop(lpszDesktop, 0, FALSE, GENERIC_READ);
+
+		if(desktop)
+		{
+			EnumDesktopWindows(desktop, EnumWindowsProcFindVisible, lParam);
+			CloseDesktop(desktop);
+		}
+	}
+	
+	return TRUE;
 }
 
 
@@ -216,16 +282,34 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 			if(gDialogsAndControls[i].dlgid == dlgid)
 			{
 				//Yes, found it ! But is the user blacklisted ?
+				//*
 				HWND hWnd = 0;
+
+				/*
 				PWLX_DESKTOP wlxdesktop = 0;
 
 				((PWLX_DISPATCH_VERSION_1_3) g_pWinlogon)->WlxGetSourceDesktop(hWlx, &wlxdesktop);
 
+				OutputDebugString(wlxdesktop->pszDesktopName);
+				OutputDebugString(L"\n");
+
+				OutputDebugString(L"About to enumerate\n");
 				EnumDesktopWindows(wlxdesktop->hDesktop, EnumWindowsProc, (LPARAM)&hWnd);
 
 				LocalFree(wlxdesktop);
+				//*/
 
-				if(!GetLastError())
+				HWINSTA winsta;
+
+				winsta = GetProcessWindowStation();
+
+				if(winsta)
+				{
+					EnumDesktops(winsta, EnumDesktopProc, (LPARAM)&hWnd);
+					CloseWindowStation(winsta);
+				}
+
+				if(hWnd)
 				{
 					DWORD pid, tid;
 					HANDLE process;
@@ -247,45 +331,40 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 							GetGroupName(gExcludedGroupName, excluded, sizeof *excluded);
 							if(UsagerEstDansGroupe(token, excluded) != S_OK)
 							{
-								//User is not blacklisted, let's hook this
+								//User is not blacklisted, let's hook the dialog
 								gCurrentDlgIndex = i;
 								pfWlxWkstaLockedSASDlgProc = dlgprc;
 								proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
 								OutputDebugString(L"Hooked!\n");
 								break;
 							}
+							else OutputDebugString(L"Pas dans groupe \n");
 
 							CloseHandle(token);
 						}
 						CloseHandle(process);
 					}
 				}
+				/*/
+				if(! ((PWLX_DISPATCH_VERSION_1_3) g_pWinlogon)->WlxSwitchDesktopToUser(hWlx))
+				{
+					HWINSTA winsta;
+
+					winsta = GetProcessWindowStation();
+
+					if(winsta)
+					{
+						EnumDesktops(winsta, EnumDesktopProc, 0);
+						CloseWindowStation(winsta);
+					}
+
+				}
+				//*/
 			}
 		}
 	}
 
+	if(proc2use != MyWlxWkstaLockedSASDlgProc) OutputDebugString(L"Not hooked :(\n");
+
 	return pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, dwInitParam);
-}
-
-int WINAPI MyWlxMessageBox(HANDLE hWlx, HWND hwndOwner, LPWSTR lpszText, LPWSTR lpszTitle, UINT fuStyle)
-{
-	OutputDebugString(L"MyWlxMessageBox: ");
-	OutputDebugString(lpszText);
-	OutputDebugString(L"\n");
-
-	{
-		wchar_t buf[512];
-		DWORD nbuf = sizeof buf / sizeof *buf;
-
-		GetUserName(buf, &nbuf);
-		OutputDebugString(L"Thread user name is ");
-		if(nbuf > 0)
-			OutputDebugString(buf);
-		else
-			OutputDebugString(L"unknown !!!");
-
-		OutputDebugString(L"\n");
-	}
-
-	return pfWlxMessageBox(hWlx, hwndOwner, lpszText, lpszTitle, fuStyle);
 }

@@ -38,7 +38,6 @@
 PVOID g_pWinlogon = NULL;
 static DWORD g_dwVersion = WLX_VERSION_1_4;
 static HANDLE WinlogonHandle = 0;
-PVOID gpWinlogon = 0;
 //
 // Pointers to the real MSGINA functions.
 //
@@ -81,14 +80,6 @@ static PFWLXREMOVESTATUSMESSAGE   pfWlxRemoveStatusMessage  = NULL;
 static PWLXGETCONSOLESWITCHCREDENTIALS pfWlxGetConsoleSwitchCredentials = NULL;
 static PWLXRECONNECTNOTIFY pfWlxReconnectNotify  = NULL;
 static PWLXDISCONNECTNOTIFY pfWlxDisconnectNotify = NULL;
-
-typedef struct
-{
-	wchar_t mUserName[512];
-	PVOID mOriginalContext;
-} MyGinaContext;
-
-static MyGinaContext gMyGinaContext = {0};
 
 //
 // Hook into the real MSGINA.
@@ -337,13 +328,7 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
    HookWlxDialogBoxParam(g_pWinlogon, g_dwVersion);
 
    
-   /*
-   //Hook the context
-   result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, &gMyGinaContext.mOriginalContext);
-	*pWlxContext = &gMyGinaContext;
-	/*/
    result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, pWlxContext);
-   //*/
 
    return result;
 }
@@ -388,28 +373,6 @@ BOOL WINAPI WlxIsLockOk(PVOID pWlxContext)
 int WINAPI WlxWkstaLockedSAS(PVOID pWlxContext, DWORD dwSasType)
 {
 	int result;
-
-	/*
-	{
-		HWND clipwnd;
-		DWORD pid, tid;
-		HANDLE process, token;
-		LUID luid;
-
-		clipwnd = GetClipboardOwner();
-		tid = GetWindowThreadProcessId(clipwnd, &pid);
-		process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
-		if(OpenProcessToken(process, TOKEN_QUERY, &token))
-		{
-			GetLUIDFromToken(token, &luid);
-			OutputGetSessionUserName(&luid);
-
-			CloseHandle(token);
-		}
-
-		CloseHandle(process);
-	}
-	//*/
 
 	result = pfWlxWkstaLockedSAS(pWlxContext, dwSasType);
 
