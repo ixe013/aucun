@@ -47,11 +47,27 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded);
 
-		if(UsagerEstDansGroupe(token, excluded) != S_OK)
+		if(UsagerEstDansGroupe(token, excluded) == S_OK)
 		{
-			OutputDebugString(L"Hooked");
+			OutputDebugString(L"excluded");
 		}
+
+		GetGroupName(gUnlockGroupName, excluded, sizeof excluded / sizeof *excluded);
+
+		if(UsagerEstDansGroupe(token, excluded) == S_OK)
+		{
+			OutputDebugString(L"Unlocker");
+		}
+
+		GetGroupName(gForceLogoffGroupName, excluded, sizeof excluded / sizeof *excluded);
+
+		if(UsagerEstDansGroupe(token, excluded) == S_OK)
+		{
+			OutputDebugString(L"Force logoff");
+		}
+
 		CloseHandle(token);
+
 	}
 
 

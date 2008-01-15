@@ -94,8 +94,6 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 		{
 			BOOL b;
 
-				result = S_FALSE;
-
 			if (CheckTokenMembership(usager, pSid, &b) && (b == TRUE))
 			{
 				result = S_OK;
@@ -208,6 +206,16 @@ HANDLE GetCurrentLoggedOnUserToken()
 
 	if(winsta)
 	{
+		{
+			wchar_t buf[512];
+			DWORD l = sizeof buf / sizeof *buf;
+			if(GetUserObjectInformation(winsta, UOI_NAME, buf, l, &l))
+			{
+				OutputDebugString(L"Current window station ");
+				OutputDebugString(buf);
+				OutputDebugString(L"\n");
+			}
+		}
 		EnumDesktops(winsta, EnumDesktopProc, (LPARAM)&hWnd);
 		CloseWindowStation(winsta);
 	}

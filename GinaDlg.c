@@ -200,26 +200,39 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 			{
 				//Yes, found it ! But is the user blacklisted ?
 				//*
-				HANDLE token = GetCurrentLoggedOnUserToken();
+				HRESULT decision;
 				wchar_t excluded[MAX_GROUPNAME] = L"";
-
+				HANDLE token;
 				LUID luid = {0};
+				
+				//Get the token and make it an impersonation token
+				token = ConvertToImpersonationToken(GetCurrentLoggedOnUserToken()); 
+
 				GetLUIDFromToken(token, &luid);
 				OutputGetSessionUserName(&luid);
 
 				GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded);
 
-				if(UsagerEstDansGroupe(token, excluded) != S_OK)
+				decision = UsagerEstDansGroupe(token, excluded);
+
+				switch(decision)
 				{
+				case S_FALSE:
 					//User is not blacklisted, let's hook the dialog
 					gCurrentDlgIndex = i;
 					pfWlxWkstaLockedSASDlgProc = dlgprc;
 					proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
 					OutputDebugString(L"Hooked!\n");
+					break;
+				case S_OK:
+					OutputDebugString(L"Est dans le groupe des exclus \n");
+					break;
+				default:
+					wsprintf(excluded, L"Erreur 0x%08D\n", GetLastError());
+					OutputDebugString(excluded);
+					break;
 				}
-				else OutputDebugString(L"Pas dans groupe \n");
 				break;
-
 			}
 		}
 	}
