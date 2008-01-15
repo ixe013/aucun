@@ -18,7 +18,9 @@ enum
 	eForceLogoff,
 };
 
+EXTERN HANDLE ConvertToImpersonationToken(HANDLE token);
 EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password);
 EXTERN HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe);
+EXTERN HANDLE GetCurrentLoggedOnUserToken();
 
 #endif

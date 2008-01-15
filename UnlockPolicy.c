@@ -2,7 +2,28 @@
 #include "Settings.h"
 #include "UnlockPolicy.h"
 
+HANDLE ConvertToImpersonationToken(HANDLE token)
+{
+	HANDLE result = token;
 
+	SECURITY_IMPERSONATION_LEVEL sil;
+	DWORD cbsil = sizeof sil;
+
+	//If we are not impersonating
+	if(GetTokenInformation(token, TokenImpersonationLevel, (LPVOID)&sil, sizeof sil, &cbsil) == 0)
+	{
+		HANDLE imptoken = 0;
+
+		//Change to an impersonation token
+		if(DuplicateToken(token, SecurityIdentification, &imptoken))
+		{
+			result = imptoken;
+			CloseHandle(token);
+		}
+	}
+
+	return result;
+}
 
 EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password)
 {
@@ -22,31 +43,18 @@ EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, c
 		//if (LogonUserEx(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token, 0, 0, 0, 0))
 		if (LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token))
 		{
-			SECURITY_IMPERSONATION_LEVEL sil;
-			DWORD cbsil = sizeof sil;
+			token = ConvertToImpersonationToken(token);
 
-			//LOGON32_LOGON_UNLOCK returns a primary token, we need a impersonation token with identify access only
-			if(GetTokenInformation(token, TokenImpersonationLevel, (LPVOID)&sil, sizeof sil, &cbsil) == 0)
+			if(UsagerEstDansGroupe(token, logoff) == S_OK)
 			{
-				HANDLE imptoken = 0;
-
-				//Change to an impersonation token
-				if(DuplicateToken(token, SecurityIdentification, &imptoken))
-				{
-					if(UsagerEstDansGroupe(imptoken, logoff) == S_OK)
-					{
-						result = eForceLogoff;
-					}
-					else if(UsagerEstDansGroupe(imptoken, unlock) == S_OK)
-					{
-						result = eUnlock;
-					}
-
-					CloseHandle(imptoken);
-				}
-
-				CloseHandle(token);
+				result = eForceLogoff;
 			}
+			else if(UsagerEstDansGroupe(token, unlock) == S_OK)
+			{
+				result = eUnlock;
+			}
+
+			CloseHandle(token);
 		}
 	}
 
@@ -85,6 +93,9 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 		if (LookupAccountNameW(NULL, groupe, pSid, &dwSidSize, szDomain, &dwSize, &snu))
 		{
 			BOOL b;
+
+				result = S_FALSE;
+
 			if (CheckTokenMembership(usager, pSid, &b) && (b == TRUE))
 			{
 				result = S_OK;
@@ -103,3 +114,142 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 	return result;
 }
 
+//Stupid helper function to get the first window sent to us
+BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	BOOL result = TRUE;
+	wchar_t buf[512];
+	wsprintf(buf, L"Enun Window 0x%08X ", hwnd);
+
+	OutputDebugString(buf);
+
+	*((HWND *)lParam) = hwnd;
+
+	//Any visible window will do.
+	if(IsWindowVisible(hwnd))
+	{
+		//We fail simply because we don't need to iterate over every single window. 
+		OutputDebugString(L"is visible\n");
+
+		SetLastError(0); 
+
+
+		result = FALSE;
+	}
+	else OutputDebugString(L"is not visible\n");
+
+	return result;
+}
+
+
+
+BOOL CALLBACK EnumWindowsProcFindVisible(HWND hwnd, LPARAM lParam)
+{
+	static int nbhidden = 0;
+	BOOL result = TRUE;
+	wchar_t buf[512];
+	wsprintf(buf, L"    Enun Window 0x%08p ", hwnd);
+	OutputDebugString(buf);
+
+	//Any visible window will do.
+	if(IsWindowVisible(hwnd))
+	{
+		//We fail simply because we don't need to iterate over every single window. 
+		OutputDebugString(L"is visible\n");
+
+		*((HWND*)lParam) = hwnd;
+
+		SetLastError(0); 
+
+		result = FALSE;
+	}
+	else 
+	{
+		OutputDebugString(L"is not visible\n");
+	}
+
+	return result;
+}
+
+
+BOOL CALLBACK EnumDesktopProc(LPTSTR lpszDesktop, LPARAM lParam)
+{
+	HDESK desktop;
+	wchar_t buf[512];
+
+	wsprintf(buf, L"  Desktop %s\n", lpszDesktop);
+	OutputDebugString(buf);
+
+	//No need to enumerate Winlogon desktop windows
+	if(_wcsicmp(L"Winlogon", lpszDesktop))
+	{
+		//A real desktop, usually "Default"
+		desktop = OpenDesktop(lpszDesktop, 0, FALSE, GENERIC_READ);
+
+		if(desktop)
+		{
+			EnumDesktopWindows(desktop, EnumWindowsProcFindVisible, lParam);
+			CloseDesktop(desktop);
+		}
+	}
+	
+	return TRUE;
+}
+
+
+
+HANDLE GetCurrentLoggedOnUserToken()
+{
+	HANDLE result = 0;
+	HWND hWnd = 0;
+	HWINSTA winsta;
+
+	winsta = GetProcessWindowStation();
+
+	if(winsta)
+	{
+		EnumDesktops(winsta, EnumDesktopProc, (LPARAM)&hWnd);
+		CloseWindowStation(winsta);
+	}
+
+	if(hWnd)
+	{
+		DWORD pid, tid;
+		HANDLE process;
+
+		tid = GetWindowThreadProcessId(hWnd, &pid);
+		process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+
+		if(process)
+		{
+			HANDLE token;
+			if(OpenProcessToken(process, TOKEN_QUERY|TOKEN_DUPLICATE, &token))
+			{
+				/*
+				wchar_t excluded[MAX_GROUPNAME] = L"";
+
+				LUID luid = {0};
+				GetLUIDFromToken(token, &luid);
+				OutputGetSessionUserName(&luid);
+
+				GetGroupName(gExcludedGroupName, excluded, sizeof *excluded);
+				if(UsagerEstDansGroupe(token, excluded) != S_OK)
+				{
+					//User is not blacklisted, let's hook the dialog
+					gCurrentDlgIndex = i;
+					pfWlxWkstaLockedSASDlgProc = dlgprc;
+					proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
+					OutputDebugString(L"Hooked!\n");
+					break;
+				}
+				else OutputDebugString(L"Pas dans groupe \n");
+				//*/
+
+				result = token;
+			}
+			CloseHandle(process);
+		}
+	}
+
+	return result;
+}

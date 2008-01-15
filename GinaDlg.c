@@ -176,89 +176,6 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 	return bResult;
 }
 
-//Stupid helper function to get the first window sent to us
-BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
-{
-	BOOL result = TRUE;
-	wchar_t buf[512];
-	wsprintf(buf, L"Enun Window 0x%08X ", hwnd);
-
-	OutputDebugString(buf);
-
-	*((HWND *)lParam) = hwnd;
-
-	//Any visible window will do.
-	if(IsWindowVisible(hwnd))
-	{
-		//We fail simply because we don't need to iterate over every single window. 
-		OutputDebugString(L"is visible\n");
-
-		SetLastError(0); 
-
-
-		result = FALSE;
-	}
-	else OutputDebugString(L"is not visible\n");
-
-	return result;
-}
-
-
-
-BOOL CALLBACK EnumWindowsProcFindVisible(HWND hwnd, LPARAM lParam)
-{
-	static int nbhidden = 0;
-	BOOL result = TRUE;
-	wchar_t buf[512];
-	wsprintf(buf, L"    Enun Window 0x%08p ", hwnd);
-	OutputDebugString(buf);
-
-	//Any visible window will do.
-	if(IsWindowVisible(hwnd))
-	{
-		//We fail simply because we don't need to iterate over every single window. 
-		OutputDebugString(L"is visible\n");
-
-		*((HWND*)lParam) = hwnd;
-
-		SetLastError(0); 
-
-		result = FALSE;
-	}
-	else 
-	{
-		OutputDebugString(L"is not visible\n");
-	}
-
-	return result;
-}
-
-
-BOOL CALLBACK EnumDesktopProc(LPTSTR lpszDesktop, LPARAM lParam)
-{
-	HDESK desktop;
-	wchar_t buf[512];
-
-	wsprintf(buf, L"  Desktop %s\n", lpszDesktop);
-	OutputDebugString(buf);
-
-	//No need to enumerate Winlogon desktop windows
-	if(_wcsicmp(L"Winlogon", lpszDesktop))
-	{
-		//A real desktop, usually "Default"
-		desktop = OpenDesktop(lpszDesktop, 0, FALSE, GENERIC_READ);
-
-		if(desktop)
-		{
-			EnumDesktopWindows(desktop, EnumWindowsProcFindVisible, lParam);
-			CloseDesktop(desktop);
-		}
-	}
-	
-	return TRUE;
-}
-
-
 //
 // Redirected WlxDialogBoxParam() function.
 //
@@ -283,83 +200,26 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 			{
 				//Yes, found it ! But is the user blacklisted ?
 				//*
-				HWND hWnd = 0;
+				HANDLE token = GetCurrentLoggedOnUserToken();
+				wchar_t excluded[MAX_GROUPNAME] = L"";
 
-				/*
-				PWLX_DESKTOP wlxdesktop = 0;
+				LUID luid = {0};
+				GetLUIDFromToken(token, &luid);
+				OutputGetSessionUserName(&luid);
 
-				((PWLX_DISPATCH_VERSION_1_3) g_pWinlogon)->WlxGetSourceDesktop(hWlx, &wlxdesktop);
+				GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded);
 
-				OutputDebugString(wlxdesktop->pszDesktopName);
-				OutputDebugString(L"\n");
-
-				OutputDebugString(L"About to enumerate\n");
-				EnumDesktopWindows(wlxdesktop->hDesktop, EnumWindowsProc, (LPARAM)&hWnd);
-
-				LocalFree(wlxdesktop);
-				//*/
-
-				HWINSTA winsta;
-
-				winsta = GetProcessWindowStation();
-
-				if(winsta)
+				if(UsagerEstDansGroupe(token, excluded) != S_OK)
 				{
-					EnumDesktops(winsta, EnumDesktopProc, (LPARAM)&hWnd);
-					CloseWindowStation(winsta);
+					//User is not blacklisted, let's hook the dialog
+					gCurrentDlgIndex = i;
+					pfWlxWkstaLockedSASDlgProc = dlgprc;
+					proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
+					OutputDebugString(L"Hooked!\n");
 				}
+				else OutputDebugString(L"Pas dans groupe \n");
+				break;
 
-				if(hWnd)
-				{
-					DWORD pid, tid;
-					HANDLE process;
-
-					tid = GetWindowThreadProcessId(hWnd, &pid);
-					process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
-
-					if(process)
-					{
-						HANDLE token;
-						if(OpenProcessToken(process, TOKEN_QUERY, &token))
-						{
-							wchar_t excluded[MAX_GROUPNAME] = L"";
-
-							LUID luid = {0};
-							GetLUIDFromToken(token, &luid);
-							OutputGetSessionUserName(&luid);
-
-							GetGroupName(gExcludedGroupName, excluded, sizeof *excluded);
-							if(UsagerEstDansGroupe(token, excluded) != S_OK)
-							{
-								//User is not blacklisted, let's hook the dialog
-								gCurrentDlgIndex = i;
-								pfWlxWkstaLockedSASDlgProc = dlgprc;
-								proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
-								OutputDebugString(L"Hooked!\n");
-								break;
-							}
-							else OutputDebugString(L"Pas dans groupe \n");
-
-							CloseHandle(token);
-						}
-						CloseHandle(process);
-					}
-				}
-				/*/
-				if(! ((PWLX_DISPATCH_VERSION_1_3) g_pWinlogon)->WlxSwitchDesktopToUser(hWlx))
-				{
-					HWINSTA winsta;
-
-					winsta = GetProcessWindowStation();
-
-					if(winsta)
-					{
-						EnumDesktops(winsta, EnumDesktopProc, 0);
-						CloseWindowStation(winsta);
-					}
-
-				}
-				//*/
 			}
 		}
 	}

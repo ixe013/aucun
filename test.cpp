@@ -30,87 +30,30 @@ void ErrorExit(DWORD dw)
 	LocalFree(lpMsgBuf);
 }
 
-BOOL CALLBACK EnumAnyWindowsProc(HWND hwnd, LPARAM lParam)
-{
-	*((HWND *)lParam) = hwnd;
-
-	//We fail simply because we don't need to iterate over every single window. 
-	SetLastError(0); 
-
-	return FALSE;
-}
-
-BOOL CALLBACK EnumWindowsProcFindVisible(HWND hwnd, LPARAM lParam)
-{
-	BOOL result = TRUE;
-	wchar_t buf[512];
-	wsprintf(buf, L"    Enun Window 0x%08X ", hwnd);
-
-	OutputDebugString(buf);
-
-	*((HWND *)lParam) = hwnd;
-
-	//Any visible window will do.
-	if(IsWindowVisible(hwnd))
-	{
-
-		//We fail simply because we don't need to iterate over every single window. 
-		OutputDebugString(L"is visible\n");
-
-		SetLastError(0); 
-
-
-		result = FALSE;
-	}
-	else OutputDebugString(L"is not visible\n");
-
-	return result;
-}
-
-void FindVisibleWindowFromDesktop(HDESK desktop)
-{
-	DWORD pid, tid;
-	HANDLE process, token;
-	LUID luid;
-	HWND hWnd = 0;
-	wchar_t buf[512];
-
-	GetUserObjectInformation(desktop, UOI_NAME, buf, sizeof buf / sizeof *buf, &pid);
-
-	OutputDebugString(buf);
-	OutputDebugString(L"\n");
-
-	EnumDesktopWindows(desktop, EnumAnyWindowsProc, (LPARAM)&hWnd);
-
-	if(hWnd)
-	{
-		HDESK current_desktop;
-		HWINSTA winsta;
-
-		current_desktop = GetThreadDesktop(GetCurrentThreadId());
-
-		tid = GetWindowThreadProcessId(hWnd, &pid);
-		process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
-
-		SwitchDes
-
-		winsta = GetProcessWindowStation();
-		
-		if(OpenProcessToken(process, TOKEN_QUERY, &token))
-		{
-			GetLUIDFromToken(token, &luid);
-			OutputGetSessionUserName(&luid);
-
-			CloseHandle(token);
-		}
-
-		CloseHandle(process);
-	}
-}
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	FindVisibleWindowFromDesktop(GetThreadDesktop(GetCurrentThreadId()));
+	HANDLE token = GetCurrentLoggedOnUserToken();
+
+	if(token)
+	{
+		LUID luid = {0};
+		wchar_t excluded[MAX_GROUPNAME] = L"";
+
+		GetLUIDFromToken(token, &luid);
+		OutputGetSessionUserName(&luid);
+
+		token = ConvertToImpersonationToken(token);
+
+		GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded);
+
+		if(UsagerEstDansGroupe(token, excluded) != S_OK)
+		{
+			OutputDebugString(L"Hooked");
+		}
+		CloseHandle(token);
+	}
+
 
 	if(argc > 1) for(int i=1; i<argc; ++i)
 	{
