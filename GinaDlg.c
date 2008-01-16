@@ -116,6 +116,14 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 		wchar_t rawusername[MAX_USERNAME];
 		wchar_t password[MAX_PASSWORD];
 
+		{
+				LUID luid = {0};
+
+				OutputDebugString(L"WM_COMMAND, ID_OK\n");
+				GetLUIDFromToken(pgAucunContext->mCurrentUser, &luid);
+				OutputGetSessionUserName(&luid);
+		}
+
 		//Get the username and password for this particular Dialog template
 		if(GetDomainUsernamePassword(hwndDlg, rawdomain, sizeof rawdomain / sizeof *rawdomain, 
 											  rawusername, sizeof rawusername / sizeof *rawusername, 
@@ -199,9 +207,9 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 			if(gDialogsAndControls[i].dlgid == dlgid)
 			{
 				//Yes, found it ! But is the user blacklisted ?
-				//*
 				HRESULT decision;
 				wchar_t excluded[MAX_GROUPNAME] = L"";
+				/*
 				HANDLE token;
 				LUID luid = {0};
 				
@@ -214,6 +222,20 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 				GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded);
 
 				decision = UsagerEstDansGroupe(token, excluded);
+
+				CloseHandle(token);
+				/*/
+				LUID luid = {0};
+
+				OutputDebugString(L"MyWlxDialogBoxParam\n");
+				GetLUIDFromToken(pgAucunContext->mCurrentUser, &luid);
+				OutputGetSessionUserName(&luid);
+
+				GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded);
+
+				decision = UsagerEstDansGroupe(pgAucunContext->mCurrentUser, excluded);
+
+				//*/
 
 				switch(decision)
 				{

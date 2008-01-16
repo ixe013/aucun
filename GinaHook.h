@@ -1,3 +1,6 @@
+#ifndef __GINAHOOK_H__
+#define __GINAHOOK_H__
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
  THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
@@ -56,3 +59,12 @@ typedef BOOL(WINAPI * PFWLXREMOVESTATUSMESSAGE)(PVOID);
 typedef BOOL(WINAPI * PWLXGETCONSOLESWITCHCREDENTIALS)(PVOID, PVOID);
 typedef VOID(WINAPI * PWLXRECONNECTNOTIFY)(PVOID);
 typedef VOID(WINAPI * PWLXDISCONNECTNOTIFY)(PVOID);
+
+typedef struct
+{
+	HANDLE mCurrentUser;
+	PVOID mHookedContext;
+} MyGinaContext;
+
+
+#endif

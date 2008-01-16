@@ -10,6 +10,8 @@
 #endif
 
 EXTERN PVOID g_pWinlogon;
+EXTERN MyGinaContext *pgAucunContext;
+
 
 #endif
 

@@ -40,12 +40,21 @@ EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, c
 	if(*unlock || *logoff)
 	{
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
-		//if (LogonUserEx(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token, 0, 0, 0, 0))
 		if (LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token))
 		{
+			PSID current_sid, token_sid;
+			HANDLE current_user;
 			token = ConvertToImpersonationToken(token);
 
-			if(UsagerEstDansGroupe(token, logoff) == S_OK)
+			current_user = GetCurrentLoggedOnUserToken();
+
+			current_sid = token_sid = 0; //Fix me
+
+			if(EqualSid(current_sid, token_sid))
+			{
+				result = eUnlock;
+			}
+			else if(UsagerEstDansGroupe(token, logoff) == S_OK)
 			{
 				result = eForceLogoff;
 			}

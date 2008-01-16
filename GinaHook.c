@@ -21,6 +21,7 @@
 
 #include "Ginahook.h"
 #include "GinaDlg.h"
+#include "global.h"
 #include "debug.h"
 
 //
@@ -38,6 +39,10 @@
 PVOID g_pWinlogon = NULL;
 static DWORD g_dwVersion = WLX_VERSION_1_4;
 static HANDLE WinlogonHandle = 0;
+
+static MyGinaContext gAucunContext = {0};
+MyGinaContext *pgAucunContext = &gAucunContext;
+
 //
 // Pointers to the real MSGINA functions.
 //
@@ -81,6 +86,10 @@ static PWLXGETCONSOLESWITCHCREDENTIALS pfWlxGetConsoleSwitchCredentials = NULL;
 static PWLXRECONNECTNOTIFY pfWlxReconnectNotify  = NULL;
 static PWLXDISCONNECTNOTIFY pfWlxDisconnectNotify = NULL;
 
+PVOID GetHookedContext(PVOID pWlxContext)
+{
+	return ((MyGinaContext*)pWlxContext)->mHookedContext;
+}
 //
 // Hook into the real MSGINA.
 //
@@ -305,7 +314,6 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
 
 BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID pWinlogonFunctions, PVOID * pWlxContext)
 {
-	BOOL result;
    //
    // Save pointer to dispatch table.
    //
@@ -327,46 +335,65 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
    //
    HookWlxDialogBoxParam(g_pWinlogon, g_dwVersion);
 
-   
-   result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, pWlxContext);
+	//* 
+   *pWlxContext = &gAucunContext;
+   return pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, &gAucunContext.mHookedContext);
 
-   return result;
+
+	/*/
+   return pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, pWlxContext);
+   //*/
+
 }
 
 
 VOID WINAPI WlxDisplaySASNotice(PVOID pWlxContext)
 {
-   pfWlxDisplaySASNotice(pWlxContext);
+   pfWlxDisplaySASNotice(GetHookedContext(pWlxContext));
 }
 
 
 int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthenticationId, PSID pLogonSid, PDWORD pdwOptions, PHANDLE phToken, PWLX_MPR_NOTIFY_INFO pMprNotifyInfo, PVOID * pProfile)
 {
-   return pfWlxLoggedOutSAS(pWlxContext, dwSasType, pAuthenticationId, pLogonSid, pdwOptions, phToken, pMprNotifyInfo, pProfile);
+	int result;
+   result =  pfWlxLoggedOutSAS(GetHookedContext(pWlxContext), dwSasType, pAuthenticationId, pLogonSid, pdwOptions, phToken, pMprNotifyInfo, pProfile);
+
+	if(result == WLX_SAS_ACTION_LOGON)
+	{
+		DuplicateToken(*phToken, SecurityIdentification, &(((MyGinaContext*)pWlxContext)->mCurrentUser));
+	}
+
+	return result;
 }
 
 
 BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR pszMprLogonScript, PVOID pEnvironment)
 {
-   return pfWlxActivateUserShell(pWlxContext, pszDesktopName, pszMprLogonScript, pEnvironment);
+   return pfWlxActivateUserShell(GetHookedContext(pWlxContext), pszDesktopName, pszMprLogonScript, pEnvironment);
 }
 
 
 int WINAPI WlxLoggedOnSAS(PVOID pWlxContext, DWORD dwSasType, PVOID pReserved)
 {
-	return pfWlxLoggedOnSAS(pWlxContext, dwSasType, pReserved);
+	LUID luid = {0};
+
+	OutputDebugString(L"WlxLoggedOnSAS\n");
+	GetLUIDFromToken(((MyGinaContext*)pWlxContext)->mCurrentUser, &luid);
+	OutputGetSessionUserName(&luid);
+
+	return pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
 }
 
 
 VOID WINAPI WlxDisplayLockedNotice(PVOID pWlxContext)
 {
-   pfWlxDisplayLockedNotice(pWlxContext);
+   pfWlxDisplayLockedNotice(GetHookedContext(pWlxContext));
 }
 
 
 BOOL WINAPI WlxIsLockOk(PVOID pWlxContext)
 {
-   return pfWlxIsLockOk(pWlxContext);
+   return pfWlxIsLockOk(GetHookedContext(pWlxContext));
 }
 
 
@@ -374,7 +401,7 @@ int WINAPI WlxWkstaLockedSAS(PVOID pWlxContext, DWORD dwSasType)
 {
 	int result;
 
-	result = pfWlxWkstaLockedSAS(pWlxContext, dwSasType);
+	result = pfWlxWkstaLockedSAS(GetHookedContext(pWlxContext), dwSasType);
 
 	if(result == WLX_SAS_ACTION_LOGOFF)
 		result = WLX_SAS_ACTION_FORCE_LOGOFF;
@@ -385,19 +412,22 @@ int WINAPI WlxWkstaLockedSAS(PVOID pWlxContext, DWORD dwSasType)
 
 BOOL WINAPI WlxIsLogoffOk(PVOID pWlxContext)
 {
-   return pfWlxIsLogoffOk(pWlxContext);
+   return pfWlxIsLogoffOk(GetHookedContext(pWlxContext));
 }
 
 
 VOID WINAPI WlxLogoff(PVOID pWlxContext)
 {
-   pfWlxLogoff(pWlxContext);
+		CloseHandle(((MyGinaContext*)pWlxContext)->mCurrentUser);
+		((MyGinaContext*)pWlxContext)->mCurrentUser = 0;
+
+   pfWlxLogoff(GetHookedContext(pWlxContext));
 }
 
 
 VOID WINAPI WlxShutdown(PVOID pWlxContext, DWORD ShutdownType)
 {
-   pfWlxShutdown(pWlxContext, ShutdownType);
+   pfWlxShutdown(GetHookedContext(pWlxContext), ShutdownType);
 }
 
 
@@ -407,12 +437,12 @@ VOID WINAPI WlxShutdown(PVOID pWlxContext, DWORD ShutdownType)
 
 BOOL WINAPI WlxScreenSaverNotify(PVOID  pWlxContext, BOOL * pSecure)
 {
-   return pfWlxScreenSaverNotify(pWlxContext, pSecure);
+   return pfWlxScreenSaverNotify(GetHookedContext(pWlxContext), pSecure);
 }
 
 BOOL WINAPI WlxStartApplication(PVOID pWlxContext, PWSTR pszDesktopName, PVOID pEnvironment, PWSTR pszCmdLine)
 {
-   return pfWlxStartApplication(pWlxContext, pszDesktopName, pEnvironment, pszCmdLine);
+   return pfWlxStartApplication(GetHookedContext(pWlxContext), pszDesktopName, pEnvironment, pszCmdLine);
 }
 
 
@@ -422,25 +452,25 @@ BOOL WINAPI WlxStartApplication(PVOID pWlxContext, PWSTR pszDesktopName, PVOID p
 
 BOOL WINAPI WlxNetworkProviderLoad(PVOID pWlxContext, PWLX_MPR_NOTIFY_INFO pNprNotifyInfo)
 {
-   return pfWlxNetworkProviderLoad(pWlxContext, pNprNotifyInfo);
+   return pfWlxNetworkProviderLoad(GetHookedContext(pWlxContext), pNprNotifyInfo);
 }
 
 
 BOOL WINAPI WlxDisplayStatusMessage(PVOID pWlxContext, HDESK hDesktop, DWORD dwOptions, PWSTR pTitle, PWSTR pMessage)
 {
-   return pfWlxDisplayStatusMessage(pWlxContext, hDesktop, dwOptions, pTitle, pMessage);
+   return pfWlxDisplayStatusMessage(GetHookedContext(pWlxContext), hDesktop, dwOptions, pTitle, pMessage);
 }
 
 
 BOOL WINAPI WlxGetStatusMessage(PVOID pWlxContext, DWORD * pdwOptions, PWSTR pMessage, DWORD dwBufferSize)
 {
-   return pfWlxGetStatusMessage(pWlxContext, pdwOptions, pMessage, dwBufferSize);
+   return pfWlxGetStatusMessage(GetHookedContext(pWlxContext), pdwOptions, pMessage, dwBufferSize);
 }
 
 
 BOOL WINAPI WlxRemoveStatusMessage(PVOID pWlxContext)
 {
-   return pfWlxRemoveStatusMessage(pWlxContext);
+   return pfWlxRemoveStatusMessage(GetHookedContext(pWlxContext));
 }
 
 
@@ -449,15 +479,15 @@ BOOL WINAPI WlxRemoveStatusMessage(PVOID pWlxContext)
 //
 BOOL WINAPI WlxGetConsoleSwitchCredentials(PVOID pWlxContext, PVOID pCredInfo)
 {
-   return pfWlxGetConsoleSwitchCredentials(pWlxContext, pCredInfo);
+   return pfWlxGetConsoleSwitchCredentials(GetHookedContext(pWlxContext), pCredInfo);
 }
 
 VOID WINAPI WlxReconnectNotify(PVOID pWlxContext)
 {
-   pfWlxReconnectNotify(pWlxContext);
+   pfWlxReconnectNotify(GetHookedContext(pWlxContext));
 }
 
 VOID WINAPI WlxDisconnectNotify(PVOID pWlxContext)
 {
-   pfWlxDisconnectNotify(pWlxContext);
+   pfWlxDisconnectNotify(GetHookedContext(pWlxContext));
 }
