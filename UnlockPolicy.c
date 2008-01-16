@@ -2,6 +2,7 @@
 #include "Settings.h"
 #include "UnlockPolicy.h"
 
+
 HANDLE ConvertToImpersonationToken(HANDLE token)
 {
 	HANDLE result = token;
@@ -25,6 +26,31 @@ HANDLE ConvertToImpersonationToken(HANDLE token)
 	return result;
 }
 
+//Taken from Keith Brown Full Ginal Sample on MSJ (or MSDN mag, whatever)
+HRESULT IsSameUser(HANDLE hToken1, HANDLE hToken2) 
+{
+	HRESULT result = E_FAIL; 
+
+    BYTE buf1[sizeof(TOKEN_USER) + SECURITY_MAX_SID_SIZE];
+    BYTE buf2[sizeof(TOKEN_USER) + SECURITY_MAX_SID_SIZE];
+
+    DWORD cb;
+    if (GetTokenInformation(hToken1, TokenUser, buf1, sizeof buf1, &cb) &&
+		GetTokenInformation(hToken2, TokenUser, buf2, sizeof buf2, &cb)) 
+	{
+        if(EqualSid(((TOKEN_USER*)buf1)->User.Sid, ((TOKEN_USER*)buf2)->User.Sid))
+		{
+			result = S_OK;
+		}
+		else
+		{
+			result = S_FALSE;
+		}
+    }
+
+    return result;
+}
+
 EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password)
 {
 	int result = eLetMSGINAHandleIt; //secure by default
@@ -33,6 +59,7 @@ EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, c
 	wchar_t unlock[MAX_GROUPNAME] = L"";
 	wchar_t logoff[MAX_GROUPNAME] = L"";
 
+	//Get the groups early to ensure fail fast if GINA is not configured
 	GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock);
 	GetGroupName(gForceLogoffGroupName, logoff, sizeof logoff / sizeof *logoff);
 
@@ -42,28 +69,32 @@ EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, c
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
 		if (LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token))
 		{
-			PSID current_sid, token_sid;
+			HRESULT is_same_user;
 			HANDLE current_user;
 			token = ConvertToImpersonationToken(token);
 
 			current_user = GetCurrentLoggedOnUserToken();
 
-			current_sid = token_sid = 0; //Fix me
+			is_same_user = IsSameUser(current_user, token);
 
-			if(EqualSid(current_sid, token_sid))
+			if(is_same_user == S_OK)
 			{
-				result = eUnlock;
+				result = eUnlock; 
 			}
-			else if(UsagerEstDansGroupe(token, logoff) == S_OK)
+			else if(is_same_user == S_FALSE)
 			{
-				result = eForceLogoff;
-			}
-			else if(UsagerEstDansGroupe(token, unlock) == S_OK)
-			{
-				result = eUnlock;
+				if(UsagerEstDansGroupe(token, logoff) == S_OK)
+				{
+					result = eForceLogoff;
+				}
+				else if(UsagerEstDansGroupe(token, unlock) == S_OK)
+				{
+					result = eUnlock;
+				}
 			}
 
 			CloseHandle(token);
+			CloseHandle(current_user);
 		}
 	}
 

@@ -209,22 +209,6 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 				//Yes, found it ! But is the user blacklisted ?
 				HRESULT decision;
 				wchar_t excluded[MAX_GROUPNAME] = L"";
-				/*
-				HANDLE token;
-				LUID luid = {0};
-				
-				//Get the token and make it an impersonation token
-				token = ConvertToImpersonationToken(GetCurrentLoggedOnUserToken()); 
-
-				GetLUIDFromToken(token, &luid);
-				OutputGetSessionUserName(&luid);
-
-				GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded);
-
-				decision = UsagerEstDansGroupe(token, excluded);
-
-				CloseHandle(token);
-				/*/
 				LUID luid = {0};
 
 				OutputDebugString(L"MyWlxDialogBoxParam\n");
@@ -234,8 +218,6 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 				GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded);
 
 				decision = UsagerEstDansGroupe(pgAucunContext->mCurrentUser, excluded);
-
-				//*/
 
 				switch(decision)
 				{
