@@ -63,6 +63,7 @@ typedef VOID(WINAPI * PWLXDISCONNECTNOTIFY)(PVOID);
 typedef struct
 {
 	HANDLE mCurrentUser;
+	HANDLE Winlogon;
 	PVOID mHookedContext;
 } MyGinaContext;
 

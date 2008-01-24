@@ -340,6 +340,7 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
 
 	//* 
    *pWlxContext = &gAucunContext;
+   gAucunContext.Winlogon = hWlx;
    return pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, &gAucunContext.mHookedContext);
 
 
@@ -378,13 +379,26 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
 
 int WINAPI WlxLoggedOnSAS(PVOID pWlxContext, DWORD dwSasType, PVOID pReserved)
 {
-	LUID luid = {0};
+	int result;
+	result = pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
 
-	OutputDebugString(L"WlxLoggedOnSAS\n");
-	GetLUIDFromToken(((MyGinaContext*)pWlxContext)->mCurrentUser, &luid);
-	OutputGetSessionUserName(&luid);
+	switch(result)
+	{		   
+	case WLX_SAS_ACTION_NONE: OutputDebugString(L"WLX_SAS_ACTION_NONE  Returns to the default desktop. \n"); break;
+	case WLX_SAS_ACTION_LOCK_WKSTA: OutputDebugString(L"WLX_SAS_ACTION_LOCK_WKSTA  Locks the workstation and waits for the next SAS. \n"); break;
+	case WLX_SAS_ACTION_LOGOFF: OutputDebugString(L"WLX_SAS_ACTION_LOGOFF  Logs the user off the workstation. \n"); break;
+	case WLX_SAS_ACTION_SHUTDOWN: OutputDebugString(L"WLX_SAS_ACTION_SHUTDOWN  Logs the user off and shuts down the computer. \n"); break;
+	case WLX_SAS_ACTION_SHUTDOWN_REBOOT: OutputDebugString(L"WLX_SAS_ACTION_SHUTDOWN_REBOOT  Logs the user off, shuts down the computer, and then reboots the computer. \n"); break;
+	case WLX_SAS_ACTION_SHUTDOWN_POWER_OFF: OutputDebugString(L"WLX_SAS_ACTION_SHUTDOWN_POWER_OFF  If hardware allows, logs the user off, shuts down the computer, and then turns off the computer. \n"); break;
+	case WLX_SAS_ACTION_PWD_CHANGED: OutputDebugString(L"WLX_SAS_ACTION_PWD_CHANGED  Notifies network providers that the user changed their password. Obsolete GINA DLLs should call WlxChangePasswordNotify whenever a password is changed. \n"); break;
+	case WLX_SAS_ACTION_TASKLIST: OutputDebugString(L"WLX_SAS_ACTION_TASKLIST  Invokes the task list. \n"); break;
+	case WLX_SAS_ACTION_FORCE_LOGOFF: OutputDebugString(L"WLX_SAS_ACTION_FORCE_LOGOFF  Forcibly logs off the user. \n"); break;
+	case WLX_SAS_ACTION_SHUTDOWN_SLEEP: OutputDebugString(L"WLX_SAS_ACTION_SHUTDOWN_SLEEP  Puts the computer in suspend mode. \n"); break;
+	case WLX_SAS_ACTION_SHUTDOWN_SLEEP2: OutputDebugString(L"WLX_SAS_ACTION_SHUTDOWN_SLEEP2  Shuts down the system into an ACPI power-down state. If the computer is not an ACPI computer, this option will have no effect. \n"); break;
+	case WLX_SAS_ACTION_SHUTDOWN_HIBERNATE: OutputDebugString(L"WLX_SAS_ACTION_SHUTDOWN_HIBERNATE  Shuts down the system into the hibernate mode. If the system was not configured for hibernation, this option will have no effect. \n"); break;
+	}
 
-	return pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
+	return result;
 }
 
 

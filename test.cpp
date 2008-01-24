@@ -35,81 +35,43 @@ void ErrorExit(DWORD dw)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	HMODULE msgina;
+	wchar_t unlock[MAX_GROUPNAME] = L"";
 
-	msgina = LoadLibraryEx(L"msgina.dll", 0, LOAD_LIBRARY_AS_DATAFILE);
-
-	if(msgina)
+	if(GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
 	{
-		TCHAR szFormat[1024];
-		TCHAR buf[2048];
 		wchar_t caption[512];
-		LPSTR a, b, c;
-		TCHAR realname[MAX_USERNAME] = L"";
-		DWORD nb_realname = sizeof realname / sizeof *realname;
-		WKSTA_USER_INFO_1 *userinfo = 0;
+		wchar_t text[2048];
 
-		UINT ids = 1620;
+		OutputDebugString(L"Group name ");
+		OutputDebugString(unlock);
+		OutputDebugString(L"\n");
 
-		HANDLE token = GetCurrentLoggedOnUserToken();
-
-		a = b = c = 0;
-
-		if(ImpersonateLoggedOnUser(token))
+		if((GetNoticeText(L"Caption", caption, sizeof caption / sizeof *caption) == S_OK)
+		&& (GetNoticeText(L"Text", text, sizeof text / sizeof *text) == S_OK))
 		{
+			wchar_t message[MAX_USERNAME + sizeof text / sizeof *text];
+			wchar_t *read = text;
+			wchar_t *write = text;
 
-			GetUserNameEx(NameDisplay, realname, &nb_realname);
+			while(*read)
+			{
+				if((*read == '\\') && (*(read+1) == 'n'))
+				{
+					*write++ = '\n';
+					read += 2;
+				}
+				else
+				{
+					*write++ = *read++;
+				}
+			}
 
-			NetWkstaUserGetInfo(0, 1, (LPBYTE*)&userinfo);		
+			*write = 0;
 
-			RevertToSelf(); //We are done with this
-
-			//What information do we have ?
-			if(*userinfo->wkui1_logon_domain && *userinfo->wkui1_username && *realname)
-			{
-				//
-				ids = 1500;
-				a = userinfo->wkui1_logon_domain;
-				b = userinfo->wkui1_username;
-				c = (LPSTR)realname;
-			}
-			else if(*userinfo->wkui1_logon_domain && *userinfo->wkui1_username)
-			{
-				ids = 1550;
-				a = userinfo->wkui1_logon_domain;
-				b = userinfo->wkui1_username;
-				c = 0;
-			}
-			else if(*userinfo->wkui1_username && *realname)
-			{
-				ids = 1610;
-				a = userinfo->wkui1_username;
-				b = (LPSTR)realname;
-				c = 0;
-			}
-			else if(*userinfo->wkui1_username)
-			{
-				ids = 1611;
-				a = userinfo->wkui1_username;
-				b = 0;
-				c = 0;
-			}
+			wsprintf(message, text, unlock); //Will insert group name if there is a %s in the message
+			MessageBox(0, message, caption, MB_YESNOCANCEL|MB_ICONEXCLAMATION);
 		}
-
-		CloseHandle(token);
-
-		LoadString(msgina, 1518, caption, sizeof caption / sizeof *caption);
-		LoadString(msgina, ids, szFormat, sizeof szFormat / sizeof *szFormat);
-
-		wsprintf(buf, szFormat, a, b, c);
-
-		if(userinfo)
-			NetApiBufferFree(userinfo);
-
-
-		FreeLibrary(msgina);
 	}
-
 
 	if(argc > 1) for(int i=1; i<argc; ++i)
 	{

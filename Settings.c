@@ -6,7 +6,19 @@ const wchar_t* gForceLogoffGroupName = L"force logoff";
 const wchar_t* gExcludedGroupName = L"excluded";
 
 
+HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, DWORD size);
+
 HRESULT GetGroupName(const wchar_t *name, wchar_t *group, DWORD size)
+{
+	return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Groups", name, group, size);
+}
+
+HRESULT GetNoticeText(const wchar_t *name, wchar_t *text, DWORD size)
+{
+	return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Notice", name, text, size);
+}
+
+HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, DWORD size)
 {
    HRESULT result = E_FAIL;
    DWORD type;
@@ -14,17 +26,19 @@ HRESULT GetGroupName(const wchar_t *name, wchar_t *group, DWORD size)
 
    HKEY reg;
 
-   RegOpenKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Paralint.com\\Aucun\\Groups", &reg);
-
-   if (RegQueryValueEx(reg, name, 0, &type, (LPBYTE)group, &returnedsize) == ERROR_SUCCESS)
+   if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_READ, &reg) == ERROR_SUCCESS)
    {
-      if ((type == REG_SZ) && (returnedsize < size))
-      {
-         result = S_OK;
-      }
-   }
 
-   RegCloseKey(reg);
+	   if (RegQueryValueEx(reg, name, 0, &type, (LPBYTE)text, &returnedsize) == ERROR_SUCCESS)
+	   {
+		  if ((type == REG_SZ) && (returnedsize < size) && (returnedsize > 0))
+		  {
+			 result = S_OK;
+		  }
+	   }
+
+		RegCloseKey(reg);
+   }
 
    return result;
 }

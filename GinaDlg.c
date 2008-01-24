@@ -16,7 +16,10 @@
 
 typedef struct
 {
-	int dlgid;
+	int IDD_SAS;
+	int IDC_LOCKWKSTA;
+	int IDC_LOGOFF;
+	int IDD_UNLOCKPASSWORD;
 	int IDC_USERNAME;
 	int IDC_PASSWORD;
 	int IDC_DOMAIN;
@@ -29,10 +32,11 @@ DialogAndControlsID;
 
 static const DialogAndControlsID gDialogsAndControls[] =
 {
-	//Windows 2000 (never tested, taken from MS HookGina Sample)
-	{ 1850, 1453, 1454, 1455, 0, 0, 0, 0 },
+	//Windows 2000 (never tested, taken from MS HookGina Sample) 
+	//0 values means I don't know the number
+	{ 0, 0, 0, 1850, 1453, 1454, 1455, 0, 0, 0, 0 },
 	//Windows Server 2003 (and probably XP SP2, never tested)
-	{ 1950, 1953, 1954, 1956, 1501, 1528, 1561, 1620 },
+	{ 1800, 1800, 1801, 1950, 1953, 1954, 1956, 1501, 1528, 1561, 1620 },
 };
 
 static const int nbDialogsAndControlsID = sizeof gDialogsAndControls / sizeof *gDialogsAndControls;
@@ -63,8 +67,9 @@ static DLGPROC pfWlxWkstaLockedSASDlgProc = NULL;
 // Local functions.
 //
 
-int WINAPI MyWlxMessageBox(HANDLE, HWND, LPWSTR, LPWSTR, UINT);
 int WINAPI MyWlxDialogBoxParam(HANDLE, HANDLE, LPWSTR, HWND, DLGPROC, LPARAM);
+
+BOOLEAN ShouldHookUnlockPasswordDialog();
 
 
 //
@@ -95,7 +100,53 @@ BOOLEAN GetDomainUsernamePassword(HWND hwndDlg, wchar_t *domain, int nbdomain, w
 	return result;
 }
 
-DWORD DisplayForceUnlockNotice(HWND hDlg, HANDLE hWlx)
+DWORD DisplayUnlockNotice(HWND hDlg, HANDLE hWlx)
+{
+	DWORD result = IDNO; //proceed with lock
+
+	wchar_t unlock[MAX_GROUPNAME] = L"";
+
+	if(GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
+	{
+		wchar_t caption[512];
+		wchar_t text[2048];
+
+		OutputDebugString(L"Group name ");
+		OutputDebugString(unlock);
+		OutputDebugString(L"\n");
+
+		if((GetNoticeText(L"Caption", caption, sizeof caption / sizeof *caption) == S_OK)
+		&& (GetNoticeText(L"Text", text, sizeof text / sizeof *text) == S_OK))
+		{
+			wchar_t message[MAX_USERNAME + sizeof text / sizeof *text];
+			wchar_t *read = text;
+			wchar_t *write = text;
+
+			while(*read)
+			{
+				if((*read == '\\') && (*(read+1) == 'n'))
+				{
+					*write++ = '\n';
+					read += 2;
+				}
+				else
+				{
+					*write++ = *read++;
+				}
+			}
+
+			*write = 0;
+
+			wsprintf(message, text, unlock); //Will insert group name if there is a %s in the message
+			result = ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxMessageBox(hWlx, hDlg, message, caption, MB_YESNOCANCEL|MB_ICONEXCLAMATION);
+		}
+	}
+
+	return result;
+
+}
+
+DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx)
 {
 	DWORD result = IDCANCEL;
 
@@ -115,17 +166,9 @@ DWORD DisplayForceUnlockNotice(HWND hDlg, HANDLE hWlx)
 
 		if(ImpersonateLoggedOnUser(token))
 		{
-			OutputDebugString(L"Impersonating\n");
 			NetWkstaUserGetInfo(0, 1, (LPBYTE*)&userinfo);		
 
 			RevertToSelf(); //We are done with this
-
-			OutputDebugString(L"Logon domain");
-			OutputDebugString(userinfo->wkui1_logon_domain);
-			OutputDebugString(L"\n");
-			OutputDebugString(L"Username ");
-			OutputDebugString(userinfo->wkui1_username);
-			OutputDebugString(L"\n");
 
 			//What information do we have ?
 			if(*userinfo->wkui1_logon_domain && *userinfo->wkui1_username)
@@ -144,11 +187,6 @@ DWORD DisplayForceUnlockNotice(HWND hDlg, HANDLE hWlx)
 
 		CloseHandle(token);
 
-		OutputDebugString(L"a+b ");
-		OutputDebugString(a);
-		OutputDebugString(b);
-		OutputDebugString(L"\n");
-
 		LoadString(hDll, gDialogsAndControls[gCurrentDlgIndex].IDS_CAPTION, caption, sizeof caption / sizeof *caption);
 		LoadString(hDll, ids, szFormat, sizeof szFormat / sizeof *szFormat);
 
@@ -159,7 +197,6 @@ DWORD DisplayForceUnlockNotice(HWND hDlg, HANDLE hWlx)
 	
 		result = ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxMessageBox(hWlx, hDlg, buf, caption, MB_OKCANCEL|MB_ICONEXCLAMATION);
 	}
-	else OutputDebugString(L"Sanity check failed !\n");
 
 	return result;
 }
@@ -171,6 +208,65 @@ BOOL CALLBACK DelPropProc(HWND hwndSubclass, LPTSTR lpszString, HANDLE hData, UL
     RemoveProp(hwndSubclass, lpszString); 
     return TRUE; 
 } 
+
+INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	INT_PTR bResult = FALSE;
+
+	// We hook a click on OK
+	if(uMsg == WM_INITDIALOG)
+	{
+		DialogLParamHook *myinitparam = (DialogLParamHook*)lParam;
+
+		lParam = myinitparam->HookedLPARAM;
+
+		SetProp(hwndDlg, gAucunWinlogonContext, myinitparam->Winlogon);
+	}
+	else if(uMsg == WM_DESTROY)
+	{
+	    EnumPropsEx(hwndDlg, DelPropProc, 0); 
+	}
+	else if ((uMsg == WM_COMMAND) && (wParam == gDialogsAndControls[gCurrentDlgIndex].IDC_LOCKWKSTA))
+	{
+		/*
+		There is a race condition here (time of check, time of use).
+		We check for a certain condition and display a warning. Then we let go 
+		and make the same test again to hook the dialog or not. An administrator
+		with a good sense of timing could manage set the registry just after the 
+		test of ShouldHookUnlockPasswordDialog is made but before the actual 
+		dialog would be hooked. 
+
+		In other words: with good timing, an administrator with access to the 
+		registry can prevent the unlock notice from showing.
+
+		Spotting the flaw is 80% of the fun... I will probably never fix it.
+		*/
+		if(ShouldHookUnlockPasswordDialog(pgAucunContext->mCurrentUser))
+		{
+			switch(DisplayUnlockNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext)))
+			{
+				case IDYES: 
+					//wParam = gDialogsAndControls[gCurrentDlgIndex].IDC_LOGOFF; 
+					//PostMessage(hwndDlg, WLX_WM_SAS, WLX_SAS_TYPE_USER_LOGOFF, 0);
+					EndDialog(hwndDlg, WLX_DLG_USER_LOGOFF);
+					bResult = TRUE; 
+
+					break;
+				case IDCANCEL: 
+					bResult = TRUE; 
+					break;
+				case IDNO: 
+					break;
+			}
+		}
+	}
+
+	if (!bResult)
+		bResult = pfWlxWkstaLockedSASDlgProc(hwndDlg, uMsg, wParam, lParam);
+
+	return bResult;
+}
+
 
 //
 // Redirected WlxWkstaLockedSASDlgProc().
@@ -254,7 +350,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 				{
 				case eForceLogoff:
 					//Might help with house keeping, instead of directly calling EndDialog
-					if(DisplayForceUnlockNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext)) == IDOK)
+					if(DisplayForceLogoffNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext)) == IDOK)
 					{
 						PostMessage(hwndDlg, WLX_WM_SAS, WLX_SAS_TYPE_USER_LOGOFF, 0);
 					}
@@ -296,6 +392,12 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 	LPARAM lparam2use = dwInitParam;
 	DialogLParamHook myInitParam = {0};
 
+	//We might doint this for nothing (if dialog is not hooked)
+	myInitParam.HookedLPARAM = dwInitParam;
+	myInitParam.Winlogon = hWlx;
+
+	pfWlxWkstaLockedSASDlgProc = dlgprc;
+
 	//
 	// We only know MSGINA dialogs by identifiers.
 	//
@@ -309,50 +411,33 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 		for(i=0; i<nbDialogsAndControlsID; ++i)
 		{
 			//Is it one of the ID we know ?
-			if(gDialogsAndControls[i].dlgid == dlgid)
+			if(gDialogsAndControls[i].IDD_SAS == dlgid)
 			{
-				//Yes, found it ! But is the user blacklisted ?
-				HRESULT decision;
-				wchar_t excluded[MAX_GROUPNAME] = L"";
-				LUID luid = {0};
+				gCurrentDlgIndex = i;
 
-				OutputDebugString(L"MyWlxDialogBoxParam\n");
-				GetLUIDFromToken(pgAucunContext->mCurrentUser, &luid);
-				OutputGetSessionUserName(&luid);
+				proc2use = MyWlxWkstaLoggedOnSASDlgProc;
+				lparam2use = (LPARAM)&myInitParam;
+				OutputDebugString(L"Hooked SAS!\n");
 
-				GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded);
+				break;
+			}
+			else if(gDialogsAndControls[i].IDD_UNLOCKPASSWORD == dlgid)
+			{
+				gCurrentDlgIndex = i;
 
-				decision = UsagerEstDansGroupe(pgAucunContext->mCurrentUser, excluded);
-
-				switch(decision)
+				if(ShouldHookUnlockPasswordDialog(pgAucunContext->mCurrentUser))
 				{
-				case S_FALSE:
-					//User is not blacklisted, let's hook the dialog
-					gCurrentDlgIndex = i;
-					pfWlxWkstaLockedSASDlgProc = dlgprc;
 					proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
-
-					myInitParam.HookedLPARAM = dwInitParam;
-					myInitParam.Winlogon = hWlx;
 					lparam2use = (LPARAM)&myInitParam;
-
-					OutputDebugString(L"Hooked!\n");
-					
-					break;
-				case S_OK:
-					OutputDebugString(L"Est dans le groupe des exclus \n");
-					break;
-				default:
-					wsprintf(excluded, L"Erreur 0x%08D\n", GetLastError());
-					OutputDebugString(excluded);
-					break;
+					OutputDebugString(L"Hooked unlock\n");
 				}
+
+				//No need to go on, even if nothing was hooked
 				break;
 			}
 		}
 	}
 
-	if(proc2use != MyWlxWkstaLockedSASDlgProc) OutputDebugString(L"Not hooked :(\n");
-
 	return pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, lparam2use);
 }
+

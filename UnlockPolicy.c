@@ -284,3 +284,26 @@ HANDLE GetCurrentLoggedOnUserToken()
 
 	return result;
 }
+
+BOOLEAN ShouldHookUnlockPasswordDialog(HANDLE token)
+{
+	BOOLEAN result = FALSE;
+
+	wchar_t unlock[MAX_GROUPNAME] = L"";
+	wchar_t excluded[MAX_GROUPNAME] = L"";
+	wchar_t forcelogoff[MAX_GROUPNAME] = L"";
+
+	//If there is either an unlock or force logoff group, 
+	if((GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
+	|| (GetGroupName(gForceLogoffGroupName, forcelogoff, sizeof forcelogoff / sizeof *forcelogoff) == S_OK))
+	{
+		//User must not be in the excluded group
+		if(GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded) == S_OK)
+		{
+			//If is not blacklisted, return TRUE (so the dialog will be hooked)
+			result = UsagerEstDansGroupe(token, excluded) == S_FALSE;
+		}
+	}
+
+	return result;
+}
