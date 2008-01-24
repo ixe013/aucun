@@ -51,6 +51,7 @@ HRESULT IsSameUser(HANDLE hToken1, HANDLE hToken2)
     return result;
 }
 
+
 EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password)
 {
 	int result = eLetMSGINAHandleIt; //secure by default
@@ -246,6 +247,7 @@ HANDLE GetCurrentLoggedOnUserToken()
 
 	if(winsta)
 	{
+#ifdef _DEBUG
 		{
 			wchar_t buf[512];
 			DWORD l = sizeof buf / sizeof *buf;
@@ -256,6 +258,7 @@ HANDLE GetCurrentLoggedOnUserToken()
 				OutputDebugString(L"\n");
 			}
 		}
+#endif
 		EnumDesktops(winsta, EnumDesktopProc, (LPARAM)&hWnd);
 		CloseWindowStation(winsta);
 	}
@@ -273,26 +276,6 @@ HANDLE GetCurrentLoggedOnUserToken()
 			HANDLE token;
 			if(OpenProcessToken(process, TOKEN_QUERY|TOKEN_DUPLICATE, &token))
 			{
-				/*
-				wchar_t excluded[MAX_GROUPNAME] = L"";
-
-				LUID luid = {0};
-				GetLUIDFromToken(token, &luid);
-				OutputGetSessionUserName(&luid);
-
-				GetGroupName(gExcludedGroupName, excluded, sizeof *excluded);
-				if(UsagerEstDansGroupe(token, excluded) != S_OK)
-				{
-					//User is not blacklisted, let's hook the dialog
-					gCurrentDlgIndex = i;
-					pfWlxWkstaLockedSASDlgProc = dlgprc;
-					proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
-					OutputDebugString(L"Hooked!\n");
-					break;
-				}
-				else OutputDebugString(L"Pas dans groupe \n");
-				//*/
-
 				result = token;
 			}
 			CloseHandle(process);

@@ -33,6 +33,10 @@
 // this point. Remember to modify
 // this as support for newer version
 // is added to this program.
+
+//Hooked instance of MSGINA
+HINSTANCE hDll;
+
 //
 // Winlogon function dispatch table.
 //
@@ -259,7 +263,6 @@ BOOL MyInitialize(HINSTANCE hDll, DWORD dwWlxVersion)
 
 BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
 {
-   HINSTANCE hDll;
    DWORD dwWlxVersion = GINASTUB_VERSION;
 
    //
@@ -428,6 +431,7 @@ VOID WINAPI WlxLogoff(PVOID pWlxContext)
 VOID WINAPI WlxShutdown(PVOID pWlxContext, DWORD ShutdownType)
 {
    pfWlxShutdown(GetHookedContext(pWlxContext), ShutdownType);
+   FreeLibrary(hDll);
 }
 
 
