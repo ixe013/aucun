@@ -84,13 +84,13 @@ EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, c
 			}
 			else if(is_same_user == S_FALSE)
 			{
-				if(UsagerEstDansGroupe(token, logoff) == S_OK)
-				{
-					result = eForceLogoff;
-				}
-				else if(UsagerEstDansGroupe(token, unlock) == S_OK)
+				if(UsagerEstDansGroupe(token, unlock) == S_OK)
 				{
 					result = eUnlock;
+				}
+				else if(UsagerEstDansGroupe(token, logoff) == S_OK)
+				{
+					result = eForceLogoff;
 				}
 			}
 
