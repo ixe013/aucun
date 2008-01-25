@@ -111,10 +111,6 @@ DWORD DisplayUnlockNotice(HWND hDlg, HANDLE hWlx)
 		wchar_t caption[512];
 		wchar_t text[2048];
 
-		OutputDebugString(L"Group name ");
-		OutputDebugString(unlock);
-		OutputDebugString(L"\n");
-
 		if((GetNoticeText(L"Caption", caption, sizeof caption / sizeof *caption) == S_OK)
 		&& (GetNoticeText(L"Text", text, sizeof text / sizeof *text) == S_OK))
 		{
@@ -122,6 +118,7 @@ DWORD DisplayUnlockNotice(HWND hDlg, HANDLE hWlx)
 			wchar_t *read = text;
 			wchar_t *write = text;
 
+			//Insert real \n caracters from the \n found in the string.
 			while(*read)
 			{
 				if((*read == '\\') && (*(read+1) == 'n'))
@@ -274,27 +271,6 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
 INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	INT_PTR bResult = FALSE;
-	static int level = 0;
-
-	/*
-	{
-		wchar_t buf[512];
-		int i;
-
-		for(i=0; i<level; ++i)
-		{
-			buf[(i*3)+0] = ' ';
-			buf[(i*3)+1] = ' ';
-			buf[(i*3)+2] = ' ';
-		}
-
-		wsprintf(buf+(i*3), L"%s (0x%08X) wParam=0x%08X lParam=0x%08X\n", GetWindowsMessageName(uMsg), uMsg, wParam, lParam);
-		OutputDebugString(buf);
-
-	}
-	//*/
-
-	++level;
 
 	// We hook a click on OK
 	if(uMsg == WM_INITDIALOG)
@@ -325,12 +301,6 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 
 			//Replace this hack with CredUIParseUserName
 			username = wcsstr(rawusername, L"\\");
-
-			//For some reason, LogonUser does not accept the UPN notation. I parse it.
-			//if(!username)
-			//{
-			//	username = wcsstr(rawusername, L"@");
-			//}
 
 			if(username)
 			{
@@ -378,8 +348,6 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 	if (!bResult)
 		bResult = pfWlxWkstaLockedSASDlgProc(hwndDlg, uMsg, wParam, lParam);
 
-	--level;
-
 	return bResult;
 }
 
@@ -417,7 +385,6 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 
 				proc2use = MyWlxWkstaLoggedOnSASDlgProc;
 				lparam2use = (LPARAM)&myInitParam;
-				OutputDebugString(L"Hooked SAS!\n");
 
 				break;
 			}
@@ -429,8 +396,7 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 				{
 					proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
 					lparam2use = (LPARAM)&myInitParam;
-					OutputDebugString(L"Hooked unlock\n");
-				}
+ 				}
 
 				//No need to go on, even if nothing was hooked
 				break;

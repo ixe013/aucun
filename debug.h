@@ -1,3 +1,4 @@
+#ifdef _DEBUG
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
@@ -18,4 +19,5 @@ EXTERN BOOLEAN GetLUIDFromToken(HANDLE token, PLUID session);
 EXTERN void OutputGetSessionUserName(PLUID session);
 
 
+#endif
 #endif

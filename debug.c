@@ -1,3 +1,4 @@
+#ifdef _DEBUG
 #include <windows.h>
 #include "debug.h"
 
@@ -269,3 +270,4 @@ void OutputGetSessionUserName(PLUID session)
 	return;
 }
 
+#endif

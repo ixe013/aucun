@@ -157,10 +157,6 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
 	BOOL result = TRUE;
-	wchar_t buf[512];
-	wsprintf(buf, L"Enun Window 0x%08X ", hwnd);
-
-	OutputDebugString(buf);
 
 	*((HWND *)lParam) = hwnd;
 
@@ -168,14 +164,10 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 	if(IsWindowVisible(hwnd))
 	{
 		//We fail simply because we don't need to iterate over every single window. 
-		OutputDebugString(L"is visible\n");
-
 		SetLastError(0); 
-
 
 		result = FALSE;
 	}
-	else OutputDebugString(L"is not visible\n");
 
 	return result;
 }
@@ -186,25 +178,16 @@ BOOL CALLBACK EnumWindowsProcFindVisible(HWND hwnd, LPARAM lParam)
 {
 	static int nbhidden = 0;
 	BOOL result = TRUE;
-	wchar_t buf[512];
-	wsprintf(buf, L"    Enun Window 0x%08p ", hwnd);
-	OutputDebugString(buf);
 
 	//Any visible window will do.
 	if(IsWindowVisible(hwnd))
 	{
 		//We fail simply because we don't need to iterate over every single window. 
-		OutputDebugString(L"is visible\n");
-
 		*((HWND*)lParam) = hwnd;
 
 		SetLastError(0); 
 
 		result = FALSE;
-	}
-	else 
-	{
-		OutputDebugString(L"is not visible\n");
 	}
 
 	return result;
@@ -214,10 +197,6 @@ BOOL CALLBACK EnumWindowsProcFindVisible(HWND hwnd, LPARAM lParam)
 BOOL CALLBACK EnumDesktopProc(LPTSTR lpszDesktop, LPARAM lParam)
 {
 	HDESK desktop;
-	wchar_t buf[512];
-
-	wsprintf(buf, L"  Desktop %s\n", lpszDesktop);
-	OutputDebugString(buf);
 
 	//No need to enumerate Winlogon desktop windows
 	if(_wcsicmp(L"Winlogon", lpszDesktop))
@@ -247,18 +226,6 @@ HANDLE GetCurrentLoggedOnUserToken()
 
 	if(winsta)
 	{
-#ifdef _DEBUG
-		{
-			wchar_t buf[512];
-			DWORD l = sizeof buf / sizeof *buf;
-			if(GetUserObjectInformation(winsta, UOI_NAME, buf, l, &l))
-			{
-				OutputDebugString(L"Current window station ");
-				OutputDebugString(buf);
-				OutputDebugString(L"\n");
-			}
-		}
-#endif
 		EnumDesktops(winsta, EnumDesktopProc, (LPARAM)&hWnd);
 		CloseWindowStation(winsta);
 	}
