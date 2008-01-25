@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION 1,2,0,0
+ PRODUCTVERSION 1,2,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -69,13 +69,16 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "FileDescription", "AnyUserC Dynamic Link Library"
-            VALUE "FileVersion", "1.0.0"
-            VALUE "InternalName", "AnyUserC"
-            VALUE "LegalCopyright", "Copyright (C) 2007"
-            VALUE "OriginalFilename", "AnyUserC.dll"
-            VALUE "ProductName", " AnyUserC Dynamic Link Library"
-            VALUE "ProductVersion", "1.0.0"
+            VALUE "Comments", "http://www.paralint.com/projects/aucun/"
+            VALUE "CompanyName", "Paralint.com"
+            VALUE "FileDescription", "Replacement GINA DLL that allows ordinary users to unlock or force logoff a locked workstation"
+            VALUE "FileVersion", "1.2.0"
+            VALUE "InternalName", "aucun.dll"
+            VALUE "LegalCopyright", "Copyright (C) 2008"
+            VALUE "LegalTrademarks", "BSD Licenced"
+            VALUE "OriginalFilename", "aucun.dll"
+            VALUE "ProductName", " Any User Can Unlock Now"
+            VALUE "ProductVersion", "1.2.0"
         END
     END
     BLOCK "VarFileInfo"

@@ -243,9 +243,10 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
 			switch(DisplayUnlockNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext)))
 			{
 				case IDYES: 
-					//wParam = gDialogsAndControls[gCurrentDlgIndex].IDC_LOGOFF; 
-					//PostMessage(hwndDlg, WLX_WM_SAS, WLX_SAS_TYPE_USER_LOGOFF, 0);
-					EndDialog(hwndDlg, WLX_DLG_USER_LOGOFF);
+					//Why 113 ? I didn't find this value anywhere in the header files,
+					//but it is the value returned by the original MSGINA DialogProc
+					//When you click YES on the "Are you sure you want to log off" dialog box.
+					EndDialog(hwndDlg, 113); 
 					bResult = TRUE; 
 
 					break;
