@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="test"
 	ProjectGUID="{F1F2E1B6-B42F-46C9-A778-47E77EFA8A6C}"
 	RootNamespace="test"
@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SECURITY_WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib"
+				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib secur32.lib"
 				LinkIncremental="2"
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
@@ -117,7 +117,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SECURITY_WIN32"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -135,7 +135,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib"
+				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib secur32.lib"
 				LinkIncremental="1"
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
@@ -179,6 +179,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\debug.c"
+				>
+			</File>
+			<File
 				RelativePath=".\Settings.c"
 				>
 			</File>
@@ -196,6 +200,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\debug.h"
+				>
+			</File>
 			<File
 				RelativePath=".\Settings.h"
 				>

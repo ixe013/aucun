@@ -9,7 +9,19 @@
 #endif
 #endif
 
-EXTERN BOOLEAN ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password);
+
+enum
+{
+	eNotSureYet,
+	eLetMSGINAHandleIt,
+	eUnlock,
+	eForceLogoff,
+};
+
+EXTERN HANDLE ConvertToImpersonationToken(HANDLE token);
+EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password);
+EXTERN BOOLEAN ShouldHookUnlockPasswordDialog(HANDLE token);
 EXTERN HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe);
+EXTERN HANDLE GetCurrentLoggedOnUserToken();
 
 #endif

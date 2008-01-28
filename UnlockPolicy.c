@@ -2,63 +2,100 @@
 #include "Settings.h"
 #include "UnlockPolicy.h"
 
-#define MAX_GROUPNAME 512
 
-#ifdef DEBUG
-void ErrorExit(DWORD dw) 
-{ 
-	wchar_t buf[2048];
-	LPVOID lpMsgBuf;
-
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-		FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL,
-		dw,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR) &lpMsgBuf,
-		0, NULL );
-
-	wsprintf(buf, L"failed with error %d: %s", dw, lpMsgBuf); 
-	OutputDebugString(buf);
-
-	LocalFree(lpMsgBuf);
-}
-#endif
-
-EXTERN BOOLEAN ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password)
+HANDLE ConvertToImpersonationToken(HANDLE token)
 {
-	BOOLEAN result = FALSE;
+	HANDLE result = token;
+
+	SECURITY_IMPERSONATION_LEVEL sil;
+	DWORD cbsil = sizeof sil;
+
+	//If we are not impersonating
+	if(GetTokenInformation(token, TokenImpersonationLevel, (LPVOID)&sil, sizeof sil, &cbsil) == 0)
+	{
+		HANDLE imptoken = 0;
+
+		//Change to an impersonation token
+		if(DuplicateToken(token, SecurityIdentification, &imptoken))
+		{
+			result = imptoken;
+			CloseHandle(token);
+		}
+	}
+
+	return result;
+}
+
+//Taken from Keith Brown Full Ginal Sample on MSJ (or MSDN mag, whatever)
+HRESULT IsSameUser(HANDLE hToken1, HANDLE hToken2) 
+{
+	HRESULT result = E_FAIL; 
+
+    BYTE buf1[sizeof(TOKEN_USER) + SECURITY_MAX_SID_SIZE];
+    BYTE buf2[sizeof(TOKEN_USER) + SECURITY_MAX_SID_SIZE];
+
+    DWORD cb;
+    if (GetTokenInformation(hToken1, TokenUser, buf1, sizeof buf1, &cb) &&
+		GetTokenInformation(hToken2, TokenUser, buf2, sizeof buf2, &cb)) 
+	{
+        if(EqualSid(((TOKEN_USER*)buf1)->User.Sid, ((TOKEN_USER*)buf2)->User.Sid))
+		{
+			result = S_OK;
+		}
+		else
+		{
+			result = S_FALSE;
+		}
+    }
+
+    return result;
+}
+
+
+EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password)
+{
+	int result = eLetMSGINAHandleIt; //secure by default
 	HANDLE token = 0;
 
-	wchar_t buf[MAX_GROUPNAME];
+	wchar_t unlock[MAX_GROUPNAME] = L"";
+	wchar_t logoff[MAX_GROUPNAME] = L"";
 
-	if (SUCCEEDED(GetAllowedGroupName(buf, sizeof buf)))
+	//Get the groups early to ensure fail fast if GINA is not configured
+	GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock);
+	GetGroupName(gForceLogoffGroupName, logoff, sizeof logoff / sizeof *logoff);
+
+	//Do we have anything to work with ?
+	if(*unlock || *logoff)
 	{
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
-		if (LogonUserEx(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token, 0, 0, 0, 0))
+		if (LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token))
 		{
-			SECURITY_IMPERSONATION_LEVEL sil;
-			DWORD cbsil = sizeof sil;
+			HRESULT is_same_user;
+			HANDLE current_user;
+			token = ConvertToImpersonationToken(token);
 
-			//LOGON32_LOGON_UNLOCK returns a primary token, we need a impersonation token with identify access only
-			if(GetTokenInformation(token, TokenImpersonationLevel, (LPVOID)&sil, sizeof sil, &cbsil) == 0)
+			current_user = GetCurrentLoggedOnUserToken();
+
+			is_same_user = IsSameUser(current_user, token);
+
+			if(is_same_user == S_OK)
 			{
-				HANDLE imptoken = 0;
-
-				//Change to an impersonation token
-				if(DuplicateToken(token, SecurityIdentification, &imptoken))
-				{
-					if(UsagerEstDansGroupe(imptoken, buf) == S_OK)
-					{
-						result = TRUE;
-					}
-
-					CloseHandle(imptoken);
-				}
-
-				CloseHandle(token);
+				result = eUnlock; 
 			}
+			else if(is_same_user == S_FALSE)
+			{
+				if(UsagerEstDansGroupe(token, unlock) == S_OK)
+				{
+					result = eUnlock;
+				}
+				else if(UsagerEstDansGroupe(token, logoff) == S_OK)
+				{
+					result = eForceLogoff;
+				}
+			}
+
+			CloseHandle(token);
+			CloseHandle(current_user);
 		}
 	}
 
@@ -97,6 +134,7 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 		if (LookupAccountNameW(NULL, groupe, pSid, &dwSidSize, szDomain, &dwSize, &snu))
 		{
 			BOOL b;
+
 			if (CheckTokenMembership(usager, pSid, &b) && (b == TRUE))
 			{
 				result = S_OK;
@@ -115,3 +153,124 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 	return result;
 }
 
+//Stupid helper function to get the first window sent to us
+BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	BOOL result = TRUE;
+
+	*((HWND *)lParam) = hwnd;
+
+	//Any visible window will do.
+	if(IsWindowVisible(hwnd))
+	{
+		//We fail simply because we don't need to iterate over every single window. 
+		SetLastError(0); 
+
+		result = FALSE;
+	}
+
+	return result;
+}
+
+
+
+BOOL CALLBACK EnumWindowsProcFindVisible(HWND hwnd, LPARAM lParam)
+{
+	static int nbhidden = 0;
+	BOOL result = TRUE;
+
+	//Any visible window will do.
+	if(IsWindowVisible(hwnd))
+	{
+		//We fail simply because we don't need to iterate over every single window. 
+		*((HWND*)lParam) = hwnd;
+
+		SetLastError(0); 
+
+		result = FALSE;
+	}
+
+	return result;
+}
+
+
+BOOL CALLBACK EnumDesktopProc(LPTSTR lpszDesktop, LPARAM lParam)
+{
+	HDESK desktop;
+
+	//No need to enumerate Winlogon desktop windows
+	if(_wcsicmp(L"Winlogon", lpszDesktop))
+	{
+		//A real desktop, usually "Default"
+		desktop = OpenDesktop(lpszDesktop, 0, FALSE, GENERIC_READ);
+
+		if(desktop)
+		{
+			EnumDesktopWindows(desktop, EnumWindowsProcFindVisible, lParam);
+			CloseDesktop(desktop);
+		}
+	}
+	
+	return TRUE;
+}
+
+
+
+HANDLE GetCurrentLoggedOnUserToken()
+{
+	HANDLE result = 0;
+	HWND hWnd = 0;
+	HWINSTA winsta;
+
+	winsta = GetProcessWindowStation();
+
+	if(winsta)
+	{
+		EnumDesktops(winsta, EnumDesktopProc, (LPARAM)&hWnd);
+		CloseWindowStation(winsta);
+	}
+
+	if(hWnd)
+	{
+		DWORD pid, tid;
+		HANDLE process;
+
+		tid = GetWindowThreadProcessId(hWnd, &pid);
+		process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+
+		if(process)
+		{
+			HANDLE token;
+			if(OpenProcessToken(process, TOKEN_QUERY|TOKEN_DUPLICATE, &token))
+			{
+				result = token;
+			}
+			CloseHandle(process);
+		}
+	}
+
+	return result;
+}
+
+BOOLEAN ShouldHookUnlockPasswordDialog(HANDLE token)
+{
+	BOOLEAN result = FALSE;
+
+	wchar_t unlock[MAX_GROUPNAME] = L"";
+	wchar_t excluded[MAX_GROUPNAME] = L"";
+	wchar_t forcelogoff[MAX_GROUPNAME] = L"";
+
+	//If there is either an unlock or force logoff group, 
+	if((GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
+	|| (GetGroupName(gForceLogoffGroupName, forcelogoff, sizeof forcelogoff / sizeof *forcelogoff) == S_OK))
+	{
+		//User must not be in the excluded group
+		if(GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded) == S_OK)
+		{
+			//If is not blacklisted, return TRUE (so the dialog will be hooked)
+			result = UsagerEstDansGroupe(token, excluded) == S_FALSE;
+		}
+	}
+
+	return result;
+}
