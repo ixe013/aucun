@@ -1,9 +1,9 @@
 EXPORTS
     DllMain
     WlxNegotiate                        
-    WlxInitialize                       
+    WlxInitialize=AucunWlxLoggedOutSAS
     WlxDisplaySASNotice                 
-    WlxLoggedOutSAS                     
+    WlxLoggedOutSAS=AucunWlxLoggedOutSAS
     WlxActivateUserShell                
     WlxLoggedOnSAS                      
     WlxDisplayLockedNotice              
@@ -11,11 +11,14 @@ EXPORTS
     WlxIsLockOk                         
     WlxIsLogoffOk                       
     WlxLogoff                           
-    WlxShutdown                         
-    WlxNetworkProviderLoad              
-    WlxDisplayStatusMessage             
-    WlxGetStatusMessage                 
-    WlxRemoveStatusMessage              
-    WlxGetConsoleSwitchCredentials      
-    WlxReconnectNotify                  
-    WlxDisconnectNotify                 
+    WlxShutdown
+    WlxScreenSaverNotify=MSGINA.WlxScreenSaverNotify
+    WlxNetworkProviderLoad=MSGINA.WlxNetworkProviderLoad
+    WlxDisplayStatusMessage=MSGINA.WlxDisplayStatusMessage
+    WlxGetStatusMessage=MSGINA.WlxGetStatusMessage	
+    WlxRemoveStatusMessage=MSGINA.WlxRemoveStatusMessage
+    WlxGetConsoleSwitchCredentials=MSGINA.WlxGetConsoleSwitchCredentials
+    WlxReconnectNotify=MSGINA.WlxReconnectNotify
+    WlxDisconnectNotify=MSGINA.WlxDisconnectNotify
+    WlxStartApplication=MSGINA.WlxStartApplication
+

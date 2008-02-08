@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib Secur32.lib"
+				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib Secur32.lib msgina.lib"
 				OutputFile="$(OutDir)\aucun.dll"
 				LinkIncremental="2"
 				GenerateManifest="false"
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib Secur32.lib"
+				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib Secur32.lib msgina.lib"
 				OutputFile="$(OutDir)\aucun.dll"
 				LinkIncremental="1"
 				GenerateManifest="false"
@@ -198,6 +198,10 @@
 			</File>
 			<File
 				RelativePath=".\GinaHook.Def"
+				>
+			</File>
+			<File
+				RelativePath=".\MSGINA.DEF"
 				>
 			</File>
 			<File
