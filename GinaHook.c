@@ -24,6 +24,7 @@
 #include "global.h"
 #include "debug.h"
 
+#pragma comment
 //
 // Location of the real MSGINA.
 //
