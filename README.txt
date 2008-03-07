@@ -17,11 +17,13 @@ just wraps the original DLL and overrides unlock decisions.
 Installation
 ------------
 1. Copy AUCUN.DLL anywhere. 
-2. Add a key under HKLM\Software\Microsoft\Winlogon\CurrentVersion named GinaDLL 
-with the path to the DLL.
-3. Modify the file Sample.reg to use your groups. Everything is optionnal. If an
-entry is removed, that feature is silently disable (like the warning message).
-4. Merge Sample.reg to the registry and reboot
+2. Add a string value key named GinaDLL under 
+   HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon 
+3. Set the value of the new GinaDLL key to aucun.dll (add the path if it is not 
+   in system32.
+4. Modify the file Sample.reg to use your groups. Everything is optionnal. If an
+   entry is removed, that feature is silently disable (like the warning message).
+5. Merge Sample.reg to the registry and reboot
 
 Messed up ?
 -----------
