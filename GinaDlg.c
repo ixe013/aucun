@@ -317,7 +317,11 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 
 			if (*username && *password)
 			{
-				switch(ShouldUnlockForUser(domain, username, password))
+				WLX_DESKTOP *desktop = 0;
+				
+				((PWLX_DISPATCH_VERSION_1_1) g_pWinlogon)->WlxGetSourceDesktop(GetProp(hwndDlg, gAucunWinlogonContext), &desktop);
+
+				switch(ShouldUnlockForUser(desktop->hDesktop, domain, username, password))
 				{
 				case eForceLogoff:
 					//Might help with house keeping, instead of directly calling EndDialog
@@ -340,6 +344,9 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 					//Most of the time, we end up here with nothing to do
 					break;
 				}
+
+				LocalFree(desktop);
+				desktop = 0;
 
 				SecureZeroMemory(password, sizeof password);
 			}

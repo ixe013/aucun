@@ -52,7 +52,7 @@ HRESULT IsSameUser(HANDLE hToken1, HANDLE hToken2)
 }
 
 
-EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, const wchar_t *password)
+EXTERN int ShouldUnlockForUser(HDESK desktop, const wchar_t *domain, const wchar_t *username, const wchar_t *password)
 {
 	int result = eLetMSGINAHandleIt; //secure by default
 	HANDLE token = 0;
@@ -74,7 +74,7 @@ EXTERN int ShouldUnlockForUser(const wchar_t *domain, const wchar_t *username, c
 			HANDLE current_user;
 			token = ConvertToImpersonationToken(token);
 
-			current_user = GetCurrentLoggedOnUserToken();
+			current_user = GetCurrentLoggedOnUserToken(desktop);
 
 			is_same_user = IsSameUser(current_user, token);
 
@@ -153,26 +153,6 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 	return result;
 }
 
-//Stupid helper function to get the first window sent to us
-BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
-{
-	BOOL result = TRUE;
-
-	*((HWND *)lParam) = hwnd;
-
-	//Any visible window will do.
-	if(IsWindowVisible(hwnd))
-	{
-		//We fail simply because we don't need to iterate over every single window. 
-		SetLastError(0); 
-
-		result = FALSE;
-	}
-
-	return result;
-}
-
-
 
 BOOL CALLBACK EnumWindowsProcFindVisible(HWND hwnd, LPARAM lParam)
 {
@@ -194,41 +174,14 @@ BOOL CALLBACK EnumWindowsProcFindVisible(HWND hwnd, LPARAM lParam)
 }
 
 
-BOOL CALLBACK EnumDesktopProc(LPTSTR lpszDesktop, LPARAM lParam)
-{
-	HDESK desktop;
-
-	//No need to enumerate Winlogon desktop windows
-	if(_wcsicmp(L"Winlogon", lpszDesktop))
-	{
-		//A real desktop, usually "Default"
-		desktop = OpenDesktop(lpszDesktop, 0, FALSE, GENERIC_READ);
-
-		if(desktop)
-		{
-			EnumDesktopWindows(desktop, EnumWindowsProcFindVisible, lParam);
-			CloseDesktop(desktop);
-		}
-	}
-	
-	return TRUE;
-}
 
 
-
-HANDLE GetCurrentLoggedOnUserToken()
+HANDLE GetCurrentLoggedOnUserToken(HDESK desktop)
 {
 	HANDLE result = 0;
 	HWND hWnd = 0;
-	HWINSTA winsta;
 
-	winsta = GetProcessWindowStation();
-
-	if(winsta)
-	{
-		EnumDesktops(winsta, EnumDesktopProc, (LPARAM)&hWnd);
-		CloseWindowStation(winsta);
-	}
+	EnumDesktopWindows(desktop, EnumWindowsProcFindVisible, (LPARAM)&hWnd);
 
 	if(hWnd)
 	{
