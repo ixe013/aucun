@@ -80,13 +80,16 @@ int _tmain(int argc, _TCHAR* argv[])
 		wchar_t passwd[MAX_PASSWORD];
 
 		HANDLE token = 0;
+		HDESK desktop;
+
+		desktop = GetThreadDesktop(GetCurrentThreadId());
 
 		wprintf(L"Enter password for %s : ", argv[i]);
 		if (_getws_s(passwd, MAX_PASSWORD) == passwd)
 		{
 			//if(ShouldUnlockForUser(L"HYDRO-YN4PUBYPI", argv[i], passwd))
 			//if(ShouldUnlockForUser(domain, user, passwd))
-			switch(ShouldUnlockForUser(L"", argv[i], passwd))
+			switch(ShouldUnlockForUser(desktop, L"", argv[i], passwd))
 			{
 			case eLetMSGINAHandleIt: wprintf(L"eLetMSGINAHandleIt\n"); break;
 			case eUnlock: wprintf(L"eUnlock\n"); break;
@@ -97,6 +100,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			break;
 		}
+
+		//CloseDesktop(desktop); //Not needed says MSDN
 	}
 
 

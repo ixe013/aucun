@@ -2,7 +2,8 @@
 #include "Settings.h"
 #include "UnlockPolicy.h"
 
-
+//Converts a token to an impersonation token, if it is not already one
+//
 HANDLE ConvertToImpersonationToken(HANDLE token)
 {
 	HANDLE result = token;
@@ -76,26 +77,34 @@ EXTERN int ShouldUnlockForUser(HDESK desktop, const wchar_t *domain, const wchar
 
 			current_user = GetCurrentLoggedOnUserToken(desktop);
 
-			is_same_user = IsSameUser(current_user, token);
+			//Sometimes, AUCUN failed to get the current logged on user
+			//This is a fail safe. If something goes wrong with the detection, then
+			//the regulare MSGINA logic will take over.
+			if(current_user)
+			{
+				is_same_user = IsSameUser(current_user, token);
 
-			if(is_same_user == S_OK)
-			{
-				result = eUnlock; 
-			}
-			else if(is_same_user == S_FALSE)
-			{
-				if(UsagerEstDansGroupe(token, unlock) == S_OK)
+				if(is_same_user == S_OK)
 				{
-					result = eUnlock;
+					result = eUnlock; 
 				}
-				else if(UsagerEstDansGroupe(token, logoff) == S_OK)
+				else if(is_same_user == S_FALSE)
 				{
-					result = eForceLogoff;
+					if(UsagerEstDansGroupe(token, unlock) == S_OK)
+					{
+						result = eUnlock;
+					}
+					else if(UsagerEstDansGroupe(token, logoff) == S_OK)
+					{
+						result = eForceLogoff;
+					}
 				}
+				//if(is_same_user == E_FAIL) ;//let msgina handle it.
+
+				CloseHandle(current_user);
 			}
 
 			CloseHandle(token);
-			CloseHandle(current_user);
 		}
 	}
 
