@@ -157,11 +157,9 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx)
 
 		UINT ids = gDialogsAndControls[gCurrentDlgIndex].IDS_GENERIC_UNLOCK;
 
-		HANDLE token = GetCurrentLoggedOnUserToken();
-
 		a = b = 0;
 
-		if(ImpersonateLoggedOnUser(token))
+		if(ImpersonateLoggedOnUser(pgAucunContext->mCurrentUser))
 		{
 			NetWkstaUserGetInfo(0, 1, (LPBYTE*)&userinfo);		
 
@@ -181,8 +179,6 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx)
 				b = 0;
 			}
 		}
-
-		CloseHandle(token);
 
 		LoadString(hDll, gDialogsAndControls[gCurrentDlgIndex].IDS_CAPTION, caption, sizeof caption / sizeof *caption);
 		LoadString(hDll, ids, szFormat, sizeof szFormat / sizeof *szFormat);
@@ -242,17 +238,22 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
 		{
 			switch(DisplayUnlockNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext)))
 			{
-				case IDYES: 
+				//We said that a custom Gina was installed, and asked "do you want
+				//to lof off instead" ?
+				case IDYES:
 					//Why 113 ? I didn't find this value anywhere in the header files,
 					//but it is the value returned by the original MSGINA DialogProc
 					//When you click YES on the "Are you sure you want to log off" dialog box.
 					EndDialog(hwndDlg, 113); 
 					bResult = TRUE; 
-
 					break;
+
+				//Forget about it, I am not locking at all
 				case IDCANCEL: 
 					bResult = TRUE; 
 					break;
+
+				//I don't care. Lock my workstation
 				case IDNO: 
 					break;
 			}
@@ -321,7 +322,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 				
 				((PWLX_DISPATCH_VERSION_1_1) g_pWinlogon)->WlxGetSourceDesktop(GetProp(hwndDlg, gAucunWinlogonContext), &desktop);
 
-				switch(ShouldUnlockForUser(desktop->hDesktop, domain, username, password))
+				switch(ShouldUnlockForUser(pgAucunContext->mCurrentUser, domain, username, password))
 				{
 				case eForceLogoff:
 					//Might help with house keeping, instead of directly calling EndDialog

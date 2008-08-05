@@ -53,7 +53,7 @@ HRESULT IsSameUser(HANDLE hToken1, HANDLE hToken2)
 }
 
 
-EXTERN int ShouldUnlockForUser(HDESK desktop, const wchar_t *domain, const wchar_t *username, const wchar_t *password)
+EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const wchar_t *username, const wchar_t *password)
 {
 	int result = eLetMSGINAHandleIt; //secure by default
 	HANDLE token = 0;
@@ -72,10 +72,7 @@ EXTERN int ShouldUnlockForUser(HDESK desktop, const wchar_t *domain, const wchar
 		if (LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token))
 		{
 			HRESULT is_same_user;
-			HANDLE current_user;
 			token = ConvertToImpersonationToken(token);
-
-			current_user = GetCurrentLoggedOnUserToken(desktop);
 
 			//Sometimes, AUCUN failed to get the current logged on user
 			//This is a fail safe. If something goes wrong with the detection, then
@@ -162,57 +159,6 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 	return result;
 }
 
-
-BOOL CALLBACK EnumWindowsProcFindVisible(HWND hwnd, LPARAM lParam)
-{
-	static int nbhidden = 0;
-	BOOL result = TRUE;
-
-	//Any visible window will do.
-	if(IsWindowVisible(hwnd))
-	{
-		//We fail simply because we don't need to iterate over every single window. 
-		*((HWND*)lParam) = hwnd;
-
-		SetLastError(0); 
-
-		result = FALSE;
-	}
-
-	return result;
-}
-
-
-
-
-HANDLE GetCurrentLoggedOnUserToken(HDESK desktop)
-{
-	HANDLE result = 0;
-	HWND hWnd = 0;
-
-	EnumDesktopWindows(desktop, EnumWindowsProcFindVisible, (LPARAM)&hWnd);
-
-	if(hWnd)
-	{
-		DWORD pid, tid;
-		HANDLE process;
-
-		tid = GetWindowThreadProcessId(hWnd, &pid);
-		process = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
-
-		if(process)
-		{
-			HANDLE token;
-			if(OpenProcessToken(process, TOKEN_QUERY|TOKEN_DUPLICATE, &token))
-			{
-				result = token;
-			}
-			CloseHandle(process);
-		}
-	}
-
-	return result;
-}
 
 BOOLEAN ShouldHookUnlockPasswordDialog(HANDLE token)
 {

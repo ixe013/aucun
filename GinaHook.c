@@ -416,10 +416,10 @@ BOOL WINAPI WlxIsLogoffOk(PVOID pWlxContext)
 
 VOID WINAPI WlxLogoff(PVOID pWlxContext)
 {
-		CloseHandle(((MyGinaContext*)pWlxContext)->mCurrentUser);
-		((MyGinaContext*)pWlxContext)->mCurrentUser = 0;
+	pfWlxLogoff(GetHookedContext(pWlxContext));
 
-   pfWlxLogoff(GetHookedContext(pWlxContext));
+	CloseHandle(((MyGinaContext*)pWlxContext)->mCurrentUser);
+	((MyGinaContext*)pWlxContext)->mCurrentUser = 0;
 }
 
 
