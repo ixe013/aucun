@@ -87,6 +87,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		//OpenThreadToken(GetCurrentThread(), TOKEN_READ, TRUE, &current_user);
 		OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &current_user);
 
+		ExtractTokenOwner(current_user, passwd, 512);
+
 		if(ShouldHookUnlockPasswordDialog(current_user))
 		{
 			wprintf(L"Should hook.\n");

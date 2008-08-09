@@ -270,6 +270,58 @@ void OutputGetSessionUserName(PLUID session)
 	return;
 }
 
+BOOLEAN ExtractTokenOwner( HANDLE token, wchar_t *csOwner_o, size_t size)
+{
+   // First get size needed, TokenUser indicates we want user information from given token
+   DWORD dwProcessTokenInfoAllocSize = 0;
+   GetTokenInformation(token, TokenUser, NULL, 0, &dwProcessTokenInfoAllocSize);
+  
+   // Call should have failed due to zero-length buffer.
+   if( GetLastError() == ERROR_INSUFFICIENT_BUFFER )
+   {
+      // Allocate buffer for user information in the token.
+      PTOKEN_USER pUserToken = (PTOKEN_USER) malloc(dwProcessTokenInfoAllocSize);
+      if (pUserToken != NULL)
+      {
+         // Now get user information in the allocated buffer
+         if (GetTokenInformation( token, TokenUser, pUserToken, dwProcessTokenInfoAllocSize, &dwProcessTokenInfoAllocSize ))
+         {
+            // Some vars that we may need
+            SID_NAME_USE   snuSIDNameUse;
+            TCHAR          szUser[MAX_PATH] = { 0 };
+            DWORD          dwUserNameLength = MAX_PATH;
+            TCHAR          szDomain[MAX_PATH] = { 0 };
+            DWORD          dwDomainNameLength = MAX_PATH;
+           
+            // Retrieve user name and domain name based on user's SID.
+            if ( LookupAccountSid( NULL,
+                                     pUserToken->User.Sid,
+                                     szUser,
+                                     &dwUserNameLength,
+                                     szDomain,
+                                     &dwDomainNameLength,
+                                     &snuSIDNameUse ))
+            {
+               // Prepare user name string
+               TRACELN(szDomain);
+               TRACELN(szUser);
+              
+               // We are done!
+               free(pUserToken);
+              
+               // We succeeded
+               return TRUE;
+            }//End if
+         }// End if
+        
+         free(pUserToken);
+      }// End if
+   }// End if
+  
+  
+   // Oops trouble
+   return FALSE;
+}// End GetProcessOwner  
 
 #endif
 

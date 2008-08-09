@@ -17,6 +17,8 @@ EXTERN LPCWSTR GetWindowsMessageName(UINT msg);
 
 EXTERN BOOLEAN GetLUIDFromToken(HANDLE token, PLUID session);
 EXTERN void OutputGetSessionUserName(PLUID session);
+EXTERN BOOLEAN ExtractTokenOwner( HANDLE token, wchar_t *csOwner_o, size_t size);
+
 
 #define TRACE(s) OutputDebugString(s);
 #define TRACELN(s) OutputDebugString(s);OutputDebugString(L"\n");

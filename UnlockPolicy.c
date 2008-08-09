@@ -188,12 +188,15 @@ BOOLEAN ShouldHookUnlockPasswordDialog(HANDLE token)
 		if(GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded) == S_OK)
 		{
 			//If is not blacklisted, return TRUE (so the dialog will be hooked)
-			result = UsagerEstDansGroupe(token, excluded) == S_FALSE;
+			if(UsagerEstDansGroupe(token, excluded) != S_OK)
+			{
+				result = TRUE;
+			}
 		}
 		else
 		{
 			//There is no excluded group, let's hook !
-			result = S_OK;
+			result = TRUE;
 		}
 	}
 
