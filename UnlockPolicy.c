@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "Settings.h"
 #include "UnlockPolicy.h"
+#include "debug.h"
 
 //Converts a token to an impersonation token, if it is not already one
 //
@@ -68,6 +69,11 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 	//Do we have anything to work with ?
 	if(*unlock || *logoff)
 	{
+		TRACE(L"On a les groupes ");
+		TRACE(unlock);
+		TRACE(L" ");
+		TRACELN(logoff);
+
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
 		if (LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token))
 		{
@@ -79,26 +85,32 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 			//the regulare MSGINA logic will take over.
 			if(current_user)
 			{
+				TRACE(L"We have a user");
+
 				is_same_user = IsSameUser(current_user, token);
 
 				if(is_same_user == S_OK)
 				{
+					TRACE(L" it is the same user");
 					result = eUnlock; 
 				}
 				else if(is_same_user == S_FALSE)
 				{
 					if(UsagerEstDansGroupe(token, unlock) == S_OK)
 					{
+						TRACELN(L" dans le groupe unlock");
 						result = eUnlock;
 					}
 					else if(UsagerEstDansGroupe(token, logoff) == S_OK)
 					{
+						TRACELN(L" dans le groupe dans le groupe logoff");
+
 						result = eForceLogoff;
 					}
 				}
 				//if(is_same_user == E_FAIL) ;//let msgina handle it.
 
-				CloseHandle(current_user);
+				//CloseHandle(current_user);
 			}
 
 			CloseHandle(token);
@@ -177,6 +189,11 @@ BOOLEAN ShouldHookUnlockPasswordDialog(HANDLE token)
 		{
 			//If is not blacklisted, return TRUE (so the dialog will be hooked)
 			result = UsagerEstDansGroupe(token, excluded) == S_FALSE;
+		}
+		else
+		{
+			//There is no excluded group, let's hook !
+			result = S_OK;
 		}
 	}
 

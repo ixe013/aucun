@@ -270,4 +270,6 @@ void OutputGetSessionUserName(PLUID session)
 	return;
 }
 
+
 #endif
+

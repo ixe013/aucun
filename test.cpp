@@ -37,6 +37,8 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	wchar_t unlock[MAX_GROUPNAME] = L"";
 
+	OutputDebugString(L"TEST starting...\n");
+/*
 	if(GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
 	{
 		wchar_t caption[512];
@@ -72,6 +74,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			MessageBox(0, message, caption, MB_YESNOCANCEL|MB_ICONEXCLAMATION);
 		}
 	}
+*/
 
 	if(argc > 1) for(int i=1; i<argc; ++i)
 	{
@@ -79,17 +82,22 @@ int _tmain(int argc, _TCHAR* argv[])
 //		wchar_t domain[MAX_DOMAIN];
 		wchar_t passwd[MAX_PASSWORD];
 
-		HANDLE token = 0;
-		HDESK desktop;
+		HANDLE current_user = 0;
 
-		desktop = GetThreadDesktop(GetCurrentThreadId());
+		//OpenThreadToken(GetCurrentThread(), TOKEN_READ, TRUE, &current_user);
+		OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &current_user);
+
+		if(ShouldHookUnlockPasswordDialog(current_user))
+		{
+			wprintf(L"Should hook.\n");
+		}
 
 		wprintf(L"Enter password for %s : ", argv[i]);
 		if (_getws_s(passwd, MAX_PASSWORD) == passwd)
 		{
 			//if(ShouldUnlockForUser(L"HYDRO-YN4PUBYPI", argv[i], passwd))
 			//if(ShouldUnlockForUser(domain, user, passwd))
-			switch(ShouldUnlockForUser(desktop, L"", argv[i], passwd))
+			switch(ShouldUnlockForUser(current_user, L"", argv[i], passwd))
 			{
 			case eLetMSGINAHandleIt: wprintf(L"eLetMSGINAHandleIt\n"); break;
 			case eUnlock: wprintf(L"eUnlock\n"); break;
@@ -102,6 +110,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 
 		//CloseDesktop(desktop); //Not needed says MSDN
+		CloseHandle(current_user); 
 	}
 
 

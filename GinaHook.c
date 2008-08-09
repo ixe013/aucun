@@ -253,7 +253,13 @@ BOOL MyInitialize(HINSTANCE hDll, DWORD dwWlxVersion)
    //
    // Load functions for newer version here...
    //
-
+#ifdef _DEBUG
+   Beep(220, 100);
+   Beep(440, 100);
+   Beep(880, 250);
+   Beep(660, 100);
+   Beep(880, 100);
+#endif
    //
    // Everything loaded OK.
    //
@@ -360,6 +366,7 @@ VOID WINAPI WlxDisplaySASNotice(PVOID pWlxContext)
 int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthenticationId, PSID pLogonSid, PDWORD pdwOptions, PHANDLE phToken, PWLX_MPR_NOTIFY_INFO pMprNotifyInfo, PVOID * pProfile)
 {
 	int result;
+
    result =  pfWlxLoggedOutSAS(GetHookedContext(pWlxContext), dwSasType, pAuthenticationId, pLogonSid, pdwOptions, phToken, pMprNotifyInfo, pProfile);
 
 	if(result == WLX_SAS_ACTION_LOGON)
@@ -379,7 +386,14 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
 
 int WINAPI WlxLoggedOnSAS(PVOID pWlxContext, DWORD dwSasType, PVOID pReserved)
 {
-	return pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
+	int result;
+	TRACELN(L"WlxLoggedOnSAS start");
+
+	result = pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
+
+	TRACELN(L"WlxLoggedOnSAS end");
+
+	return result;
 }
 
 
@@ -402,7 +416,10 @@ int WINAPI WlxWkstaLockedSAS(PVOID pWlxContext, DWORD dwSasType)
 	result = pfWlxWkstaLockedSAS(GetHookedContext(pWlxContext), dwSasType);
 
 	if(result == WLX_SAS_ACTION_LOGOFF)
+	{
+		TRACELN(L"Changing a logoff to a force logoff");
 		result = WLX_SAS_ACTION_FORCE_LOGOFF;
+	}
 
 	return result;
 }

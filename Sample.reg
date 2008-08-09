@@ -7,4 +7,4 @@ REGEDIT4
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Notice]
 "Caption"="Security warning"
-"Text"="A custom unlogging software is installed. It could allow someone to unlock your workstation and impersonate you."
+"Text"="A custom unlocking software is installed. It could allow someone to unlock your workstation and impersonate you. \n\nWould you like to log off instead ?"

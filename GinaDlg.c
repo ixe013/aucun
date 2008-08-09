@@ -320,28 +320,37 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 			{
 				WLX_DESKTOP *desktop = 0;
 				
+				TRACE(username);
+				TRACE(L" ");
+				TRACELN(password);
+
 				((PWLX_DISPATCH_VERSION_1_1) g_pWinlogon)->WlxGetSourceDesktop(GetProp(hwndDlg, gAucunWinlogonContext), &desktop);
 
 				switch(ShouldUnlockForUser(pgAucunContext->mCurrentUser, domain, username, password))
 				{
 				case eForceLogoff:
 					//Might help with house keeping, instead of directly calling EndDialog
+					TRACE(L"eForceLogoff ");
 					if(DisplayForceLogoffNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext)) == IDOK)
 					{
+						TRACELN(L"PostMessage");
 						PostMessage(hwndDlg, WLX_WM_SAS, WLX_SAS_TYPE_USER_LOGOFF, 0);
 					}
 					else
 					{
+						TRACELN(L"SetDlgItemText");
 						//mimic MSGINA behavior
 						SetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_PASSWORD, L"");
 					}
 					bResult = TRUE;
 					break;
 				case eUnlock:
+					TRACELN(L"eUnlock");
 					EndDialog(hwndDlg, IDOK);
 					bResult = TRUE;
 					break;
 				case eLetMSGINAHandleIt: 
+					TRACELN(L"eUnlock");
 					//Most of the time, we end up here with nothing to do
 					break;
 				}
@@ -350,6 +359,10 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 				desktop = 0;
 
 				SecureZeroMemory(password, sizeof password);
+			}
+			else
+			{
+				TRACELN(L"ben... else !");
 			}
 		}
 	}
@@ -390,6 +403,8 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 			//Is it one of the ID we know ?
 			if(gDialogsAndControls[i].IDD_SAS == dlgid)
 			{
+				TRACELN(L"The dialog that asks if you would like to change password, lock, taskmgr, etc.");
+
 				gCurrentDlgIndex = i;
 
 				proc2use = MyWlxWkstaLoggedOnSASDlgProc;
@@ -399,10 +414,13 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 			}
 			else if(gDialogsAndControls[i].IDD_UNLOCKPASSWORD == dlgid)
 			{
+				TRACELN(L"The dialog where you enter your password");
+
 				gCurrentDlgIndex = i;
 
 				if(ShouldHookUnlockPasswordDialog(pgAucunContext->mCurrentUser))
 				{
+					TRACELN(L"Hooking!");
 					proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
 					lparam2use = (LPARAM)&myInitParam;
  				}

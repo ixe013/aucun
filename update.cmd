@@ -1,27 +1,33 @@
 @echo off
-echo F | xcopy /y /q release\aucun.dll release\aucun2.dll 
+
+setlocal
+rem ------------------------------
+rem Make a time based file name
+rem ------------------------------
+set AUCUN_DLL_NAME=AUCUN-%DATE%%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.dll
+echo %AUCUN_DLL_NAME%
 
 rem ------------------------------
-rem Take a chance with Aucun.dll
+rem Delete any old DLL, but one...
 rem ------------------------------
-echo.
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v GinaDLL /t REG_SZ /d aucun.dll /f > nul
-xcopy /y /f release\aucun.dll %WINDIR%\system32\.
+del /q %windir%\system32\aucun*.dll
 
-if not %ERRORLEVEL%==0 (
+echo F | xcopy /v .\debug\aucun.dll %windir%\system32\%AUCUN_DLL_NAME%
 
 rem ------------------------------
-rem It must be aucun2.dll
+rem Edit the registry
 rem ------------------------------
-echo.
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v GinaDLL /t REG_SZ /d aucun2.dll /f > nul
-xcopy /y /f release\aucun2.dll %WINDIR%\system32\.
-)
-:SHUTUPANDREBOOT
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v GinaDLL /t REG_SZ /d %AUCUN_DLL_NAME% /f > nul
 
-echo.
-dir /od %windir%\system32\aucun*.dll | findstr /I /c:aucun
+if %ERRORLEVEL%==0 (
+
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v GinaDLL
+dir /od %windir%\system32\aucun*.dll | findstr /I /c:aucun
 
 shutdown /r /t 5 /f
+
+)
+
+endlocal
+
 
