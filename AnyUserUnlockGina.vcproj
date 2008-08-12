@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="AnyUserCanUnlockNowGina"
 	ProjectGUID="{D818D87C-2DFB-47CE-8944-49A220F2F365}"
 	RootNamespace="RemoteUnlockGina"
@@ -205,6 +205,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Trace.c"
+				>
+			</File>
+			<File
 				RelativePath=".\UnlockPolicy.c"
 				>
 			</File>
@@ -236,6 +240,10 @@
 			</File>
 			<File
 				RelativePath=".\Settings.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Trace.h"
 				>
 			</File>
 			<File
