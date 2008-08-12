@@ -253,13 +253,6 @@ BOOL MyInitialize(HINSTANCE hDll, DWORD dwWlxVersion)
    //
    // Load functions for newer version here...
    //
-#ifdef _DEBUG
-   Beep(220, 100);
-   Beep(440, 100);
-   Beep(880, 250);
-   Beep(660, 100);
-   Beep(880, 100);
-#endif
    //
    // Everything loaded OK.
    //
