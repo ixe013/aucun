@@ -157,13 +157,17 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 			{
 				 if (b == TRUE)
 					result = S_OK;
+#ifdef _DEBUG
 				 else
-				OutputDebugStringError(GetLastError());
+					OutputDebugStringError(GetLastError());
+#endif
 
 			}
 			else
 			{
+#ifdef _DEBUG
 				OutputDebugStringError(GetLastError());
+#endif
 				result = S_FALSE;
 			}
 		}
