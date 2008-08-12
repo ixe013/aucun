@@ -321,7 +321,29 @@ BOOLEAN ExtractTokenOwner( HANDLE token, wchar_t *csOwner_o, size_t size)
   
    // Oops trouble
    return FALSE;
-}// End GetProcessOwner  
+}// End GetProcessOwner 
+
+void OutputDebugStringError(DWORD dw) 
+{ 
+    TCHAR szBuf[1024]; 
+    LPVOID lpMsgBuf;
+
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+        FORMAT_MESSAGE_FROM_SYSTEM,
+        NULL,
+        dw,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR) &lpMsgBuf,
+        0, NULL );
+
+    wsprintf(szBuf, 
+        L"Error %d: %s\n", 
+        dw, lpMsgBuf); 
+ 
+    OutputDebugString(szBuf); 
+
+    LocalFree(lpMsgBuf);
+}
 
 #endif
-

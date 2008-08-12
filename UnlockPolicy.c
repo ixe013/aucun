@@ -153,12 +153,17 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 		{
 			BOOL b;
 
-			if (CheckTokenMembership(usager, pSid, &b) && (b == TRUE))
+			if (CheckTokenMembership(usager, pSid, &b))
 			{
-				result = S_OK;
+				 if (b == TRUE)
+					result = S_OK;
+				 else
+				OutputDebugStringError(GetLastError());
+
 			}
 			else
 			{
+				OutputDebugStringError(GetLastError());
 				result = S_FALSE;
 			}
 		}

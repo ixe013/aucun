@@ -87,7 +87,12 @@ int _tmain(int argc, _TCHAR* argv[])
 		//OpenThreadToken(GetCurrentThread(), TOKEN_READ, TRUE, &current_user);
 		OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &current_user);
 
-		ExtractTokenOwner(current_user, passwd, 512);
+		//ExtractTokenOwner(current_user, passwd, 512);
+
+		//ImpersonateSelf(SecurityIdentification);
+
+		current_user = ConvertToImpersonationToken(current_user);
+
 
 		if(ShouldHookUnlockPasswordDialog(current_user))
 		{
@@ -110,6 +115,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			break;
 		}
+
+		//RevertToSelf();
 
 		//CloseDesktop(desktop); //Not needed says MSDN
 		CloseHandle(current_user); 

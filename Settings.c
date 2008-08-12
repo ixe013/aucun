@@ -41,7 +41,9 @@ HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, D
 
 		RegCloseKey(reg);
    }
-
+#ifdef _DEBUG
+   else OutputDebugStringError(GetLastError());
+#endif
    return result;
 }
 
