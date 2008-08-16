@@ -83,12 +83,11 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 			//Sometimes, AUCUN failed to get the current logged on user
 			//This is a fail safe. If something goes wrong with the detection, then
 			//the regulare MSGINA logic will take over.
-			//if(current_user)
+			if(current_user)
 			{
 				TRACE(L"We have a user");
 
-				//is_same_user = IsSameUser(current_user, token);
-				is_same_user = S_FALSE;
+				is_same_user = IsSameUser(current_user, token);
 
 				if(is_same_user == S_OK)
 				{
