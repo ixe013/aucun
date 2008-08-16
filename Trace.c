@@ -3,10 +3,11 @@
 #include <stdarg.h>
 #include <string.h>
 #include <tchar.h>
+#include "settings.h"
 
 #define MAX_TRACE_BUFFER 1024
 
-int (*WriteBufferProc)(const wchar_t *buffer);
+typedef int (*WriteBufferProc)(const wchar_t *buffer);
 
 void TraceInBuffer(const wchar_t* format, wchar_t* buffer, size_t size, ...)
 {
@@ -44,6 +45,34 @@ int WriteBufferToOutputDebugString(const wchar_t *buffer)
 {
 	OutputDebugString(buffer);
 	return 1;
+}
+
+WriteBufferProc GetOutputWriter()
+{
+	static DWORD lastcheck = 0;
+	DWORD current = GetTickCount();
+	WriteBufferProc result = 0;
+
+	if((current - lastcheck) > 60000)
+	{
+		wchar_t buffer[512];
+		if(GetDebugSetting(L"Output", buffer, sizeof buffer) == S_OK)
+		{
+			//Is it output debug string ?
+			if(_wcsicmp(L"OutputDebugString", buffer) == 0)
+			{
+				result = &WriteBufferToOutputDebugString;
+			}
+			else
+			{
+				result = &WriteBufferToStream;
+			}
+		}
+
+		lastcheck = current;
+	}
+	
+	return result;
 }
 
 

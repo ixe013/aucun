@@ -84,15 +84,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		HANDLE current_user = 0;
 
-		//OpenThreadToken(GetCurrentThread(), TOKEN_READ, TRUE, &current_user);
 		OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &current_user);
-
-		//ExtractTokenOwner(current_user, passwd, 512);
-
-		//ImpersonateSelf(SecurityIdentification);
-
-		current_user = ConvertToImpersonationToken(current_user);
-
 
 		if(ShouldHookUnlockPasswordDialog(current_user))
 		{
@@ -102,8 +94,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		wprintf(L"Enter password for %s : ", argv[i]);
 		if (_getws_s(passwd, MAX_PASSWORD) == passwd)
 		{
-			//if(ShouldUnlockForUser(L"HYDRO-YN4PUBYPI", argv[i], passwd))
-			//if(ShouldUnlockForUser(domain, user, passwd))
 			switch(ShouldUnlockForUser(current_user, L"", argv[i], passwd))
 			{
 			case eLetMSGINAHandleIt: wprintf(L"eLetMSGINAHandleIt\n"); break;
@@ -116,12 +106,8 @@ int _tmain(int argc, _TCHAR* argv[])
 			break;
 		}
 
-		//RevertToSelf();
-
-		//CloseDesktop(desktop); //Not needed says MSDN
 		CloseHandle(current_user); 
 	}
-
 
 	return 0;
 }

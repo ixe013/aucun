@@ -21,6 +21,12 @@ HRESULT GetNoticeText(const wchar_t *name, wchar_t *text, DWORD size)
 	return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Notice", name, text, size);
 }
 
+HRESULT GetDebugSetting(const wchar_t *name, wchar_t *text, DWORD size)
+{
+	return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Debug", name, text, size);
+}
+
+
 HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, DWORD size)
 {
    HRESULT result = E_FAIL;
@@ -41,9 +47,7 @@ HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, D
 
 		RegCloseKey(reg);
    }
-#ifdef _DEBUG
-   else OutputDebugStringError(GetLastError());
-#endif
+
    return result;
 }
 

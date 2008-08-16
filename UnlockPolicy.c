@@ -83,11 +83,12 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 			//Sometimes, AUCUN failed to get the current logged on user
 			//This is a fail safe. If something goes wrong with the detection, then
 			//the regulare MSGINA logic will take over.
-			if(current_user)
+			//if(current_user)
 			{
 				TRACE(L"We have a user");
 
-				is_same_user = IsSameUser(current_user, token);
+				//is_same_user = IsSameUser(current_user, token);
+				is_same_user = S_FALSE;
 
 				if(is_same_user == S_OK)
 				{
@@ -108,9 +109,6 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 						result = eForceLogoff;
 					}
 				}
-				//if(is_same_user == E_FAIL) ;//let msgina handle it.
-
-				//CloseHandle(current_user);
 			}
 
 			CloseHandle(token);
@@ -153,21 +151,16 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 		{
 			BOOL b;
 
+		if((snu == SidTypeGroup) || (snu == SidTypeWellKnownGroup ))
+			Sleep(0);
+
 			if (CheckTokenMembership(usager, pSid, &b))
 			{
 				 if (b == TRUE)
 					result = S_OK;
-#ifdef _DEBUG
-				 else
-					OutputDebugStringError(GetLastError());
-#endif
-
 			}
 			else
 			{
-#ifdef _DEBUG
-				OutputDebugStringError(GetLastError());
-#endif
 				result = S_FALSE;
 			}
 		}
