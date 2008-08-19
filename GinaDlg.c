@@ -12,6 +12,7 @@
 
 #include "global.h"
 #include "debug.h"
+#include "trace.h"
 
 
 typedef struct
@@ -118,6 +119,8 @@ DWORD DisplayUnlockNotice(HWND hDlg, HANDLE hWlx)
 			wchar_t *read = text;
 			wchar_t *write = text;
 
+			TRACE(L"Unlock notice will be displayed.\n");
+
 			//Insert real \n caracters from the \n found in the string.
 			while(*read)
 			{
@@ -214,6 +217,8 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
 		lParam = myinitparam->HookedLPARAM;
 
 		SetProp(hwndDlg, gAucunWinlogonContext, myinitparam->Winlogon);
+
+		TRACE(L"Hooked dialog shown.\n");
 	}
 	else if(uMsg == WM_DESTROY)
 	{
@@ -221,6 +226,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
 	}
 	else if ((uMsg == WM_COMMAND) && (wParam == gDialogsAndControls[gCurrentDlgIndex].IDC_LOCKWKSTA))
 	{
+		TRACE(L"User locking workstation.\n");
 		/*
 		There is a race condition here (time of check, time of use).
 		We check for a certain condition and display a warning. Then we let go 
@@ -236,6 +242,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
 		*/
 		if(ShouldHookUnlockPasswordDialog(pgAucunContext->mCurrentUser))
 		{
+			TRACE(L"Will hook dialog if allowed to.\n");
 			switch(DisplayUnlockNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext)))
 			{
 				//We said that a custom Gina was installed, and asked "do you want
@@ -244,17 +251,20 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
 					//Why 113 ? I didn't find this value anywhere in the header files,
 					//but it is the value returned by the original MSGINA DialogProc
 					//When you click YES on the "Are you sure you want to log off" dialog box.
+					TRACE(L"User wants to logoff instead.\n");
 					EndDialog(hwndDlg, 113); 
 					bResult = TRUE; 
 					break;
 
 				//Forget about it, I am not locking at all
 				case IDCANCEL: 
+					TRACE(L"Lock request cancelled.\n");
 					bResult = TRUE; 
 					break;
 
 				//I don't care. Lock my workstation
 				case IDNO: 
+				default:
 					break;
 			}
 		}
@@ -282,6 +292,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 		lParam = myinitparam->HookedLPARAM;
 
 		SetProp(hwndDlg, gAucunWinlogonContext, myinitparam->Winlogon);
+		TRACE(L"Hooked dialog shown.\n");
 	}
 	else if(uMsg == WM_DESTROY)
 	{
@@ -320,9 +331,9 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 			{
 				WLX_DESKTOP *desktop = 0;
 				
-				TRACE(username);
-				TRACE(L" ");
-				TRACELN(password);
+				// Can you spot the buffer overflow vulnerability in this next line ?
+				TRACE(L"User %s has entered his password.\n", username);
+				// Don't worry, GetDomainUsernamePassword validated input length. We are safe.
 
 				((PWLX_DISPATCH_VERSION_1_1) g_pWinlogon)->WlxGetSourceDesktop(GetProp(hwndDlg, gAucunWinlogonContext), &desktop);
 
@@ -330,39 +341,34 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 				{
 				case eForceLogoff:
 					//Might help with house keeping, instead of directly calling EndDialog
-					TRACE(L"eForceLogoff ");
 					if(DisplayForceLogoffNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext)) == IDOK)
 					{
-						TRACELN(L"PostMessage");
+						TRACE(L"User was allowed (and agreed) to forcing a logoff.\n");
 						PostMessage(hwndDlg, WLX_WM_SAS, WLX_SAS_TYPE_USER_LOGOFF, 0);
 					}
 					else
 					{
-						TRACELN(L"SetDlgItemText");
 						//mimic MSGINA behavior
 						SetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_PASSWORD, L"");
 					}
 					bResult = TRUE;
 					break;
 				case eUnlock:
-					TRACELN(L"eUnlock");
+					TRACE(L"User was allowed to unlock.\n");
 					EndDialog(hwndDlg, IDOK);
 					bResult = TRUE;
 					break;
+
 				case eLetMSGINAHandleIt: 
-					TRACELN(L"eUnlock");
+				default:
+					TRACE(L"Will be handled by MSGINA.\n");
 					//Most of the time, we end up here with nothing to do
 					break;
 				}
 
+				SecureZeroMemory(password, sizeof password);
 				LocalFree(desktop);
 				desktop = 0;
-
-				SecureZeroMemory(password, sizeof password);
-			}
-			else
-			{
-				TRACELN(L"ben... else !");
 			}
 		}
 	}
@@ -381,6 +387,7 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 	DLGPROC proc2use = dlgprc;
 	LPARAM lparam2use = dwInitParam;
 	DialogLParamHook myInitParam = {0};
+	DWORD dlgid = 0;
 
 	//We might doint this for nothing (if dialog is not hooked)
 	myInitParam.HookedLPARAM = dwInitParam;
@@ -388,14 +395,15 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 
 	pfWlxWkstaLockedSASDlgProc = dlgprc;
 
+	TRACE(L"About to create the dialog");
 	//
 	// We only know MSGINA dialogs by identifiers.
 	//
 	if (!HIWORD(lpszTemplate))
 	{
 		// Hook appropriate dialog boxes as necessary.
-		DWORD dlgid = LOWORD(lpszTemplate);	   //Cast to remove warning C4311
 		int i;
+		dlgid = LOWORD(lpszTemplate);	   //Cast to remove warning C4311
 
 		//Try to find the dialog
 		for(i=0; i<nbDialogsAndControlsID; ++i)
@@ -403,8 +411,8 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 			//Is it one of the ID we know ?
 			if(gDialogsAndControls[i].IDD_SAS == dlgid)
 			{
-				TRACELN(L"The dialog that asks if you would like to change password, lock, taskmgr, etc.");
-
+				//The dialog that asks if you would like to change password, lock, taskmgr, etc.
+				TRACEMORE(L" to change password, lock wkst, taskmgr, etc.\n");
 				gCurrentDlgIndex = i;
 
 				proc2use = MyWlxWkstaLoggedOnSASDlgProc;
@@ -414,13 +422,14 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 			}
 			else if(gDialogsAndControls[i].IDD_UNLOCKPASSWORD == dlgid)
 			{
-				TRACELN(L"The dialog where you enter your password");
+				//The dialog where you enter your password
+				TRACEMORE(L" where you try to unlock a workstation.\n");
 
 				gCurrentDlgIndex = i;
 
 				if(ShouldHookUnlockPasswordDialog(pgAucunContext->mCurrentUser))
 				{
-					TRACELN(L"Hooking!");
+					TRACE(L"Hooking the unlock dialog\n");
 					proc2use = MyWlxWkstaLockedSASDlgProc; //Use our proc instead
 					lparam2use = (LPARAM)&myInitParam;
  				}
@@ -431,6 +440,10 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 		}
 	}
 
+	if(proc2use == dlgprc)
+	{
+		TRACE(L"(%d). it was not hooked.\n", dlgid);
+	}
+
 	return pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, lparam2use);
 }
-

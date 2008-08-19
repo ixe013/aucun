@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "Settings.h"
 #include "UnlockPolicy.h"
+#include "trace.h"
 #include "debug.h"
 
 //Converts a token to an impersonation token, if it is not already one
@@ -69,15 +70,14 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 	//Do we have anything to work with ?
 	if(*unlock || *logoff)
 	{
-		TRACE(L"On a les groupes ");
-		TRACE(unlock);
-		TRACE(L" ");
-		TRACELN(logoff);
+		TRACE(L"We have the %s and %s group.\n", unlock?unlock:L"--", logoff?logoff:L"--");
 
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
 		if (LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token))
 		{
 			HRESULT is_same_user;
+
+			TRACE(L"User logged in.\n");
 			token = ConvertToImpersonationToken(token);
 
 			//Sometimes, AUCUN failed to get the current logged on user
@@ -85,27 +85,29 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 			//the regulare MSGINA logic will take over.
 			if(current_user)
 			{
-				TRACE(L"We have a user");
-
 				is_same_user = IsSameUser(current_user, token);
 
 				if(is_same_user == S_OK)
 				{
-					TRACE(L" it is the same user");
+					TRACE(L"Same user, unlocking.\n");
 					result = eUnlock; 
 				}
 				else if(is_same_user == S_FALSE)
 				{
+					TRACE(L"Different user, ");
 					if(UsagerEstDansGroupe(token, unlock) == S_OK)
 					{
-						TRACELN(L" dans le groupe unlock");
+						TRACEMORE(L"in the unlock group, unlocking.\n");
 						result = eUnlock;
 					}
 					else if(UsagerEstDansGroupe(token, logoff) == S_OK)
 					{
-						TRACELN(L" dans le groupe dans le groupe logoff");
-
+						TRACEMORE(L"in the logoff group, forcing a logoff.\n");
 						result = eForceLogoff;
+					}
+					else
+					{
+						TRACEMORE(L"no privileges we can handle.\n");
 					}
 				}
 			}
@@ -150,9 +152,6 @@ HRESULT UsagerEstDansGroupe(HANDLE usager, const wchar_t *groupe)
 		{
 			BOOL b;
 
-		if((snu == SidTypeGroup) || (snu == SidTypeWellKnownGroup ))
-			Sleep(0);
-
 			if (CheckTokenMembership(usager, pSid, &b))
 			{
 				 if (b == TRUE)
@@ -185,20 +184,31 @@ BOOLEAN ShouldHookUnlockPasswordDialog(HANDLE token)
 	if((GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
 	|| (GetGroupName(gForceLogoffGroupName, forcelogoff, sizeof forcelogoff / sizeof *forcelogoff) == S_OK))
 	{
+		TRACE(L"Groups are set, ");
 		//User must not be in the excluded group
 		if(GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded) == S_OK)
 		{
 			//If is not blacklisted, return TRUE (so the dialog will be hooked)
 			if(UsagerEstDansGroupe(token, excluded) != S_OK)
 			{
+				TRACEMORE(L"user is not excluded, should hook.\n");
 				result = TRUE;
+			}
+			else
+			{
+				TRACEMORE(L"user is excluded and will get standard MSGINA behavior.\n");
 			}
 		}
 		else
 		{
 			//There is no excluded group, let's hook !
+			TRACEMORE(L"but there is no excluded group, should hook.\n");
 			result = TRUE;
 		}
+	}
+	else
+	{
+		TRACE(L"Neither %s or %s group present, shouldn't hook.\n", gUnlockGroupName, gForceLogoffGroupName);
 	}
 
 	return result;
