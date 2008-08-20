@@ -64,6 +64,7 @@ typedef struct
 {
 	HANDLE mCurrentUser;
 	HANDLE Winlogon;
+	HANDLE mLSA;
 	PVOID mHookedContext;
 } MyGinaContext;
 

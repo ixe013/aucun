@@ -9,7 +9,9 @@
 #include <lm.h>
 #include "settings.h"
 #include "unlockpolicy.h"
+#include "trace.h"
 #include "debug.h"
+#include "SecurityHelper.h"
 
 
 void ErrorExit(DWORD dw) 
@@ -36,8 +38,12 @@ void ErrorExit(DWORD dw)
 int _tmain(int argc, _TCHAR* argv[])
 {
 	wchar_t unlock[MAX_GROUPNAME] = L"";
+	HANDLE lsa;
 
-	OutputDebugString(L"TEST starting...\n");
+	TRACE(L"TEST starting...\n");
+
+	RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa);
+
 /*
 	if(GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
 	{
@@ -108,6 +114,8 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		CloseHandle(current_user); 
 	}
+
+	LsaDeregisterLogonProcess(lsa);
 
 	return 0;
 }

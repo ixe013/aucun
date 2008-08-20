@@ -24,6 +24,7 @@
 #include "global.h"
 #include "trace.h"
 #include "debug.h"
+#include "SecurityHelper.h"
 
 //
 // Location of the real MSGINA.
@@ -314,6 +315,7 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
 
 BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID pWinlogonFunctions, PVOID * pWlxContext)
 {
+	BOOL result;
     //
     // Save pointer to dispatch table.
     //
@@ -338,13 +340,17 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
     //*
     *pWlxContext = &gAucunContext;
     gAucunContext.Winlogon = hWlx;
-    return pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, &gAucunContext.mHookedContext);
+    result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, &gAucunContext.mHookedContext);
 
 
     /*/
-    return pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, pWlxContext);
+    result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, pWlxContext);
     //*/
 
+	if(result == TRUE)
+		RegisterLogonProcess(LOGON_PROCESS_NAME, &gAucunContext.mLSA);
+
+	return result;
 }
 
 
@@ -444,6 +450,7 @@ VOID WINAPI WlxLogoff(PVOID pWlxContext)
 VOID WINAPI WlxShutdown(PVOID pWlxContext, DWORD ShutdownType)
 {
     pfWlxShutdown(GetHookedContext(pWlxContext), ShutdownType);
+	LsaDeregisterLogonProcess(((MyGinaContext*)pWlxContext)->mLSA);
     FreeLibrary(hDll);
 }
 
