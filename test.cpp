@@ -13,37 +13,71 @@
 #include "debug.h"
 #include "SecurityHelper.h"
 
+//BEGIN - Found on Google Code search, now 404 http://www.cybertech.net/~sh0ksh0k/projects_new/TRET-1.0-PUBSRC/Shared/utils/security.c
+BOOL EnablePrivilegeInToken(HANDLE hToken, const wchar_t *PrivilegeName)
+{
+	LUID Privilege;
+	TOKEN_PRIVILEGES TokenPrivileges;
 
-void ErrorExit(DWORD dw) 
-{ 
-	//wchar_t buf[2048];
-	LPVOID lpMsgBuf;
-
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-		FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL,
-		dw,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR) &lpMsgBuf,
-		0, NULL );
-
-	wprintf(L"failed with error %d: %s", dw, lpMsgBuf); 
-	//OutputDebugString(buf);
-
-	LocalFree(lpMsgBuf);
+	if (!LookupPrivilegeValue(NULL, PrivilegeName, &Privilege)) return FALSE;
+	TokenPrivileges.PrivilegeCount = 1;
+	TokenPrivileges.Privileges[0].Luid = Privilege;
+	TokenPrivileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	if (!AdjustTokenPrivileges(hToken, FALSE, &TokenPrivileges, sizeof(TokenPrivileges), NULL, NULL)) return FALSE;
+	else if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) return FALSE;
+	return TRUE;
 }
+
+
+
+BOOL EnablePrivilege(const wchar_t *PrivilegeName)
+{
+	BOOL Result;
+	HANDLE hToken;
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) return FALSE;
+	Result = EnablePrivilegeInToken(hToken, PrivilegeName);
+	CloseHandle(hToken);
+	return Result;
+}
+
+BOOL DisablePrivilegeInToken(HANDLE hToken, const wchar_t *PrivilegeName)
+{
+	LUID Privilege;
+	TOKEN_PRIVILEGES TokenPrivileges;
+
+	if (!LookupPrivilegeValue(NULL, PrivilegeName, &Privilege)) return FALSE;
+	TokenPrivileges.PrivilegeCount = 1;
+	TokenPrivileges.Privileges[0].Luid = Privilege;
+	TokenPrivileges.Privileges[0].Attributes = 0;
+	if (!AdjustTokenPrivileges(hToken, FALSE, &TokenPrivileges, sizeof(TokenPrivileges), NULL, NULL)) return FALSE;
+	else if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) return FALSE;
+	return TRUE;
+}
+
+BOOL DisablePrivilege(const wchar_t *PrivilegeName)
+{
+	BOOL Result;
+	HANDLE hToken;
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) return FALSE;
+	Result = DisablePrivilegeInToken(hToken, PrivilegeName);
+	CloseHandle(hToken);
+	return Result;
+}
+
+
+//END - Found on Google Code search, now 404 http://www.cybertech.net/~sh0ksh0k/projects_new/TRET-1.0-PUBSRC/Shared/utils/security.c
 
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	wchar_t unlock[MAX_GROUPNAME] = L"";
-	HANDLE lsa;
+	//wchar_t unlock[MAX_GROUPNAME] = L"";
+	//HANDLE lsa;
 
-	TRACE(L"TEST starting...\n");
+	TRACE(L"-------------------------\n");
 
-	RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa);
-
+	//EnablePrivilege(L"SeTcbPrivilege");
+	//if(!RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa))
+	//	TRACEMSG(GetLastError());
 /*
 	if(GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
 	{
@@ -94,28 +128,40 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		if(ShouldHookUnlockPasswordDialog(current_user))
 		{
-			wprintf(L"Should hook.\n");
+			TRACE(L"Should hook.\n");
 		}
 
-		wprintf(L"Enter password for %s : ", argv[i]);
 		if (_getws_s(passwd, MAX_PASSWORD) == passwd)
 		{
+			TRACE(L"TEST RESULT ");
+			wprintf(L"Actual result   : ");
 			switch(ShouldUnlockForUser(current_user, L"", argv[i], passwd))
 			{
-			case eLetMSGINAHandleIt: wprintf(L"eLetMSGINAHandleIt\n"); break;
-			case eUnlock: wprintf(L"eUnlock\n"); break;
-			case eForceLogoff: wprintf(L"eForceLogoff\n"); break;
+			case eLetMSGINAHandleIt: 
+				TRACEMORE(L"eLetMSGINAHandleIt\n"); 
+				wprintf(L"eLetMSGINAHandleIt\n"); 
+				break;
+			case eUnlock: 
+				TRACEMORE(L"eUnlock\n"); 
+				wprintf(L"eUnlock\n"); 
+				break;
+			case eForceLogoff: 
+				TRACEMORE(L"eForceLogoff\n"); 
+				wprintf(L"eForceLogoff\n"); 
+				break;
 			}
 		}
 		else
 		{
+			TRACE(L"Unable to read password\n");
 			break;
 		}
 
 		CloseHandle(current_user); 
 	}
 
-	LsaDeregisterLogonProcess(lsa);
+	//LsaDeregisterLogonProcess(lsa);
+	//DisablePrivilege(L"SeTcbPrivilege");
 
 	return 0;
 }
