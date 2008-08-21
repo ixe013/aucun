@@ -70,7 +70,7 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 	//Do we have anything to work with ?
 	if(*unlock || *logoff)
 	{
-		TRACE(L"We have the %s and %s group.\n", unlock?unlock:L"--", logoff?logoff:L"--");
+		TRACE(L"We have the %s and %s group.\n", (unlock&&*unlock)?unlock:L"--", (logoff&&*logoff)?logoff:L"--");
 
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
 		if (LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token))
@@ -113,6 +113,10 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 			}
 
 			CloseHandle(token);
+		}
+		else
+		{
+			TRACE(L"Unable to logon user %s (%s)\n", username, password);
 		}
 	}
 

@@ -70,6 +70,8 @@ BOOL DisablePrivilege(const wchar_t *PrivilegeName)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	int result = -1;
+
 	//wchar_t unlock[MAX_GROUPNAME] = L"";
 	//HANDLE lsa;
 
@@ -133,21 +135,21 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		if (_getws_s(passwd, MAX_PASSWORD) == passwd)
 		{
-			TRACE(L"TEST RESULT ");
-			wprintf(L"Actual result   : ");
-			switch(ShouldUnlockForUser(current_user, L"", argv[i], passwd))
+			result = ShouldUnlockForUser(current_user, L"", argv[i], passwd);
+
+			switch(result)
 			{
 			case eLetMSGINAHandleIt: 
-				TRACEMORE(L"eLetMSGINAHandleIt\n"); 
-				wprintf(L"eLetMSGINAHandleIt\n"); 
+				TRACE(L"TEST result is eLetMSGINAHandleIt\n"); 
+				wprintf(L"Actual result   : eLetMSGINAHandleIt\n");
 				break;
 			case eUnlock: 
-				TRACEMORE(L"eUnlock\n"); 
-				wprintf(L"eUnlock\n"); 
+				TRACE(L"TEST result is eUnlock\n"); 
+				wprintf(L"Actual result   : eUnlock\n"); 
 				break;
 			case eForceLogoff: 
-				TRACEMORE(L"eForceLogoff\n"); 
-				wprintf(L"eForceLogoff\n"); 
+				TRACE(L"TEST result is eForceLogoff\n"); 
+				wprintf(L"Actual result   : eForceLogoff\n"); 
 				break;
 			}
 		}
@@ -163,6 +165,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	//LsaDeregisterLogonProcess(lsa);
 	//DisablePrivilege(L"SeTcbPrivilege");
 
-	return 0;
+	return result;
 }
 

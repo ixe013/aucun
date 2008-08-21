@@ -12,8 +12,7 @@
 
 enum
 {
-	eNotSureYet,
-	eLetMSGINAHandleIt,
+	eLetMSGINAHandleIt=1,
 	eUnlock,
 	eForceLogoff,
 };
