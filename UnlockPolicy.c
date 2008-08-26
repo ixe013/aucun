@@ -116,7 +116,7 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 		}
 		else
 		{
-			TRACE(L"Unable to logon user %s (%s)\n", username, password);
+			TRACEMSG(GetLastError());
 		}
 	}
 
