@@ -72,14 +72,14 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	int result = -1;
 
+	HANDLE lsa = 0;
 	//wchar_t unlock[MAX_GROUPNAME] = L"";
-	//HANDLE lsa;
 
 	TRACE(L"-------------------------\n");
 
 	//EnablePrivilege(L"SeTcbPrivilege");
-	//if(!RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa))
-	//	TRACEMSG(GetLastError());
+	if(!RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa))
+		TRACEMSG(GetLastError());
 /*
 	if(GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
 	{
@@ -135,7 +135,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		if (_getws_s(passwd, MAX_PASSWORD) == passwd)
 		{
-			result = ShouldUnlockForUser(current_user, L"", argv[i], passwd);
+			result = ShouldUnlockForUser(lsa, current_user, L"P1176MOBILE", argv[i], passwd);
 
 			switch(result)
 			{
@@ -162,7 +162,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		CloseHandle(current_user); 
 	}
 
-	//LsaDeregisterLogonProcess(lsa);
+	LsaDeregisterLogonProcess(lsa);
 	//DisablePrivilege(L"SeTcbPrivilege");
 
 	return result;

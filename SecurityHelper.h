@@ -30,7 +30,7 @@ EXTERN BOOL ExtractProfilePath(wchar_t** ppProfilePath, MSV1_0_INTERACTIVE_PROFI
 EXTERN BOOL AllocWinLogonProfile(WLX_PROFILE_V1_0** ppWinLogonProfile, const wchar_t* profilePath);
 EXTERN BOOL CreateProcessAsUserOnDesktop(HANDLE hToken, wchar_t* programImage, wchar_t* desktop, void* env);
 EXTERN BOOL ImpersonateAndGetUserName(HANDLE hToken, wchar_t* name, int cch);
-EXTERN BOOL IsSameUser(HANDLE hToken1, HANDLE hToken2, BOOLEAN* pbIsSameUser);
+EXTERN BOOL IsSameUser(HANDLE hToken1, HANDLE hToken2, BOOL* pbIsSameUser);
 EXTERN BOOL IsAdmin(HANDLE hToken);
 
 #endif

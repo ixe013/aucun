@@ -51,6 +51,7 @@ echo                     U  F   U  F
 rem *------------------------------------------------------------*
 echo Running test :  0   0  0   0  0    Expected result : eLetMSGINAHandleIt
 rem *------------------------------------------------------------*
+echo  %TEST_EXE% %1
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eLetMSGINAHandleIt% goto TEST_FAILED
 echo.

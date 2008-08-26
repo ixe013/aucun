@@ -3,6 +3,7 @@
 #include "UnlockPolicy.h"
 #include "trace.h"
 #include "debug.h"
+#include "SecurityHelper.h"
 
 //Converts a token to an impersonation token, if it is not already one
 //
@@ -29,33 +30,8 @@ HANDLE ConvertToImpersonationToken(HANDLE token)
 	return result;
 }
 
-//Taken from Keith Brown Full Ginal Sample on MSJ (or MSDN mag, whatever)
-HRESULT IsSameUser(HANDLE hToken1, HANDLE hToken2) 
-{
-	HRESULT result = E_FAIL; 
 
-    BYTE buf1[sizeof(TOKEN_USER) + SECURITY_MAX_SID_SIZE];
-    BYTE buf2[sizeof(TOKEN_USER) + SECURITY_MAX_SID_SIZE];
-
-    DWORD cb;
-    if (GetTokenInformation(hToken1, TokenUser, buf1, sizeof buf1, &cb) &&
-		GetTokenInformation(hToken2, TokenUser, buf2, sizeof buf2, &cb)) 
-	{
-        if(EqualSid(((TOKEN_USER*)buf1)->User.Sid, ((TOKEN_USER*)buf2)->User.Sid))
-		{
-			result = S_OK;
-		}
-		else
-		{
-			result = S_FALSE;
-		}
-    }
-
-    return result;
-}
-
-
-EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const wchar_t *username, const wchar_t *password)
+EXTERN int ShouldUnlockForUser(HANDLE lsa, HANDLE current_user, const wchar_t *domain, const wchar_t *username, const wchar_t *password)
 {
 	int result = eLetMSGINAHandleIt; //secure by default
 	HANDLE token = 0;
@@ -70,12 +46,24 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 	//Do we have anything to work with ?
 	if(*unlock || *logoff)
 	{
+		BOOL logged_on = FALSE;
+        DWORD win32Error;
 		TRACE(L"We have the %s and %s group.\n", (unlock&&*unlock)?unlock:L"--", (logoff&&*logoff)?logoff:L"--");
 
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
-		if (LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token))
+		if(lsa)
 		{
-			HRESULT is_same_user;
+			logged_on = CallLsaLogonUser(lsa, domain, username, password, Unlock, 0, &token, 0, &win32Error);
+		}
+		else
+		{
+			logged_on = LogonUser(username, domain, password, LOGON32_LOGON_UNLOCK, LOGON32_PROVIDER_DEFAULT, &token);
+			win32Error = GetLastError();
+		}
+
+		if(logged_on)
+		{
+			BOOL is_same_user;
 
 			TRACE(L"User logged in.\n");
 			token = ConvertToImpersonationToken(token);
@@ -85,14 +73,14 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 			//the regulare MSGINA logic will take over.
 			if(current_user)
 			{
-				is_same_user = IsSameUser(current_user, token);
+				IsSameUser(current_user, token, &is_same_user);
 
-				if(is_same_user == S_OK)
+				if(is_same_user)
 				{
 					TRACE(L"Same user, unlocking.\n");
 					result = eUnlock; 
 				}
-				else if(is_same_user == S_FALSE)
+				else
 				{
 					TRACE(L"Different user, ");
 					if(UsagerEstDansGroupe(token, unlock) == S_OK)
@@ -116,7 +104,7 @@ EXTERN int ShouldUnlockForUser(HANDLE current_user, const wchar_t *domain, const
 		}
 		else
 		{
-			TRACEMSG(GetLastError());
+			TRACEMSG(win32Error);
 		}
 	}
 

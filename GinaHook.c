@@ -348,7 +348,10 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
     //*/
 
 	if(result == TRUE)
+	{
+		gAucunContext.mLSA = 0; //safety
 		RegisterLogonProcess(LOGON_PROCESS_NAME, &gAucunContext.mLSA);
+	}
 
 	return result;
 }
