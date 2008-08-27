@@ -150,17 +150,20 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx)
 {
 	DWORD result = IDCANCEL;
 
+	TRACE(L"About to display a notice for dialog index %d\n", gCurrentDlgIndex);
+
 	if((gCurrentDlgIndex >= 0) && (gCurrentDlgIndex < nbDialogsAndControlsID)) //sanity
 	{
 		TCHAR szFormat[1024];
 		TCHAR buf[2048];
 		wchar_t caption[512];
-		wchar_t *a, *b;
+		const wchar_t *a, *b;
 		WKSTA_USER_INFO_1 *userinfo = 0;
+		static const wchar_t vide[] = L"";
 
 		UINT ids = gDialogsAndControls[gCurrentDlgIndex].IDS_GENERIC_UNLOCK;
 
-		a = b = 0;
+		a = b = vide;
 
 		if(ImpersonateLoggedOnUser(pgAucunContext->mCurrentUser))
 		{
@@ -179,7 +182,6 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx)
 			{
 				ids = gDialogsAndControls[gCurrentDlgIndex].IDC_USERNAME;
 				a = userinfo->wkui1_username;
-				b = 0;
 			}
 		}
 
@@ -187,6 +189,9 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx)
 		LoadString(hDll, ids, szFormat, sizeof szFormat / sizeof *szFormat);
 
 		wsprintf(buf, szFormat, a, b, L"some time");
+
+		TRACE(buf);
+		TRACEMORE(L"\n");
 
 		if(userinfo)
 			NetApiBufferFree(userinfo);
