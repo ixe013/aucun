@@ -461,7 +461,15 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
          else if (gDialogsAndControls[i].IDD_UNLOCKPASSWORD == dlgid)
          {
             //The dialog where you enter your password
-            TRACEMORE(L" where you try to unlock a workstation.\n");
+            TRACEMORE(L" where you try to unlock a ");
+
+            if(IsWindowsServer())
+	    {
+	         //Ugly hack : Windows XP is just after Server 2003 in the table
+	         //So if we found a dialog, but we are running on XP, we grab the
+	         //next definition
+	         ++i;
+	    }
 
             gCurrentDlgIndex = i;
 
