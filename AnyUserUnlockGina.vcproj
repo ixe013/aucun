@@ -67,6 +67,7 @@
 				GenerateManifest="false"
 				ModuleDefinitionFile="$(SolutionDir)\GinaHook.def"
 				GenerateDebugInformation="true"
+				GenerateMapFile="true"
 				SubSystem="2"
 				TargetMachine="1"
 			/>
@@ -145,6 +146,7 @@
 				GenerateManifest="false"
 				ModuleDefinitionFile="$(SolutionDir)\GinaHook.def"
 				GenerateDebugInformation="true"
+				GenerateMapFile="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"

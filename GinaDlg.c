@@ -197,7 +197,7 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx)
          TCHAR szFormat[1024];
          a = b = vide;
 
-         if (ImpersonateLoggedOnUser(pgAucunContext->mCurrentUser))
+		 if (ImpersonateLoggedOnUser(pgAucunContext->mCurrentUser))
          {
             if ((NetWkstaUserGetInfo(0, 1, (LPBYTE*)&userinfo) == NERR_Success) && userinfo)
             {
