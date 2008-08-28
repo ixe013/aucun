@@ -13,6 +13,7 @@
 #include "debug.h"
 #include "SecurityHelper.h"
 
+
 //BEGIN - Found on Google Code search, now 404 http://www.cybertech.net/~sh0ksh0k/projects_new/TRET-1.0-PUBSRC/Shared/utils/security.c
 BOOL EnablePrivilegeInToken(HANDLE hToken, const wchar_t *PrivilegeName)
 {
@@ -74,7 +75,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	HANDLE lsa = 0;
 	//wchar_t unlock[MAX_GROUPNAME] = L"";
-
+	
 	TRACE(L"-------------------------\n");
 
 	//EnablePrivilege(L"SeTcbPrivilege");

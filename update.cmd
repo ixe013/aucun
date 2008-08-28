@@ -4,7 +4,7 @@ setlocal
 rem ------------------------------
 rem Make a time based file name
 rem ------------------------------
-set AUCUN_DLL_NAME=AUCUN-%DATE%%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.dll
+set AUCUN_DLL_NAME=AUCUN-%DATE%-%TIME:~0,2%%TIME:~3,2%%TIME:~6,2%.dll
 
 rem ------------------------------
 rem Delete any old DLL, but one...
