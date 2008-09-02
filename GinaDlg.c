@@ -33,13 +33,21 @@ DialogAndControlsID;
 
 static const DialogAndControlsID gDialogsAndControls[] =
 {
-   //Windows 2000 (never tested, taken from MS HookGina Sample)
-   //0 values means I don't know the number
-   { 0, 0, 0, 1850, 1453, 1454, 1455, 0, 0, 0, 0 },
    //Windows Server 2003
-   { 1800, 1800, 1801, 1950, 1953, 1954, 1956, 1501, 1528, 1561, 1620 },
    //XP SP3 (and probably previeus versions also, never tested)
-   { 1800, 1800, 1801, 1950, 1953, 1954, 1956, 1501, 1528, 1561, 1528 },
+   { 
+     1800,    // IDD_SAS
+     1800,    // IDC_LOCKWKSTA
+     1801,    // IDC_LOGOFF
+     1950,    // IDD_UNLOCKPASSWORD
+     1953,    // IDC_USERNAME
+     1954,    // IDC_PASSWORD
+     1956,    // IDC_DOMAIN
+     1501,    // IDS_CAPTION
+     1528,    // IDS_DOMAIN_USERNAME
+     1561,    // IDS_USERNAME
+     1528     // IDS_GENERIC_UNLOCK
+   },
 };
 
 static const int nbDialogsAndControlsID = sizeof gDialogsAndControls / sizeof *gDialogsAndControls;
