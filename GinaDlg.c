@@ -350,6 +350,8 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
       wchar_t rawusername[MAX_USERNAME];
       wchar_t password[MAX_PASSWORD];
 
+      TRACE(L"Unlock or logoff attemp\n");
+
       //Get the username and password for this particular Dialog template
       if (GetDomainUsernamePassword(hwndDlg, rawdomain, sizeof rawdomain / sizeof *rawdomain,
                                     rawusername, sizeof rawusername / sizeof *rawusername,
@@ -386,9 +388,9 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
             switch (ShouldUnlockForUser(pgAucunContext->mLSA, pgAucunContext->mCurrentUser, domain, username, password))
             {
                case eForceLogoff:
-                  //Might help with house keeping, instead of directly calling EndDialog
                   if (DisplayForceLogoffNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext)) == IDOK)
                   {
+                     //Might help with house keeping, instead of directly calling EndDialog
                      TRACE(L"User was allowed (and agreed) to forcing a logoff.\n");
                      PostMessage(hwndDlg, WLX_WM_SAS, WLX_SAS_TYPE_USER_LOGOFF, 0);
                   }
