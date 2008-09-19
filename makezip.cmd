@@ -1,22 +1,39 @@
-@echo off
-setlocal
-msbuild AnyUserUnlockGina.sln /nologo /v:m /p:Configuration=Release /t:Rebuild
-msbuild AnyUserUnlockGina.sln /nologo /v:m /p:Configuration=Debug   /t:Rebuild
+@echo off                            
 
+setlocal
+
+SET PROJECT_NAME=aucun
+
+echo Getting repository URL
 SET TEMP_FILE=%RANDOM%-%RANDOM%.tmp
 svn info | findstr URL | gawk '{print $2}' > %TEMP_FILE%
 
 SET /P SVN_URL= < %TEMP_FILE%
 del %TEMP_FILE%
 
-svn co -q %SVN_URL% aucun
+echo Checking out files
+svn co -q %SVN_URL% %PROJECT_NAME%
 
-del aucun-src.zip
-del aucun.zip
+echo Creating source zip
+zip -rp -q %PROJECT_NAME%-src.zip %PROJECT_NAME%\*
 
-zip -rp -q aucun-src.zip aucun\*
-rd /s /q aucun 
+pushd %PROJECT_NAME%
 
-zip -j -q aucun.zip README.txt release\aucun.dll sample.reg
+echo Building release configuration
+for %%i in (*.sln) do msbuild %%i /nologo /v:q /p:Configuration=Release /t:Rebuild
+echo Building debug configuration
+for %%i in (*.sln) do msbuild %%i /nologo /v:q /p:Configuration=Debug   /t:Rebuild
 
+echo Creating binary zip
+zip -j -q %PROJECT_NAME%.zip README.txt release\%PROJECT_NAME%.dll sample.reg
+
+popd
+copy %PROJECT_NAME%\%PROJECT_NAME%.zip
+
+rd /s /q %PROJECT_NAME% 
+
+dir *.zip | findstr zip
+echo.
+echo Done.
 endlocal
+echo.
