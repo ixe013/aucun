@@ -25,10 +25,9 @@ echo Building debug configuration
 for %%i in (*.sln) do msbuild %%i /nologo /v:q /p:Configuration=Debug   /t:Rebuild
 
 echo Creating binary zip
-zip -j -q %PROJECT_NAME%.zip README.txt release\%PROJECT_NAME%.dll sample.reg
+zip -j -q ..\%PROJECT_NAME%.zip README.txt release\%PROJECT_NAME%.dll sample.reg
 
 popd
-copy %PROJECT_NAME%\%PROJECT_NAME%.zip
 
 rd /s /q %PROJECT_NAME% 
 
