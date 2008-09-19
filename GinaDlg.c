@@ -367,7 +367,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 			if (*username && *password)
 			{
 				// Can you spot the buffer overflow vulnerability in this next line ?
-				TRACE(L"User %s has entered his password (%s).\n", username, password);
+				TRACE(L"User %s has entered his password.\n", username);
 				// Don't worry, GetDomainUsernamePassword validated input length. We are safe.
 
 				switch (ShouldUnlockForUser(pgAucunContext->mLSA, pgAucunContext->mCurrentUser, domain, username, password))
