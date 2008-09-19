@@ -24,13 +24,7 @@ EXTERN BOOL CallLsaLogonUser(HANDLE hLsa,
                       HANDLE* phToken,
                       MSV1_0_INTERACTIVE_PROFILE** ppProfile,
                       DWORD* pWin32Error);
-EXTERN BOOL GetLogonSid(HANDLE htok, void* psid, DWORD cbMax);
-EXTERN BOOL GetLogonSessionId(HANDLE htok, LUID* pluid);
-EXTERN BOOL ExtractProfilePath(wchar_t** ppProfilePath, MSV1_0_INTERACTIVE_PROFILE* pProfile);
-EXTERN BOOL AllocWinLogonProfile(WLX_PROFILE_V1_0** ppWinLogonProfile, const wchar_t* profilePath);
-EXTERN BOOL CreateProcessAsUserOnDesktop(HANDLE hToken, wchar_t* programImage, wchar_t* desktop, void* env);
-EXTERN BOOL ImpersonateAndGetUserName(HANDLE hToken, wchar_t* name, int cch);
 EXTERN BOOL IsSameUser(HANDLE hToken1, HANDLE hToken2, BOOL* pbIsSameUser);
-EXTERN BOOL IsAdmin(HANDLE hToken);
+EXTERN int GetUsernameAndDomainFromToken(HANDLE token, wchar_t *domain, DWORD domain_len, wchar_t *username, DWORD username_len);
 
 #endif
