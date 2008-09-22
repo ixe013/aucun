@@ -33,4 +33,4 @@ REGEDIT4
 ;* we will work it out
 ;****************************************************************************
 ;[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Debug]
-;"Outpt"="OutputDebugString"
+;"Output"="OutputDebugString"
