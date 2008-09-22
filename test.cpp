@@ -169,11 +169,9 @@ int _tmain(int argc, _TCHAR* argv[])
 			TRACE(L"Should hook.\n");
 		}
 
-		//PrintCurrentUser(current_user);
-
 		if (_getws_s(passwd, MAX_PASSWORD) == passwd)
 		{
-			result = ShouldUnlockForUser(lsa, current_user, L"P1176MOBILE", argv[i], passwd);
+			result = ShouldUnlockForUser(lsa, current_user, L".", argv[i], passwd);
 
 			switch(result)
 			{
