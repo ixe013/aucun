@@ -1,3 +1,31 @@
+/*
+ Copyright (c) 2008, Guillaume Seguin (guillaume@paralint.com)
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+*/
+
 #ifdef _DEBUG
 #include <windows.h>
 #include "trace.h"
@@ -269,78 +297,6 @@ void OutputGetSessionUserName(PLUID session)
     if (sessionData)
         LsaFreeReturnBuffer(sessionData);
     return;
-}
-
-BOOLEAN ExtractTokenOwner( HANDLE token, wchar_t *csOwner_o, size_t size)
-{
-    // First get size needed, TokenUser indicates we want user information from given token
-    DWORD dwProcessTokenInfoAllocSize = 0;
-    GetTokenInformation(token, TokenUser, NULL, 0, &dwProcessTokenInfoAllocSize);
-
-    // Call should have failed due to zero-length buffer.
-    if ( GetLastError() == ERROR_INSUFFICIENT_BUFFER )
-    {
-        // Allocate buffer for user information in the token.
-        PTOKEN_USER pUserToken = (PTOKEN_USER) malloc(dwProcessTokenInfoAllocSize);
-        if (pUserToken != NULL)
-        {
-            // Now get user information in the allocated buffer
-            if (GetTokenInformation( token, TokenUser, pUserToken, dwProcessTokenInfoAllocSize, &dwProcessTokenInfoAllocSize ))
-            {
-                // Some vars that we may need
-                SID_NAME_USE   snuSIDNameUse;
-                TCHAR          szUser[MAX_PATH] = { 0 };
-                DWORD          dwUserNameLength = MAX_PATH;
-                TCHAR          szDomain[MAX_PATH] = { 0 };
-                DWORD          dwDomainNameLength = MAX_PATH;
-
-                // Retrieve user name and domain name based on user's SID.
-                if ( LookupAccountSid( NULL,
-                                       pUserToken->User.Sid,
-                                       szUser,
-                                       &dwUserNameLength,
-                                       szDomain,
-                                       &dwDomainNameLength,
-                                       &snuSIDNameUse ))
-                {
-                    // We are done!
-                    free(pUserToken);
-
-                    // We succeeded
-                    return TRUE;
-                }//End if
-            }// End if
-
-            free(pUserToken);
-        }// End if
-    }// End if
-
-
-    // Oops trouble
-    return FALSE;
-}// End GetProcessOwner
-
-void OutputDebugStringError(DWORD dw)
-{
-    TCHAR szBuf[1024];
-    LPVOID lpMsgBuf;
-
-    FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL,
-        dw,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR) &lpMsgBuf,
-        0, NULL );
-
-    wsprintf(szBuf,
-             L"Error %d: %s\n",
-             dw, lpMsgBuf);
-
-    OutputDebugString(szBuf);
-
-    LocalFree(lpMsgBuf);
 }
 
 #endif
