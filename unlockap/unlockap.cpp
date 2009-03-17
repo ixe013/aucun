@@ -7,7 +7,7 @@
 #include "trace.h"
 
 //Function pointers back into LSASS
-LSA_DISPATCH_TABLE *g_pSec;
+PLSA_DISPATCH_TABLE g_pSec = 0;
 
 
 NTSTATUS NTAPI LsaApCallPackage(
