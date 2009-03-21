@@ -29,6 +29,7 @@
 #ifdef _DEBUG
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
+#define SAFEDEBUGBREAK()	{if(IsDebuggerPresent()) DebugBreak();}
 
 #include <windows.h>
 #include <Ntsecapi.h>
@@ -44,4 +45,6 @@ EXTERN void OutputDebugStringError(DWORD dw);
 
 
 #endif
+#else
+#define SAFEDEBUGBREAK()
 #endif

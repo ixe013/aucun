@@ -42,6 +42,8 @@
 #include "debug.h"
 #include "trace.h"
 #include "SecurityHelper.h"
+#include "dlgdefs.h"
+
 
 
 typedef struct
@@ -65,6 +67,19 @@ static const DialogAndControlsID gDialogsAndControls[] =
 	//Windows Server 2003
 	//XP SP3 (and probably previeus versions also, never tested)
 	{
+		1500,    // IDD_LOGGED_OUT_SAS
+			0,    // IDC_LOCKWKSTA
+			0,    // IDC_LOGOFF
+			0,    // IDD_UNLOCKPASSWORD
+			1502,    // IDC_USERNAME
+			1503,    // IDC_PASSWORD
+			1504,    // IDC_DOMAIN
+			0,    // IDS_CAPTION
+			0,    // IDS_DOMAIN_USERNAME
+			1502,    // IDS_USERNAME
+			0     // IDS_GENERIC_UNLOCK //1607
+	},
+	{
 		1800,    // IDD_SAS
 			1800,    // IDC_LOCKWKSTA
 			1801,    // IDC_LOGOFF
@@ -81,6 +96,7 @@ static const DialogAndControlsID gDialogsAndControls[] =
 
 static const int nbDialogsAndControlsID = sizeof gDialogsAndControls / sizeof *gDialogsAndControls;
 static int gCurrentDlgIndex = -1;
+
 
 //
 // Pointers to redirected functions.
@@ -101,7 +117,11 @@ const wchar_t gAucunWinlogonContext[] = L"Paralint.com_Aucun_WinlogonContext";
 // Pointers to redirected dialog box.
 //
 
-static DLGPROC pfWlxWkstaLockedSASDlgProc = NULL;
+static DLGPROC pfWlxOriginalDlgProc = NULL;
+
+INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 //
 // Local functions.
@@ -120,6 +140,11 @@ void HookWlxDialogBoxParam(PVOID pWinlogonFunctions, DWORD dwWlxVersion)
 	//WlxDialogBoxParam
 	pfWlxDialogBoxParam = ((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxDialogBoxParam;
 	((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxDialogBoxParam = MyWlxDialogBoxParam;
+
+	//Patch the dialog proc to their dialogs
+	gDialogsProc[LOGGED_OUT_SAS_dlg].dlgproc = MyWlxWkstaLoggedOutSASDlgProc; 
+	gDialogsProc[LOGGED_ON_SAS_dlg].dlgproc = MyWlxWkstaLoggedOnSASDlgProc; 
+	gDialogsProc[LOCKED_SAS_dlg].dlgproc = MyWlxWkstaLockedSASDlgProc; 
 }
 
 BOOLEAN GetDomainUsernamePassword(HWND hwndDlg, wchar_t *domain, int nbdomain, wchar_t *username, int nbusername, wchar_t *password, int nbpassword)
@@ -268,6 +293,83 @@ BOOL CALLBACK DelPropProc(HWND hwndSubclass, LPTSTR lpszString, HANDLE hData, UL
 	return TRUE;
 }
 
+
+INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	INT_PTR bResult = FALSE;
+
+	// We hook a click on OK
+	if (uMsg == WM_INITDIALOG)
+	{
+		DialogLParamHook *myinitparam = (DialogLParamHook*)lParam;
+
+		lParam = myinitparam->HookedLPARAM;
+
+		SetProp(hwndDlg, gAucunWinlogonContext, myinitparam->Winlogon);
+		TRACE(L"Hooked dialog shown.\n");
+	}
+	else if (uMsg == WM_DESTROY)
+	{
+		EnumPropsEx(hwndDlg, DelPropProc, 0);
+	}
+	else if ((uMsg == WM_COMMAND) && (wParam == IDOK))
+	{
+		wchar_t rawdomain[MAX_DOMAIN];
+		wchar_t rawusername[MAX_USERNAME];
+		wchar_t password[MAX_PASSWORD];
+
+		TRACE(L"Logon attemp\n");
+
+		//Get the username and password for this particular Dialog template
+		if (GetDomainUsernamePassword(hwndDlg, rawdomain, sizeof rawdomain / sizeof *rawdomain,
+			rawusername, sizeof rawusername / sizeof *rawusername,
+			password, sizeof password / sizeof *password))
+		{
+			wchar_t *username = 0;
+			wchar_t *domain = 0;
+
+			//Replace this hack with CredUIParseUserName
+			username = wcsstr(rawusername, L"\\");
+
+			if (username)
+			{
+				domain = rawusername;
+				*username++ = 0; //Null terminate the domain name and skip the separator
+			}
+			else
+			{
+				username = rawusername; //No domain entered, so point directly to the supplied buffer
+				if (*rawdomain)
+					domain = rawdomain;
+			}
+
+			if (*username && *password)
+			{
+				if(wcscmp(username, L"selfserve") == 0)
+				{
+					TRACE(L"Switching to selfservice user");
+
+					ShowWindow(GetDlgItem(hwndDlg, 1502), SW_HIDE); //Username
+					ShowWindow(GetDlgItem(hwndDlg, 1503), SW_HIDE); //Password
+					ShowWindow(GetDlgItem(hwndDlg, 1504), SW_HIDE); //Domain
+
+					SetDlgItemText(hwndDlg, 1502, L"funny");
+					SetDlgItemText(hwndDlg, 1503, L"asdf1234");
+				}
+				else
+				{
+					TRACE(L"Unknown input, sending to MSGINA");
+				}
+			}
+		}
+	}
+
+	if (!bResult)
+		bResult = pfWlxOriginalDlgProc(hwndDlg, uMsg, wParam, lParam);
+
+	return bResult;
+}
+
 INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	INT_PTR bResult = FALSE;
@@ -334,7 +436,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
 	}
 
 	if (!bResult)
-		bResult = pfWlxWkstaLockedSASDlgProc(hwndDlg, uMsg, wParam, lParam);
+		bResult = pfWlxOriginalDlgProc(hwndDlg, uMsg, wParam, lParam);
 
 	return bResult;
 }
@@ -433,7 +535,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 	}
 
 	if (!bResult)
-		bResult = pfWlxWkstaLockedSASDlgProc(hwndDlg, uMsg, wParam, lParam);
+		bResult = pfWlxOriginalDlgProc(hwndDlg, uMsg, wParam, lParam);
 
 	return bResult;
 }
@@ -452,7 +554,7 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 	myInitParam.HookedLPARAM = dwInitParam;
 	myInitParam.Winlogon = hWlx;
 
-	pfWlxWkstaLockedSASDlgProc = dlgprc;
+	pfWlxOriginalDlgProc = dlgprc;
 
 	TRACE(L"About to create the dialog");
 	//
@@ -465,7 +567,16 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 		dlgid = LOWORD(lpszTemplate);    //Cast to remove warning C4311
 
 		//Try to find the dialog
-		for (i=0; i<nbDialogsAndControlsID; ++i)
+		if(dlgid == 1500)
+		{
+			TRACEMORE(L" where you try to logon\n");
+
+			proc2use = MyWlxWkstaLoggedOutSASDlgProc;
+			lparam2use = (LPARAM)&myInitParam;
+
+			gCurrentDlgIndex = 0;
+		}
+		else for (i=0; i<nbDialogsAndControlsID; ++i)
 		{
 			//Is it one of the ID we know ?
 			if (gDialogsAndControls[i].IDD_SAS == dlgid)

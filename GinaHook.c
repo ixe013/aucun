@@ -406,7 +406,7 @@ int WINAPI WlxLoggedOnSAS(PVOID pWlxContext, DWORD dwSasType, PVOID pReserved)
 {
     int result;
 
-    TRACE(L"Logged on SAS, type %d\n", dwSasType);
+    TRACE(L"LoggedOn SAS type %d\n", dwSasType);
 
     result = pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
 

@@ -61,7 +61,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib secur32.lib $(OutDir)\libsuid.lib"
+				AdditionalOptions="/pdbpath:none"
+				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib secur32.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -134,7 +135,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib secur32.lib $(OutDir)\libsuid.lib"
+				AdditionalOptions="/pdbpath:none"
+				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib secur32.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"

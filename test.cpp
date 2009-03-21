@@ -13,8 +13,6 @@
 #include "debug.h"
 #include "SecurityHelper.h"
 
-#include "suid.h"
-
 int DumpThisToken();
 int DumpThisToken(HANDLE tok);
 
@@ -42,33 +40,6 @@ BOOL IsWindowsServer()
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-#if 1
-   if (argc == 3)
-   {
-	   getc(stdin);
-      _tprintf(_T("Trying setuid on %s\\%s\n\n"), argv[2], argv[1]);
-      HANDLE tok = INVALID_HANDLE_VALUE;
-      DumpThisToken();
-      if (SuidGetImpersonationToken(argv[1], argv[2], Network, &tok) == 0)
-      {
-         _tprintf(_T("Worked !\n\n"));
-         DumpThisToken(tok);
-         CloseHandle(tok);
-      }
-      else
-      {
-         _tprintf(_T("Failed !\n\n"));
-
-      }
-   }
-   else
-   {
-      _tprintf(_T("Usage : %s user domain\n\n"), argv[0]);
-   }
-	   getc(stdin);
-
-   return 0;
-#else
    int result = -1;
 
    HANDLE lsa = 0;
@@ -89,45 +60,8 @@ int _tmain(int argc, _TCHAR* argv[])
       TRACE(L"Windows pas Server\n");
    }
 
-   /*
-   if(GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
-   {
-   wchar_t caption[512];
-   wchar_t text[2048];
-
-   OutputDebugString(L"Group name ");
-   OutputDebugString(unlock);
-   OutputDebugString(L"\n");
-
-   if((GetNoticeText(L"Caption", caption, sizeof caption / sizeof *caption) == S_OK)
-   && (GetNoticeText(L"Text", text, sizeof text / sizeof *text) == S_OK))
-   {
-   wchar_t message[MAX_USERNAME + sizeof text / sizeof *text];
-   wchar_t *read = text;
-   wchar_t *write = text;
-
-   while(*read)
-   {
-   if((*read == '\\') && (*(read+1) == 'n'))
-   {
-   *write++ = '\n';
-   read += 2;
-   }
-   else
-   {
-   *write++ = *read++;
-   }
-   }
-
-   *write = 0;
-
-   wsprintf(message, text, unlock); //Will insert group name if there is a %s in the message
-   MessageBox(0, message, caption, MB_YESNOCANCEL|MB_ICONEXCLAMATION);
-   }
-   }
-   */
    if (argc > 1) for (int i=1; i<argc; ++i)
-      {
+   {
          //  wchar_t user[MAX_USERNAME];
          //  wchar_t domain[MAX_DOMAIN];
          wchar_t passwd[MAX_PASSWORD];
@@ -173,11 +107,22 @@ int _tmain(int argc, _TCHAR* argv[])
 
          CloseHandle(current_user);
       }
+   else
+   {
+	   HMODULE msginadll = LoadLibraryEx(_T("msgina.dll"), 0, LOAD_LIBRARY_AS_DATAFILE);
 
-   LsaDeregisterLogonProcess(lsa);
-   //DisablePrivilege(L"SeTcbPrivilege");
+	   if(msginadll)
+	   {
+			DialogBox(msginadll, MAKEINTRESOURCE(1500), 0, 0);
+
+		   FreeLibrary(msginadll);
+		   msginadll = 0;
+	   }
+   }
+
+   if(lsa)
+     LsaDeregisterLogonProcess(lsa);
 
    return result;
-#endif
 }
 

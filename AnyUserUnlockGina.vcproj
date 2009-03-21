@@ -25,6 +25,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="C:\Users\gseguin\warez\gnuwin32\bin\touch.exe build_stats.cpp"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -66,10 +67,11 @@
 				OutputFile="$(OutDir)\aucun.dll"
 				LinkIncremental="2"
 				GenerateManifest="false"
+				UACUIAccess="true"
 				ModuleDefinitionFile="$(SolutionDir)\GinaHook.def"
 				GenerateDebugInformation="true"
-				GenerateMapFile="true"
 				SubSystem="2"
+				SetChecksum="false"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -95,6 +97,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Stamping the build number in the resource"
+				CommandLine="stampver -v&quot;$(ProjectDir)\aucun.stampver&quot; -i4 $(OutDir)\aucun.dll"
 			/>
 		</Configuration>
 		<Configuration
@@ -107,6 +111,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="C:\Users\gseguin\warez\gnuwin32\bin\touch.exe build_stats.cpp"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -139,7 +144,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/pdbpath:none"
+				AdditionalOptions="/pdbpath:sourcemap"
 				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib Secur32.lib"
 				OutputFile="$(OutDir)\aucun.dll"
 				LinkIncremental="1"
@@ -175,6 +180,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Stamping the build number in the resource"
+				CommandLine="stampver -v&quot;$(ProjectDir)\aucun.stampver&quot; -i4 $(OutDir)\aucun.dll"
 			/>
 		</Configuration>
 	</Configurations>
@@ -187,7 +194,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\build_stats.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\debug.c"
+				>
+			</File>
+			<File
+				RelativePath=".\dlgdefs.cpp"
 				>
 			</File>
 			<File
@@ -225,7 +240,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\build_stats.h"
+				>
+			</File>
+			<File
 				RelativePath=".\debug.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dlgdefs.h"
 				>
 			</File>
 			<File
