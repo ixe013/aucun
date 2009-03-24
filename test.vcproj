@@ -182,10 +182,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\dumptoken.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\SecurityHelper.cpp"
 				>
 			</File>
@@ -213,10 +209,6 @@
 			>
 			<File
 				RelativePath=".\debug.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dumptoken.h"
 				>
 			</File>
 			<File
