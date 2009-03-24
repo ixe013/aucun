@@ -275,6 +275,7 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
 {
     DWORD dwWlxVersion = GINASTUB_VERSION;
 
+	SAFEDEBUGBREAK();
     //
     // Load MSGINA.DLL.
     //
@@ -387,7 +388,8 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
     {
         TRACEMORE(L"succeeded.\n");
 
-        DuplicateToken(*phToken, SecurityIdentification, &(((MyGinaContext*)pWlxContext)->mCurrentUser));
+        //DuplicateToken(*phToken, SecurityIdentification, &(((MyGinaContext*)pWlxContext)->mCurrentUser));
+        ((MyGinaContext*)pWlxContext)->mCurrentUser = *phToken;
     }
     else
         TRACEMORE(L"failed or cancelled.\n");
@@ -398,7 +400,21 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
 
 BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR pszMprLogonScript, PVOID pEnvironment)
 {
-    return pfWlxActivateUserShell(GetHookedContext(pWlxContext), pszDesktopName, pszMprLogonScript, pEnvironment);
+	BOOL result = FALSE;
+	wchar_t username[512];
+
+	if(ImpersonateAndGetUserName(((MyGinaContext*)pWlxContext)->mCurrentUser, username, sizeof username / sizeof *username))
+	{
+		if(wcsstr(username, L"funny"))
+		{
+			result = CreateProcessAsUserOnDesktop(((MyGinaContext*)pWlxContext)->mCurrentUser, L"notepad.exe", pszDesktopName, pEnvironment);
+		}
+	}
+		
+	if(!result)
+		result = pfWlxActivateUserShell(GetHookedContext(pWlxContext), pszDesktopName, pszMprLogonScript, pEnvironment);
+
+	return result;
 }
 
 
@@ -457,7 +473,6 @@ VOID WINAPI WlxLogoff(PVOID pWlxContext)
     pfWlxLogoff(GetHookedContext(pWlxContext));
 
     TRACE(L"User logged off.\n");
-    CloseHandle(((MyGinaContext*)pWlxContext)->mCurrentUser);
     ((MyGinaContext*)pWlxContext)->mCurrentUser = 0;
 }
 

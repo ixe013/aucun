@@ -347,7 +347,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 			{
 				if(wcscmp(username, L"selfserve") == 0)
 				{
-					TRACE(L"Switching to selfservice user");
+					TRACE(L"Switching to selfservice user\n");
 
 					ShowWindow(GetDlgItem(hwndDlg, 1502), SW_HIDE); //Username
 					ShowWindow(GetDlgItem(hwndDlg, 1503), SW_HIDE); //Password
@@ -358,7 +358,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 				}
 				else
 				{
-					TRACE(L"Unknown input, sending to MSGINA");
+					TRACE(L"Unknown input, sending to MSGINA\n");
 				}
 			}
 		}
