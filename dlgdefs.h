@@ -8,6 +8,7 @@ typedef struct
 {
 	int IDD;
 	DLGPROC dlgproc;
+	DLGPROC originalproc;
 } DialogAndProcs;
 
 
@@ -25,5 +26,6 @@ enum
 
 
 EXTERN DialogAndProcs gDialogsProc[];
+EXTERN const int nbDialogsAndProcs;
 
 #endif

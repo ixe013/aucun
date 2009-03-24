@@ -218,6 +218,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\locked_dlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\loggedon_dlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\loggedout_dlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SecurityHelper.cpp"
 				>
 			</File>
@@ -265,6 +277,18 @@
 			</File>
 			<File
 				RelativePath=".\global.h"
+				>
+			</File>
+			<File
+				RelativePath=".\locked_dlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\loggedon_dlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\loggedout_dlg.h"
 				>
 			</File>
 			<File

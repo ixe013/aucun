@@ -31,6 +31,16 @@
 
 #include "extern.h"
 
+
+typedef struct
+{
+	HANDLE mCurrentUser;
+	HANDLE Winlogon;
+	HANDLE mLSA;
+	PVOID mHookedContext;
+} MyGinaContext;
+
+
 EXTERN PVOID g_pWinlogon;
 EXTERN MyGinaContext *pgAucunContext;
 EXTERN HINSTANCE hDll;

@@ -72,13 +72,5 @@ typedef BOOL(WINAPI * PWLXGETCONSOLESWITCHCREDENTIALS)(PVOID, PVOID);
 typedef VOID(WINAPI * PWLXRECONNECTNOTIFY)(PVOID);
 typedef VOID(WINAPI * PWLXDISCONNECTNOTIFY)(PVOID);
 
-typedef struct
-{
-	HANDLE mCurrentUser;
-	HANDLE Winlogon;
-	HANDLE mLSA;
-	PVOID mHookedContext;
-} MyGinaContext;
-
 
 #endif
