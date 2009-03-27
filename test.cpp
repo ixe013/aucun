@@ -13,9 +13,17 @@
 #include "debug.h"
 #include "SecurityHelper.h"
 
-int DumpThisToken();
-int DumpThisToken(HANDLE tok);
+#include "dlgdefs.h"
+#include "loggedout_dlg.h"
 
+INT_PTR CALLBACK DefDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+
+DialogAndProcs gDialogsProc[] = 
+{
+	{ IDD_LOGGED_OUT_SAS,  MyWlxWkstaLoggedOutSASDlgProc, DefDialogProc},
+};
+
+const int nbDialogsAndProcs = sizeof gDialogsProc / sizeof *gDialogsProc;
 
 
 BOOL IsWindowsServer()
@@ -35,6 +43,24 @@ BOOL IsWindowsServer()
 
    // Perform the test.
    return VerifyVersionInfo(&osvi, VER_MAJORVERSION | VER_PRODUCT_TYPE, dwlConditionMask);
+}
+
+
+// Message handler for about box.
+INT_PTR CALLBACK DefDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	UNREFERENCED_PARAMETER(lParam);
+	switch (message)
+	{
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
 }
 
 
@@ -113,7 +139,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	   if(msginadll)
 	   {
-			DialogBox(msginadll, MAKEINTRESOURCE(1500), 0, 0);
+			DialogBox(msginadll, MAKEINTRESOURCE(1500), 0, MyWlxWkstaLoggedOutSASDlgProc);
 
 		   FreeLibrary(msginadll);
 		   msginadll = 0;

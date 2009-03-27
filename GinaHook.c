@@ -380,19 +380,25 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
 {
     int result;
 
-    TRACE(L"Logon attemp ");
+    TRACE(L"Logon attemp\n");
 
     result =  pfWlxLoggedOutSAS(GetHookedContext(pWlxContext), dwSasType, pAuthenticationId, pLogonSid, pdwOptions, phToken, pMprNotifyInfo, pProfile);
 
     if (result == WLX_SAS_ACTION_LOGON)
     {
-        TRACEMORE(L"succeeded.\n");
+		wchar_t username[512];
+
+		TRACE(L"User ");
+		if(ImpersonateAndGetUserName(((MyGinaContext*)pWlxContext)->mCurrentUser, username, sizeof username / sizeof *username))
+			TRACEMORE(L"%s ", username);
+
+        TRACEMORE(L"logon succeeded.\n");
 
         //DuplicateToken(*phToken, SecurityIdentification, &(((MyGinaContext*)pWlxContext)->mCurrentUser));
         ((MyGinaContext*)pWlxContext)->mCurrentUser = *phToken;
     }
     else
-        TRACEMORE(L"failed or cancelled.\n");
+        TRACE(L"Logon failed or cancelled.\n");
 
     return result;
 }
@@ -407,7 +413,8 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
 	{
 		if(wcsstr(username, L"funny"))
 		{
-			result = CreateProcessAsUserOnDesktop(((MyGinaContext*)pWlxContext)->mCurrentUser, L"notepad.exe", pszDesktopName, pEnvironment);
+			TRACE(L"Switching to selfservice account\n");
+			result = CreateProcessAsUserOnDesktop(((MyGinaContext*)pWlxContext)->mCurrentUser, L"selfserviceshell.exe", pszDesktopName, pEnvironment);
 		}
 	}
 		
