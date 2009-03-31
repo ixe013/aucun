@@ -386,14 +386,6 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
 
     if (result == WLX_SAS_ACTION_LOGON)
     {
-		wchar_t username[512];
-
-		TRACE(L"User ");
-		if(ImpersonateAndGetUserName(((MyGinaContext*)pWlxContext)->mCurrentUser, username, sizeof username / sizeof *username))
-			TRACEMORE(L"%s ", username);
-
-        TRACEMORE(L"logon succeeded.\n");
-
         //DuplicateToken(*phToken, SecurityIdentification, &(((MyGinaContext*)pWlxContext)->mCurrentUser));
         ((MyGinaContext*)pWlxContext)->mCurrentUser = *phToken;
     }
@@ -411,9 +403,12 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
 
 	if(ImpersonateAndGetUserName(((MyGinaContext*)pWlxContext)->mCurrentUser, username, sizeof username / sizeof *username))
 	{
+		//TODO : Read username from the registry
 		if(wcsstr(username, L"funny"))
 		{
 			TRACE(L"Switching to selfservice account\n");
+			//TODO : Deny Administrator group in token (not sure it will work)
+			//TODO : Read shell executable name from registry
 			result = CreateProcessAsUserOnDesktop(((MyGinaContext*)pWlxContext)->mCurrentUser, L"selfserviceshell.exe", pszDesktopName, pEnvironment);
 		}
 	}

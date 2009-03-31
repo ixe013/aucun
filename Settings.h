@@ -45,6 +45,8 @@
 EXTERN HRESULT GetGroupName(const wchar_t *key, wchar_t *group, DWORD size);
 EXTERN HRESULT GetNoticeText(const wchar_t *name, wchar_t *text, DWORD size);
 EXTERN HRESULT GetDebugSetting(const wchar_t *name, wchar_t *text, DWORD size);
+EXTERN HRESULT GetSelfServeSetting(const wchar_t *name, wchar_t *text, DWORD size);
+
 EXTERN HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, DWORD size);
 
 EXTERN const wchar_t* gUnlockGroupName;

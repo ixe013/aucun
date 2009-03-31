@@ -236,6 +236,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StaticPrompt.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Trace.h"
 				>
 			</File>

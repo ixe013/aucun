@@ -28,6 +28,33 @@ REGEDIT4
 "Text"="A custom unlocking software is installed. It allows anybody from the %s group to unlock your workstation and impersonate you.\\n\\nWould you like to log off instead ?"
 
 ;****************************************************************************
+;* After so many attemps, a message is displayed allowing the user to launch
+;* the self service application. That application can be anything, but the 
+;* companion application, selfserviceshell.exe, is a locked down internet
+;* explorer shell that can go to your selfservice interal web site.
+;* 
+;****************************************************************************
+[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Selfserve]
+"Attemps"=1
+"Text"="Click here to recover your password."
+"Shell"="%windir%\system32\selfserviceshell.exe"
+"Username"=".\selfserviceuser"
+
+;****************************************************************************
+;* A self service application that loads a first URL, usually a local file
+;* that will be display rapidly while the browser is redirected to a self
+;* service web application. You can also set a page that will be displayed
+;* in case of an error (such as being offline).
+;*
+;* Don't forget to use HTTPS for the target url !
+;* 
+;****************************************************************************
+[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\SelfServe\Shell]
+"target"="http://www.paralint.com/projets/aucun/sampleselfserve/"
+"loading"="file://c:/waiting.html"
+"error"="file://c:/error.html"
+
+;****************************************************************************
 ;* Should things go bad, you can enable a trace by adding this to the registry. 
 ;* Send the trace to me (guillaume@paralint.com) along with a description and
 ;* we will work it out

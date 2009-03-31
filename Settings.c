@@ -53,6 +53,10 @@ HRESULT GetDebugSetting(const wchar_t *name, wchar_t *text, DWORD size)
 	return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Debug", name, text, size);
 }
 
+HRESULT GetSelfServeSetting(const wchar_t *name, wchar_t *text, DWORD size)
+{
+	return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\SelfServe", name, text, size);
+}
 
 HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, DWORD size)
 {

@@ -58,6 +58,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	_Module.Term();
 	::CoUninitialize();
 
+	//TODO : Read "logoff on close" parameter from the command line
 	//If Explorer is not running, chances are we are the shell
 	CProcessIterator process(0);
   while(process != CProcessIterator::End)
