@@ -89,26 +89,35 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 				GetWindowRect(GetDlgItem(hwndDlg, 1506), &rect);
 				margin = rect.left;
 
-				GetWindowRect(GetDlgItem(hwndDlg, IDOK), &rect);
-				p.x = rect.left;
-
 				//On the same line as the ok buttons (they will be moved)
 				GetWindowRect(GetDlgItem(hwndDlg, IDOK), &rect);
+				p.x = rect.left;
 				p.y = rect.top;
 
+				//As far right as the Option button
+				GetWindowRect(GetDlgItem(hwndDlg, 1514), &rect);
+				//As far left as the Ok button
+				rect.left = p.x;
+				
+				//Here, rect contains the outer rectangle including all buttons from the bottom row
+				//rect = left, top and bottom of IDOK,   right of 1514 (options);
+
+				//Now convert the top-left coordinate in client for CreateWindow
 				ScreenToClient(hwndDlg, &p);
 
-				GetClientRect(hwndDlg, &rect); //Make it as wide as the dialog box, minus margins
+				//GetClientRect(hwndDlg, &rect); //Make it as wide as the dialog box, minus margins
 
 				hwndPrompt = CreateWindowEx(0, L"STATIC", prompt, SS_LEFT|SS_NOTIFY|WS_CHILD|WS_VISIBLE, 
-					p.x, p.y, rect.right-rect.left-p.x-margin, 100, hwndDlg, (HMENU)IDC_SELFSERVEPROMPT, 0, 0);
+					//p.x, p.y, rect.right-rect.left-p.x-margin, 100, hwndDlg, (HMENU)IDC_SELFSERVEPROMPT, 0, 0);
+					p.x, p.y, rect.right-rect.left, 100, hwndDlg, (HMENU)IDC_SELFSERVEPROMPT, 0, 0);
 
 				//TODO : Subclass the STATIC control
 				gStaticPrompt.SubclassWindow(hwndPrompt);
 
 				increase = gStaticPrompt.ComputeRequiredHeight();
 
-				gStaticPrompt.MoveWindow(p.x, p.y, rect.right-rect.left-p.x-margin, increase); 
+				//gStaticPrompt.MoveWindow(p.x, p.y, rect.right-rect.left-p.x-margin, increase); 
+				gStaticPrompt.MoveWindow(p.x, p.y, rect.right-rect.left, increase); 
 
 				//Get the original window's dimension
 				GetWindowRect(hwndDlg, &rect);
@@ -117,7 +126,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
 				//Move the bottom row controls (Ok, Cancel, Options, etc.)
 				MoveControl(hwndDlg, 24064, 0, increase+margin); //Bitmap (shows current keyboard layout)
-				MoveControl(hwndDlg, IDOK, 0, increase+margin);  //OK button
+				//MoveControl(hwndDlg, IDOK, 0, increase+margin);  //OK button
 				MoveControl(hwndDlg, IDCANCEL, 0, increase+margin); //Cancel button
 				MoveControl(hwndDlg, 1501, 0, increase+margin);  //Shutdown button
 				MoveControl(hwndDlg, 1514, 0, increase+margin);  //Option button

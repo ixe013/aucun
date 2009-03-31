@@ -126,7 +126,7 @@ public:
 		dc.DrawText(prompt, -1, &rect, DT_CALCRECT|DT_WORDBREAK); //Compute the height
 
 		//Room for the text and a top and bottom margin
-		return (rect.bottom-rect.top) + 2*margin;
+		return max(rect.bottom-rect.top, DEFAULT_ICON_SIZE) + 2*margin;
 	}
 
 	// Message map and handlers
@@ -198,6 +198,10 @@ public:
 				dc.DrawText(lpszText, -1, &rcClient, nDrawStyle | DT_WORDBREAK);
 			}
 		}
+
+		GetClientRect(&rcClient);
+
+		dc.FrameRect(&rcClient, GetSysColorBrush(COLOR_3DSHADOW));
 
 		dc.SelectFont(hOldFont);
 	}
