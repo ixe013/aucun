@@ -48,8 +48,13 @@ public:
 
 	CFont m_font;
 	int m_margin;
+	HCURSOR m_hand;
 
-	CStaticPromptImpl() : m_margin(DEFAULT_MARGIN_PIXEL) {}
+	CStaticPromptImpl() 
+		: m_margin(DEFAULT_MARGIN_PIXEL)
+		, m_hand(0)
+	{
+	}
 
 	// Operations
 	BOOL SubclassWindow(HWND hWnd)
@@ -135,7 +140,7 @@ public:
 		MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
 		MESSAGE_HANDLER(WM_PAINT, OnPaint)
 		MESSAGE_HANDLER(WM_PRINTCLIENT, OnPaint)
-		//TODO : Add support for a finger cursor
+		MESSAGE_HANDLER(WM_SETCURSOR, OnSetCursor)
 	END_MSG_MAP()
 
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -172,9 +177,8 @@ public:
 		dc.FillRect(&rcClient, GetSysColorBrush(COLOR_INFOBK));
 
 		HICON question = (HICON)LoadImage(0, IDI_QUESTION, IMAGE_ICON, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE, LR_SHARED);
-		dc.DrawIconEx(m_margin, m_margin, question, 0, 0, DI_NORMAL);
+		dc.DrawIconEx(m_margin, m_margin, question, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE, DI_NORMAL);
 
-		//TODO : Compute a better size for margins, with room for an ICON
 		rcClient.left = TotalPadding()-m_margin;
 		rcClient.right -= m_margin;
 		rcClient.bottom -= m_margin;
@@ -206,6 +210,26 @@ public:
 		dc.SelectFont(hOldFont);
 	}
 
+	LRESULT OnSetCursor(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+	{
+		//TODO: Set cursor code does not work, fix it or destroy it
+		if(!m_hand)	
+		{
+			m_hand = LoadCursor(0, IDC_HAND);
+		}
+
+		if(m_hand)	
+		{
+			SetCursor(m_hand);
+			bHandled = TRUE;
+		}
+		else
+		{
+			bHandled = FALSE;
+		}
+
+		return 1;
+	}
 };
 
 

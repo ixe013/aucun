@@ -4,10 +4,10 @@
 #define asd
 void OutputBuildStats()
 {
-   OutputDebugString(L"Aucun, build ");
+	OutputDebugString(L"Aucun, build timestamp : ");
    OutputDebugStringA(__TIMESTAMP__);
    OutputDebugStringA("\n");
-   OutputDebugStringA("<?dml?><link cmd=\".shell start iexplore http://www.paralint.com/projects/aucun/\">Any user can unlock now custom GINA</link>\n");
+   OutputDebugStringA("http://www.paralint.com/projects/aucun/\n");
 }
 
 BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)

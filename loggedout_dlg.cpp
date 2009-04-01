@@ -48,7 +48,7 @@ enum
 	IDC_SELFSERVEPROMPT
 };
 
-
+//Moves a control in a dialog
 void MoveControl(HWND hwndDlg, int id, int xoffset, int yoffset)
 {
 	HWND control = GetDlgItem(hwndDlg, id);
@@ -66,83 +66,91 @@ void MoveControl(HWND hwndDlg, int id, int xoffset, int yoffset)
 	MoveWindow(control, p.x+xoffset, p.y+yoffset, rect.right-rect.left, rect.bottom-rect.top, TRUE);
 }
 
+
+HWND AddStaticPrompt(HWND hwndDlg)
+{
+	HWND hwndPrompt = 0;
+	wchar_t prompt[2048];
+	if(GetSelfServeSetting(L"Text", prompt, sizeof prompt / sizeof *prompt) == S_OK)
+	{
+		RECT rect;
+		POINT p;
+		int increase = 0;
+		int margin;
+
+		//Create a static prompt control
+		//As far left as the static controls
+		GetWindowRect(GetDlgItem(hwndDlg, 1506), &rect);
+		p.x = rect.left;
+		p.y = rect.top;
+		ScreenToClient(hwndDlg, &p);
+		margin = p.x;
+
+		//On the same line as the ok buttons (they will be moved)
+		GetWindowRect(GetDlgItem(hwndDlg, IDOK), &rect);
+		p.x = rect.left;
+		p.y = rect.top;
+
+		//As far right as the Option button
+		GetWindowRect(GetDlgItem(hwndDlg, 1514), &rect);
+		//As far left as the Ok button
+		rect.left = p.x;
+
+		//Here, rect contains the outer rectangle including all buttons from the bottom row
+		//rect = left, top and bottom of IDOK,   right of 1514 (options);
+
+		//Now convert the top-left coordinate in client for CreateWindow
+		ScreenToClient(hwndDlg, &p);
+
+		//We have the top left corner and the width. Let's create the dialog so we can
+		//compute the height of the text
+		hwndPrompt = CreateWindowEx(0, L"STATIC", prompt, SS_LEFT|SS_NOTIFY|WS_CHILD,//|WS_VISIBLE, 
+			p.x, p.y, rect.right-rect.left, 100, hwndDlg, (HMENU)IDC_SELFSERVEPROMPT, 0, 0);
+
+		gStaticPrompt.SubclassWindow(hwndPrompt);
+
+		increase = gStaticPrompt.ComputeRequiredHeight();
+
+		gStaticPrompt.MoveWindow(p.x, p.y, rect.right-rect.left, increase); 
+
+		//Get the original window's dimension
+		GetWindowRect(hwndDlg, &rect);
+		//Make it bigger
+		SetWindowPos(hwndDlg, 0, 0, 0, rect.right-rect.left, rect.bottom-rect.top+increase+margin,SWP_NOMOVE|SWP_NOZORDER);
+
+		//Move the bottom row controls (Ok, Cancel, Options, etc.)
+		MoveControl(hwndDlg, 24064, 0, increase+margin); //Bitmap (shows current keyboard layout)
+		MoveControl(hwndDlg, IDOK, 0, increase+margin);  //OK button
+		MoveControl(hwndDlg, IDCANCEL, 0, increase+margin); //Cancel button
+		MoveControl(hwndDlg, 1501, 0, increase+margin);  //Shutdown button
+		MoveControl(hwndDlg, 1514, 0, increase+margin);  //Option button
+
+		AnimateWindow(hwndPrompt, 200, AW_VER_POSITIVE|AW_SLIDE);
+	}
+
+	return hwndPrompt;
+}
+
 INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static HWND hwndPrompt = 0;
-
+	bool handled = false;
+	INT_PTR result = 0;
+	
 	switch(uMsg)
 	{
 	case WM_INITDIALOG :
 		{
-			wchar_t prompt[2048];
-			if(GetSelfServeSetting(L"Text", prompt, sizeof prompt / sizeof *prompt) == S_OK)
-			{
-				RECT rect;
-				POINT p;
-				int increase = 0;
-				int margin;
+			SetWindowPos(hwndDlg, 0, 287, 298, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
 
-				//TODO : Make a function that creates the STATIC control
-				//TODO : Do no display all the time, detect a bad password attempt
-				//Create a static prompt control
-				//As far left as the static controls
-				GetWindowRect(GetDlgItem(hwndDlg, 1506), &rect);
-				margin = rect.left;
+			result = gDialogsProc[LOGGED_OUT_SAS_dlg].originalproc(hwndDlg, uMsg, wParam, lParam);;
+			handled = true;
 
-				//On the same line as the ok buttons (they will be moved)
-				GetWindowRect(GetDlgItem(hwndDlg, IDOK), &rect);
-				p.x = rect.left;
-				p.y = rect.top;
-
-				//As far right as the Option button
-				GetWindowRect(GetDlgItem(hwndDlg, 1514), &rect);
-				//As far left as the Ok button
-				rect.left = p.x;
-				
-				//Here, rect contains the outer rectangle including all buttons from the bottom row
-				//rect = left, top and bottom of IDOK,   right of 1514 (options);
-
-				//Now convert the top-left coordinate in client for CreateWindow
-				ScreenToClient(hwndDlg, &p);
-
-				//GetClientRect(hwndDlg, &rect); //Make it as wide as the dialog box, minus margins
-
-				hwndPrompt = CreateWindowEx(0, L"STATIC", prompt, SS_LEFT|SS_NOTIFY|WS_CHILD|WS_VISIBLE, 
-					//p.x, p.y, rect.right-rect.left-p.x-margin, 100, hwndDlg, (HMENU)IDC_SELFSERVEPROMPT, 0, 0);
-					p.x, p.y, rect.right-rect.left, 100, hwndDlg, (HMENU)IDC_SELFSERVEPROMPT, 0, 0);
-
-				//TODO : Subclass the STATIC control
-				gStaticPrompt.SubclassWindow(hwndPrompt);
-
-				increase = gStaticPrompt.ComputeRequiredHeight();
-
-				//gStaticPrompt.MoveWindow(p.x, p.y, rect.right-rect.left-p.x-margin, increase); 
-				gStaticPrompt.MoveWindow(p.x, p.y, rect.right-rect.left, increase); 
-
-				//Get the original window's dimension
-				GetWindowRect(hwndDlg, &rect);
-				//Make it bigger
-				SetWindowPos(hwndDlg, 0, 0, 0, rect.right-rect.left, rect.bottom-rect.top+increase+margin,SWP_NOMOVE|SWP_NOZORDER);
-
-				//Move the bottom row controls (Ok, Cancel, Options, etc.)
-				MoveControl(hwndDlg, 24064, 0, increase+margin); //Bitmap (shows current keyboard layout)
-				//MoveControl(hwndDlg, IDOK, 0, increase+margin);  //OK button
-				MoveControl(hwndDlg, IDCANCEL, 0, increase+margin); //Cancel button
-				MoveControl(hwndDlg, 1501, 0, increase+margin);  //Shutdown button
-				MoveControl(hwndDlg, 1514, 0, increase+margin);  //Option button
-			}
+			//TODO : Do no display all the time, detect a bad password attempt
+			//hwndPrompt = AddStaticPrompt(hwndDlg);
 		}
 		break;
 
-	case WM_CTLCOLORSTATIC :
-		//TODO : Move this to a C++ class that subclasses the STATIC control
-		/*
-		if(hwndPrompt == (HWND)lParam)
-		{
-			return (INT_PTR)GetSysColorBrush(COLOR_INFOBK);
-		}
-		*/
-		break;
 	case WM_COMMAND :
 		if((HIWORD(wParam) == STN_CLICKED) && (LOWORD(wParam == IDC_SELFSERVEPROMPT)))
 		{
@@ -163,8 +171,20 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 				SetDlgItemText(hwndDlg, 1502, username);
 				SetDlgItemText(hwndDlg, 1503, ui.usri1003_password);
 		}
+		else if(LOWORD(wParam == 1514))
+		{
+			if(!hwndPrompt)
+				hwndPrompt = AddStaticPrompt(hwndDlg);
+		}
+		break;
+	case WM_DESTROY:
+		hwndPrompt = 0;
 		break;
 	}
+	
 
-	return gDialogsProc[LOGGED_OUT_SAS_dlg].originalproc(hwndDlg, uMsg, wParam, lParam);;
+	if(!handled)
+		result = gDialogsProc[LOGGED_OUT_SAS_dlg].originalproc(hwndDlg, uMsg, wParam, lParam);
+
+	return result;
 }

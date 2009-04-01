@@ -275,7 +275,6 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
 {
     DWORD dwWlxVersion = GINASTUB_VERSION;
 
-	SAFEDEBUGBREAK();
     //
     // Load MSGINA.DLL.
     //
@@ -372,6 +371,31 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
 
 VOID WINAPI WlxDisplaySASNotice(PVOID pWlxContext)
 {
+	BOOL remotedeb = FALSE; 
+
+	if(!CheckRemoteDebuggerPresent(GetCurrentProcess(), &remotedeb))
+	{
+		TRACE(L"Unable to check the presence of a remote debugger (0x%08X)\n", GetLastError());
+	}
+
+	TRACE(L"Process is ");
+
+	if(remotedeb)
+	{
+		TRACEMORE(L"running under a remote debugger\n");
+	}
+	else if(IsDebuggerPresent())
+	{
+		TRACEMORE(L"running under a local debugger\n");
+	}
+	else
+	{
+		TRACEMORE(L"not running under a debugger\n");
+	}
+
+	//Tant pis...
+	DebugBreak();
+
     pfWlxDisplaySASNotice(GetHookedContext(pWlxContext));
 }
 
