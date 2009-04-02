@@ -147,7 +147,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 			handled = true;
 
 			//TODO : Do no display all the time, detect a bad password attempt
-			//hwndPrompt = AddStaticPrompt(hwndDlg);
+			hwndPrompt = AddStaticPrompt(hwndDlg);
 		}
 		break;
 
@@ -170,11 +170,6 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 				NetUserSetInfo(0, username, 1003, (LPBYTE)&ui, 0);
 				SetDlgItemText(hwndDlg, 1502, username);
 				SetDlgItemText(hwndDlg, 1503, ui.usri1003_password);
-		}
-		else if(LOWORD(wParam == 1514))
-		{
-			if(!hwndPrompt)
-				hwndPrompt = AddStaticPrompt(hwndDlg);
 		}
 		break;
 	case WM_DESTROY:
