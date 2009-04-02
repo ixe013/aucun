@@ -37,6 +37,7 @@
 #include "trace.h"
 #include "debug.h"
 #include "SecurityHelper.h"
+#include "Settings.h"
 
 //
 // Location of the real MSGINA.
@@ -423,18 +424,27 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
 BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR pszMprLogonScript, PVOID pEnvironment)
 {
 	BOOL result = FALSE;
-	wchar_t username[512];
+	wchar_t current_username[512];
 
-	if(ImpersonateAndGetUserName(((MyGinaContext*)pWlxContext)->mCurrentUser, username, sizeof username / sizeof *username))
+	if(ImpersonateAndGetUserName(((MyGinaContext*)pWlxContext)->mCurrentUser, current_username, sizeof current_username / sizeof *current_username))
 	{
-		//TODO : Read username from the registry
-		if(wcsstr(username, L"funny"))
+		wchar_t selfservice_username[512];
+
+		if(GetSelfServeSetting(L"Username", selfservice_username, sizeof selfservice_username / sizeof *selfservice_username) == S_OK)
 		{
-			TRACE(L"Switching to selfservice account\n");
-			//TODO : Deny Administrator group in token (not sure it will work)
-			//TODO : Read shell executable name from registry
-			result = CreateProcessAsUserOnDesktop(((MyGinaContext*)pWlxContext)->mCurrentUser, L"selfserviceshell.exe", pszDesktopName, pEnvironment);
-		}
+				  if(wcsstr(current_username, selfservice_username))
+				  {
+						wchar_t shell[MAX_PATH];
+
+						if(GetSelfServeSetting(L"Shell", shell, sizeof shell / sizeof *shell) == S_OK)
+						{
+								 TRACE(L"Switching to selfservice account\n");
+								 //TODO : Deny Administrator group in token (not sure it will work)
+								 //TODO : Allow for command line parameters (could be in the registry, with placemarks ?)
+								 result = CreateProcessAsUserOnDesktop(((MyGinaContext*)pWlxContext)->mCurrentUser, shell, pszDesktopName, pEnvironment);
+						}
+				  }
+		  }
 	}
 		
 	if(!result)
@@ -449,6 +459,8 @@ int WINAPI WlxLoggedOnSAS(PVOID pWlxContext, DWORD dwSasType, PVOID pReserved)
     int result;
 
     TRACE(L"LoggedOn SAS type %d\n", dwSasType);
+
+	//TODO : Handle SAS if in the self service shell. CTRL-ALT-DEL closes the application, screen saver logs out
 
     result = pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
 
