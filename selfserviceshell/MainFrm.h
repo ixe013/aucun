@@ -39,6 +39,7 @@ public:
 		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
 		CHAIN_MSG_MAP(baseFrameClass)
 		//CHAIN_MSG_MAP(CMainFrameBase)
+		//TODO : Navigation complete handling
 	END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):

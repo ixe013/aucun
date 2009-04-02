@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="test"
-	ProjectGUID="{F1F2E1B6-B42F-46C9-A778-47E77EFA8A6C}"
-	RootNamespace="test"
+	Name="AnyUserCanUnlockNowGina"
+	ProjectGUID="{D818D87C-2DFB-47CE-8944-49A220F2F365}"
+	RootNamespace="RemoteUnlockGina"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -20,11 +20,12 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="C:\Users\gseguin\warez\gnuwin32\bin\touch.exe build_stats.cpp"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -41,14 +42,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="libsuid;setuid"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SECURITY_WIN32"
+				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0501;_DEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
+				UseFullPaths="false"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -62,10 +63,15 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/pdbpath:none"
-				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib secur32.lib"
+				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib Secur32.lib"
+				OutputFile="$(OutDir)\aucun.dll"
 				LinkIncremental="2"
+				GenerateManifest="false"
+				UACUIAccess="true"
+				ModuleDefinitionFile=".\GinaHook.def"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
+				SetChecksum="false"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -75,6 +81,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				EmbedManifest="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -90,18 +97,21 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Stamping the build number in the resource"
+				CommandLine="stampver -v&quot;$(ProjectDir)\aucun.stampver&quot; -i4 $(OutDir)\aucun.dll"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="C:\Users\gseguin\warez\gnuwin32\bin\touch.exe build_stats.cpp"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -117,8 +127,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="libsuid;setuid"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SECURITY_WIN32"
+				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0501;NDEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -135,11 +144,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/pdbpath:none"
-				AdditionalDependencies="kernel32.lib Advapi32.lib user32.lib netapi32.lib credui.lib secur32.lib"
+				AdditionalOptions="/pdbpath:sourcemap"
+				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib Secur32.lib"
+				OutputFile="$(OutDir)\aucun.dll"
 				LinkIncremental="1"
+				GenerateManifest="false"
+				ModuleDefinitionFile=".\GinaHook.def"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				GenerateMapFile="true"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
@@ -151,6 +164,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				EmbedManifest="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -166,6 +180,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Stamping the build number in the resource"
+				CommandLine="stampver -v&quot;$(ProjectDir)\aucun.stampver&quot; -i4 $(OutDir)\aucun.dll"
 			/>
 		</Configuration>
 	</Configurations>
@@ -178,7 +194,35 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\build_stats.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\debug.c"
+				>
+			</File>
+			<File
+				RelativePath=".\dlgdefs.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GinaDlg.c"
+				>
+			</File>
+			<File
+				RelativePath=".\GinaHook.c"
+				>
+			</File>
+			<File
+				RelativePath=".\GinaHook.Def"
+				>
+			</File>
+			<File
+				RelativePath=".\locked_dlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\loggedon_dlg.cpp"
 				>
 			</File>
 			<File
@@ -191,10 +235,6 @@
 			</File>
 			<File
 				RelativePath=".\Settings.c"
-				>
-			</File>
-			<File
-				RelativePath=".\test.cpp"
 				>
 			</File>
 			<File
@@ -212,6 +252,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\build_stats.h"
+				>
+			</File>
+			<File
 				RelativePath=".\debug.h"
 				>
 			</File>
@@ -224,7 +268,31 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GinaDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GinaHook.h"
+				>
+			</File>
+			<File
+				RelativePath=".\global.h"
+				>
+			</File>
+			<File
+				RelativePath=".\locked_dlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\loggedon_dlg.h"
+				>
+			</File>
+			<File
 				RelativePath=".\loggedout_dlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\resource.h"
 				>
 			</File>
 			<File
@@ -253,6 +321,10 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\AnyUserCanUnlockNowGina.rc"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

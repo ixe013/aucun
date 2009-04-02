@@ -35,7 +35,7 @@ REGEDIT4
 ;* 
 ;****************************************************************************
 [HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Selfserve]
-"Attemps"=1
+;"Attemps"=1
 "Text"="Click here to recover your password."
 "Shell"="%windir%\system32\selfserviceshell.exe"
 "Username"=".\selfserviceuser"
@@ -50,9 +50,7 @@ REGEDIT4
 ;* 
 ;****************************************************************************
 [HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\SelfServe\Shell]
-"target"="http://www.paralint.com/projets/aucun/sampleselfserve/"
-"loading"="file://c:/waiting.html"
-"error"="file://c:/error.html"
+"URL"="http://www.paralint.com/projets/aucun/sampleselfserve/"
 
 ;****************************************************************************
 ;* Should things go bad, you can enable a trace by adding this to the registry. 

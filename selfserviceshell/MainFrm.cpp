@@ -8,6 +8,7 @@
 #include "selfserviceshellView.h"
 #include "MainFrm.h"
 #include "RESHelper.h"
+#include "Settings.h"
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
@@ -26,6 +27,7 @@ BOOL CMainFrame::OnIdle()
 
 LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
+		  //TODO : Remove unneeded code
 	// create command bar window
 	//HWND hWndCmdBar = m_CmdBar.Create(m_hWnd, rcDefault, NULL, ATL_SIMPLE_CMDBAR_PANE_STYLE);
 	// attach menu
@@ -42,11 +44,22 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	//AddSimpleReBarBand(hWndToolBar, NULL, TRUE);
 
 	//CreateSimpleStatusBar();
+	
+	//TODO: Load URL from the registry
 
 	TCHAR resurl[MAX_PATH+5];
-	CRESHelper::GetURLForID(IDR_HTMLDEFAULT, resurl, MAX_PATH+5);
+
+   if((GetSettingText(L"SOFTWARE\\Paralint.com\\SelfServe\\Shell", L"URL", resurl, sizeof resurl / sizeof *resurl) != S_OK)
+	   || !*resurl)
+	{
+		CRESHelper::GetURLForID(IDR_HTMLDEFAULT, resurl, MAX_PATH+5);
+	}
+
 	m_hWndClient = m_view.Create(m_hWnd, rcDefault, resurl, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_HSCROLL | WS_VSCROLL, 0/*WS_EX_CLIENTEDGE*/);
 
+	//TODO: Install right click menu handler
+	//TODO : Register CTRL-P hotkey, tied to printing
+	
 	//UIAddToolBar(hWndToolBar);
 	//UISetCheck(ID_VIEW_TOOLBAR, 1);
 	//UISetCheck(ID_VIEW_STATUS_BAR, 1);
@@ -83,10 +96,9 @@ LRESULT CMainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 	return 0;
 }
 
+//TODO : Remove unneeded code
 LRESULT CMainFrame::OnFileNew(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	// TODO: add code to initialize document
-
 	return 0;
 }
 

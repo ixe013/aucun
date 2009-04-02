@@ -50,6 +50,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..\gina\."
 				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -135,6 +136,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="..\gina\."
 				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
@@ -191,7 +193,23 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
 			>
 			<File
-				RelativePath=".\hyperlink.cpp"
+				RelativePath=".\MainFrm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RESHelper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\selfserviceshell.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\selfserviceshellView.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\GINA\Settings.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -209,22 +227,6 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\MainFrm.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RESHelper.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\selfserviceshell.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\selfserviceshellView.cpp"
-				>
 			</File>
 			<File
 				RelativePath=".\stdafx.cpp"
@@ -272,10 +274,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc"
 			>
 			<File
-				RelativePath=".\hyperlink.h"
-				>
-			</File>
-			<File
 				RelativePath=".\MainFrm.h"
 				>
 			</File>
@@ -289,6 +287,10 @@
 			</File>
 			<File
 				RelativePath=".\selfserviceshellView.h"
+				>
+			</File>
+			<File
+				RelativePath="..\GINA\Settings.h"
 				>
 			</File>
 			<File
