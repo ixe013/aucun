@@ -41,13 +41,11 @@ dir /od %windir%\system32\aucun*.* | findstr /I /c:aucun
 
 pendmoves 
 
-copy selfserviceshell\debug\selfserviceshell.exe %windir%\system32
-copy selfserviceshell\debug\selfserviceshell.pdb %windir%\system32
-
-shutdown /r /t 5 /f
+copy debug\selfserviceshell.exe %windir%\system32
+copy debug\selfserviceshell.pdb %windir%\system32
 
 popd
 
 endlocal
 
-
+shutdown /r /t 5 /f

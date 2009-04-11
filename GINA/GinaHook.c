@@ -350,15 +350,9 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
     //
     HookWlxDialogBoxParam(g_pWinlogon, g_dwVersion);
 
-    //*
     *pWlxContext = &gAucunContext;
     gAucunContext.Winlogon = hWlx;
     result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, &gAucunContext.mHookedContext);
-
-
-    /*/
-    result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, pWlxContext);
-    //*/
 
 	if(result == TRUE)
 	{
@@ -407,6 +401,8 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
 
     TRACE(L"Logon attemp\n");
 
+	//TODO : Save last logon user in
+
     result =  pfWlxLoggedOutSAS(GetHookedContext(pWlxContext), dwSasType, pAuthenticationId, pLogonSid, pdwOptions, phToken, pMprNotifyInfo, pProfile);
 
     if (result == WLX_SAS_ACTION_LOGON)
@@ -415,7 +411,9 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
         ((MyGinaContext*)pWlxContext)->mCurrentUser = *phToken;
     }
     else
+	{
         TRACE(L"Logon failed or cancelled.\n");
+	}
 
     return result;
 }
@@ -425,6 +423,8 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
 {
 	BOOL result = FALSE;
 	wchar_t current_username[512];
+
+	//TODO : Restore last logon user
 
 	if(ImpersonateAndGetUserName(((MyGinaContext*)pWlxContext)->mCurrentUser, current_username, sizeof current_username / sizeof *current_username))
 	{

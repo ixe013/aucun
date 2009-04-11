@@ -25,7 +25,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="C:\Users\gseguin\warez\gnuwin32\bin\touch.exe build_stats.cpp"
+				CommandLine="touch.exe build_stats.cpp"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -42,6 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..\common"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0501;_DEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -111,7 +112,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="C:\Users\gseguin\warez\gnuwin32\bin\touch.exe build_stats.cpp"
+				CommandLine="touch.exe build_stats.cpp"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -127,6 +128,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="..\common"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0501;NDEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -144,7 +146,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/pdbpath:sourcemap"
+				AdditionalOptions="/pdbpath:none"
 				AdditionalDependencies="Advapi32.lib user32.lib netapi32.lib Secur32.lib"
 				OutputFile="$(OutDir)\aucun.dll"
 				LinkIncremental="1"
@@ -230,15 +232,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\randpasswd.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SecurityHelper.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Settings.c"
+				RelativePath="..\common\Settings.c"
 				>
 			</File>
 			<File
-				RelativePath=".\Trace.c"
+				RelativePath="..\common\Trace.c"
 				>
 			</File>
 			<File
@@ -292,6 +298,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\randpasswd.h"
+				>
+			</File>
+			<File
 				RelativePath=".\resource.h"
 				>
 			</File>
@@ -300,7 +310,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Settings.h"
+				RelativePath="..\common\Settings.h"
 				>
 			</File>
 			<File
@@ -308,7 +318,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Trace.h"
+				RelativePath="..\common\Trace.h"
 				>
 			</File>
 			<File

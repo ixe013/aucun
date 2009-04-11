@@ -13,6 +13,8 @@
 #include "debug.h"
 #include "SecurityHelper.h"
 
+#include "randpasswd.h"
+
 #include "dlgdefs.h"
 #include "loggedout_dlg.h"
 
@@ -77,15 +79,6 @@ int _tmain(int argc, _TCHAR* argv[])
    if (!RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa))
       TRACEMSG(GetLastError());
 
-   if (IsWindowsServer())
-   {
-      TRACE(L"Windows Server\n");
-   }
-   else
-   {
-      TRACE(L"Windows pas Server\n");
-   }
-
    if (argc > 1) for (int i=1; i<argc; ++i)
    {
          //  wchar_t user[MAX_USERNAME];
@@ -107,7 +100,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
          if (_getws_s(passwd, MAX_PASSWORD) == passwd)
          {
-            result = ShouldUnlockForUser(lsa, current_user, L".", argv[i], passwd);
+            result = ShouldUnlockForUser(lsa, current_user, domain, username, passwd);
 
             switch (result)
             {
@@ -135,6 +128,7 @@ int _tmain(int argc, _TCHAR* argv[])
       }
    else
    {
+	/*
 	   HMODULE msginadll = LoadLibraryEx(_T("msgina.dll"), 0, LOAD_LIBRARY_AS_DATAFILE);
 
 	   if(msginadll)
@@ -144,6 +138,15 @@ int _tmain(int argc, _TCHAR* argv[])
 		   FreeLibrary(msginadll);
 		   msginadll = 0;
 	   }
+	*/
+	wchar_t password[20];
+
+	for(int z=0; z<5; ++z)
+	{
+		GenerateRandomUnicodePassword(password, 20);
+
+		MessageBox(0, password, L"Crazy password", MB_OK);
+	}
    }
 
    if(lsa)

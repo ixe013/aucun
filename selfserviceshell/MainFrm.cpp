@@ -59,6 +59,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 	//TODO: Install right click menu handler
 	//TODO : Register CTRL-P hotkey, tied to printing
+	//TODO : Provide a way for the user to log off, without going into the CTRL-ALT-DEL sequence
 	
 	//UIAddToolBar(hWndToolBar);
 	//UISetCheck(ID_VIEW_TOOLBAR, 1);

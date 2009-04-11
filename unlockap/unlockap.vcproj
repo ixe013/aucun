@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\."
+				AdditionalIncludeDirectories="..\common"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;UNLOCKAP_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -116,7 +116,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\."
+				AdditionalIncludeDirectories="..\common"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;UNLOCKAP_EXPORTS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -201,7 +201,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Settings.c"
+				RelativePath="..\common\Settings.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -241,7 +241,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\Trace.c"
+				RelativePath="..\common\Trace.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -279,7 +279,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Settings.h"
+				RelativePath="..\common\Settings.h"
 				>
 			</File>
 			<File
@@ -291,7 +291,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Trace.h"
+				RelativePath="..\common\Trace.h"
 				>
 			</File>
 		</Filter>

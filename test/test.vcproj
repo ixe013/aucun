@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\gina"
+				AdditionalIncludeDirectories="..\common;..\gina"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SECURITY_WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -117,7 +117,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\gina"
+				AdditionalIncludeDirectories="..\common;..\gina"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SECURITY_WIN32"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -186,11 +186,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\GINA\randpasswd.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\GINA\SecurityHelper.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\GINA\Settings.c"
+				RelativePath="..\common\Settings.c"
 				>
 			</File>
 			<File
@@ -198,7 +202,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\GINA\Trace.c"
+				RelativePath="..\common\Trace.c"
 				>
 			</File>
 			<File
@@ -228,11 +232,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\GINA\randpasswd.h"
+				>
+			</File>
+			<File
 				RelativePath="..\GINA\SecurityHelper.h"
 				>
 			</File>
 			<File
-				RelativePath="..\GINA\Settings.h"
+				RelativePath="..\common\Settings.h"
 				>
 			</File>
 			<File
@@ -240,7 +248,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\GINA\Trace.h"
+				RelativePath="..\common\Trace.h"
 				>
 			</File>
 			<File
