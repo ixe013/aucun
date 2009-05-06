@@ -69,7 +69,7 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 	DLGPROC proc2use = dlgprc;
 	DWORD dlgid = 0;
 
-	TRACE(L"About to create the dialog");
+	TRACE(eERROR, L"About to create the dialog");
 	//
 	// We only know MSGINA dialogs by identifiers.
 	//
@@ -86,7 +86,7 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 			if (gDialogsProc[i].IDD == dlgid)
 			{
 				//The dialog that asks if you would like to change password, lock, taskmgr, etc.
-				TRACEMORE(L" IDD %d (index %d)\n", dlgid, i);
+				TRACEMORE(eERROR, L" IDD %d (index %d)\n", dlgid, i);
 
 				proc2use = gDialogsProc[i].dlgproc;
 				gDialogsProc[i].originalproc = dlgprc;
@@ -98,7 +98,7 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 
 	if (proc2use == dlgprc)
 	{
-		TRACE(L" (%d). it was not hooked.\n", dlgid);
+		TRACE(eERROR, L" (%d). it was not hooked.\n", dlgid);
 	}
 
 	return pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, dwInitParam);

@@ -39,15 +39,14 @@
 #include "SecurityHelper.h"
 #include "Settings.h"
 
+#include "loggedout_dlg.h"
+
 //
 // Location of the real MSGINA.
 //
 
 #define REALGINA_PATH      TEXT("MSGINA.DLL")
-#define GINASTUB_VERSION   (WLX_VERSION_1_4) // Highest version supported at
-// this point. Remember to modify
-// this as support for newer version
-// is added to this program.
+#define GINASTUB_VERSION   (WLX_VERSION_1_4) 
 
 //Hooked instance of MSGINA
 HINSTANCE hDll;
@@ -107,7 +106,7 @@ static PWLXDISCONNECTNOTIFY pfWlxDisconnectNotify = NULL;
 
 PVOID GetHookedContext(PVOID pWlxContext)
 {
-    return ((MyGinaContext*)pWlxContext)->mHookedContext;
+   return ((MyGinaContext*)pWlxContext)->mHookedContext;
 }
 
 //
@@ -115,411 +114,428 @@ PVOID GetHookedContext(PVOID pWlxContext)
 //
 BOOL MyInitialize(HINSTANCE hDll, DWORD dwWlxVersion)
 {
-    //
-    // Get pointers to all of the WLX functions in the real MSGINA.
-    //
-    pfWlxInitialize = (PFWLXINITIALIZE) GetProcAddress(hDll, "WlxInitialize");
+   //
+   // Get pointers to all of the WLX functions in the real MSGINA.
+   //
+   pfWlxInitialize = (PFWLXINITIALIZE) GetProcAddress(hDll, "WlxInitialize");
 
-    if (!pfWlxInitialize)
-    {
-        return FALSE;
-    }
+   if (!pfWlxInitialize)
+   {
+      return FALSE;
+   }
 
-    pfWlxDisplaySASNotice = (PFWLXDISPLAYSASNOTICE) GetProcAddress(hDll, "WlxDisplaySASNotice");
+   pfWlxDisplaySASNotice = (PFWLXDISPLAYSASNOTICE) GetProcAddress(hDll, "WlxDisplaySASNotice");
 
-    if (!pfWlxDisplaySASNotice)
-    {
-        return FALSE;
-    }
+   if (!pfWlxDisplaySASNotice)
+   {
+      return FALSE;
+   }
 
-    pfWlxLoggedOutSAS = (PFWLXLOGGEDOUTSAS) GetProcAddress(hDll, "WlxLoggedOutSAS");
+   pfWlxLoggedOutSAS = (PFWLXLOGGEDOUTSAS) GetProcAddress(hDll, "WlxLoggedOutSAS");
 
-    if (!pfWlxLoggedOutSAS)
-    {
-        return FALSE;
-    }
+   if (!pfWlxLoggedOutSAS)
+   {
+      return FALSE;
+   }
 
-    pfWlxActivateUserShell = (PFWLXACTIVATEUSERSHELL) GetProcAddress(hDll, "WlxActivateUserShell");
+   pfWlxActivateUserShell = (PFWLXACTIVATEUSERSHELL) GetProcAddress(hDll, "WlxActivateUserShell");
 
-    if (!pfWlxActivateUserShell)
-    {
-        return FALSE;
-    }
+   if (!pfWlxActivateUserShell)
+   {
+      return FALSE;
+   }
 
-    pfWlxLoggedOnSAS = (PFWLXLOGGEDONSAS) GetProcAddress(hDll, "WlxLoggedOnSAS");
+   pfWlxLoggedOnSAS = (PFWLXLOGGEDONSAS) GetProcAddress(hDll, "WlxLoggedOnSAS");
 
-    if (!pfWlxLoggedOnSAS)
-    {
-        return FALSE;
-    }
+   if (!pfWlxLoggedOnSAS)
+   {
+      return FALSE;
+   }
 
-    pfWlxDisplayLockedNotice = (PFWLXDISPLAYLOCKEDNOTICE) GetProcAddress(hDll, "WlxDisplayLockedNotice");
+   pfWlxDisplayLockedNotice = (PFWLXDISPLAYLOCKEDNOTICE) GetProcAddress(hDll, "WlxDisplayLockedNotice");
 
-    if (!pfWlxDisplayLockedNotice)
-    {
-        return FALSE;
-    }
+   if (!pfWlxDisplayLockedNotice)
+   {
+      return FALSE;
+   }
 
-    pfWlxIsLockOk = (PFWLXISLOCKOK) GetProcAddress(hDll, "WlxIsLockOk");
+   pfWlxIsLockOk = (PFWLXISLOCKOK) GetProcAddress(hDll, "WlxIsLockOk");
 
-    if (!pfWlxIsLockOk)
-    {
-        return FALSE;
-    }
+   if (!pfWlxIsLockOk)
+   {
+      return FALSE;
+   }
 
-    pfWlxWkstaLockedSAS = (PFWLXWKSTALOCKEDSAS) GetProcAddress(hDll, "WlxWkstaLockedSAS");
+   pfWlxWkstaLockedSAS = (PFWLXWKSTALOCKEDSAS) GetProcAddress(hDll, "WlxWkstaLockedSAS");
 
-    if (!pfWlxWkstaLockedSAS)
-    {
-        return FALSE;
-    }
+   if (!pfWlxWkstaLockedSAS)
+   {
+      return FALSE;
+   }
 
-    pfWlxIsLogoffOk = (PFWLXISLOGOFFOK) GetProcAddress(hDll, "WlxIsLogoffOk");
+   pfWlxIsLogoffOk = (PFWLXISLOGOFFOK) GetProcAddress(hDll, "WlxIsLogoffOk");
 
-    if (!pfWlxIsLogoffOk)
-    {
-        return FALSE;
-    }
+   if (!pfWlxIsLogoffOk)
+   {
+      return FALSE;
+   }
 
-    pfWlxLogoff = (PFWLXLOGOFF) GetProcAddress(hDll, "WlxLogoff");
+   pfWlxLogoff = (PFWLXLOGOFF) GetProcAddress(hDll, "WlxLogoff");
 
-    if (!pfWlxLogoff)
-    {
-        return FALSE;
-    }
+   if (!pfWlxLogoff)
+   {
+      return FALSE;
+   }
 
-    pfWlxShutdown = (PFWLXSHUTDOWN) GetProcAddress(hDll, "WlxShutdown");
+   pfWlxShutdown = (PFWLXSHUTDOWN) GetProcAddress(hDll, "WlxShutdown");
 
-    if (!pfWlxShutdown)
-    {
-        return FALSE;
-    }
+   if (!pfWlxShutdown)
+   {
+      return FALSE;
+   }
 
-    //
-    // Load functions for version 1.1 as necessary.
-    //
-    if (dwWlxVersion > WLX_VERSION_1_0)
-    {
-        pfWlxStartApplication = (PFWLXSTARTAPPLICATION) GetProcAddress(hDll, "WlxStartApplication");
+   //
+   // Load functions for version 1.1 as necessary.
+   //
+   if (dwWlxVersion > WLX_VERSION_1_0)
+   {
+      pfWlxStartApplication = (PFWLXSTARTAPPLICATION) GetProcAddress(hDll, "WlxStartApplication");
 
-        if (!pfWlxStartApplication)
-        {
-            return FALSE;
-        }
+      if (!pfWlxStartApplication)
+      {
+         return FALSE;
+      }
 
-        pfWlxScreenSaverNotify = (PFWLXSCREENSAVERNOTIFY) GetProcAddress(hDll, "WlxScreenSaverNotify");
+      pfWlxScreenSaverNotify = (PFWLXSCREENSAVERNOTIFY) GetProcAddress(hDll, "WlxScreenSaverNotify");
 
-        if (!pfWlxScreenSaverNotify)
-        {
-            return FALSE;
-        }
-    }
+      if (!pfWlxScreenSaverNotify)
+      {
+         return FALSE;
+      }
+   }
 
-    //
-    // Load functions for version 1.3 as necessary.
-    //
-    if (dwWlxVersion > WLX_VERSION_1_2)
-    {
-        pfWlxNetworkProviderLoad = (PFWLXNETWORKPROVIDERLOAD)GetProcAddress(hDll, "WlxNetworkProviderLoad");
+   //
+   // Load functions for version 1.3 as necessary.
+   //
+   if (dwWlxVersion > WLX_VERSION_1_2)
+   {
+      pfWlxNetworkProviderLoad = (PFWLXNETWORKPROVIDERLOAD)GetProcAddress(hDll, "WlxNetworkProviderLoad");
 
-        if (!pfWlxNetworkProviderLoad)
-        {
-            return FALSE;
-        }
+      if (!pfWlxNetworkProviderLoad)
+      {
+         return FALSE;
+      }
 
-        pfWlxDisplayStatusMessage = (PFWLXDISPLAYSTATUSMESSAGE)GetProcAddress(hDll, "WlxDisplayStatusMessage");
+      pfWlxDisplayStatusMessage = (PFWLXDISPLAYSTATUSMESSAGE)GetProcAddress(hDll, "WlxDisplayStatusMessage");
 
-        if (!pfWlxDisplayStatusMessage)
-        {
-            return FALSE;
-        }
+      if (!pfWlxDisplayStatusMessage)
+      {
+         return FALSE;
+      }
 
-        pfWlxGetStatusMessage =(PFWLXGETSTATUSMESSAGE)GetProcAddress(hDll, "WlxGetStatusMessage");
-        if (!pfWlxGetStatusMessage)
-        {
-            return FALSE;
-        }
+      pfWlxGetStatusMessage =(PFWLXGETSTATUSMESSAGE)GetProcAddress(hDll, "WlxGetStatusMessage");
+      if (!pfWlxGetStatusMessage)
+      {
+         return FALSE;
+      }
 
-        pfWlxRemoveStatusMessage =
-            (PFWLXREMOVESTATUSMESSAGE)
-            GetProcAddress(hDll, "WlxRemoveStatusMessage");
-        if (!pfWlxRemoveStatusMessage)
-        {
-            return FALSE;
-        }
-    }
+      pfWlxRemoveStatusMessage =
+         (PFWLXREMOVESTATUSMESSAGE)
+         GetProcAddress(hDll, "WlxRemoveStatusMessage");
+      if (!pfWlxRemoveStatusMessage)
+      {
+         return FALSE;
+      }
+   }
 
-    //
-    // Load functions for version 1.3 as necessary.
-    //
-    if (dwWlxVersion > WLX_VERSION_1_3)
-    {
-        pfWlxGetConsoleSwitchCredentials = (PWLXGETCONSOLESWITCHCREDENTIALS) GetProcAddress(hDll, "WlxGetConsoleSwitchCredentials");
-        if (!pfWlxGetConsoleSwitchCredentials) return FALSE;
+   //
+   // Load functions for version 1.3 as necessary.
+   //
+   if (dwWlxVersion > WLX_VERSION_1_3)
+   {
+      pfWlxGetConsoleSwitchCredentials = (PWLXGETCONSOLESWITCHCREDENTIALS) GetProcAddress(hDll, "WlxGetConsoleSwitchCredentials");
+      if (!pfWlxGetConsoleSwitchCredentials) return FALSE;
 
-        pfWlxReconnectNotify = (PWLXRECONNECTNOTIFY) GetProcAddress(hDll, "WlxReconnectNotify");
-        if (!pfWlxReconnectNotify) return FALSE;
+      pfWlxReconnectNotify = (PWLXRECONNECTNOTIFY) GetProcAddress(hDll, "WlxReconnectNotify");
+      if (!pfWlxReconnectNotify) return FALSE;
 
-        pfWlxDisconnectNotify = (PWLXDISCONNECTNOTIFY) GetProcAddress(hDll, "WlxDisconnectNotify");
-        if (!pfWlxDisconnectNotify) return FALSE;
+      pfWlxDisconnectNotify = (PWLXDISCONNECTNOTIFY) GetProcAddress(hDll, "WlxDisconnectNotify");
+      if (!pfWlxDisconnectNotify) return FALSE;
 
-    }
+   }
 
-    //
-    // Everything loaded OK.
-    //
-    return TRUE;
+   //
+   // Everything loaded OK.
+   //
+   return TRUE;
 }
 
 
 BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
 {
-    DWORD dwWlxVersion = GINASTUB_VERSION;
+   DWORD dwWlxVersion = GINASTUB_VERSION;
 
-    //
-    // Load MSGINA.DLL.
-    //
-    if (!(hDll = LoadLibrary(REALGINA_PATH)))
-    {
-        return FALSE;
-    }
+	TRACE(eDEBUG, L"WlxNegotiate\n");
+   //
+   // Load MSGINA.DLL.
+   //
+   if (!(hDll = LoadLibrary(REALGINA_PATH)))
+   {
+      return FALSE;
+   }
 
-    //
-    // Get pointers to WlxNegotiate function in the real MSGINA.
-    //
-    pfWlxNegotiate = (PFWLXNEGOTIATE) GetProcAddress(hDll, "WlxNegotiate");
-    if (!pfWlxNegotiate)
-    {
-        return FALSE;
-    }
+   //
+   // Get pointers to WlxNegotiate function in the real MSGINA.
+   //
+   pfWlxNegotiate = (PFWLXNEGOTIATE) GetProcAddress(hDll, "WlxNegotiate");
+   if (!pfWlxNegotiate)
+   {
+      return FALSE;
+   }
 
-    //
-    // Handle older version of Winlogon.
-    //
-    if (dwWinlogonVersion < dwWlxVersion)
-    {
-        dwWlxVersion = dwWinlogonVersion;
-    }
+   //
+   // Handle older version of Winlogon.
+   //
+   if (dwWinlogonVersion < dwWlxVersion)
+   {
+      dwWlxVersion = dwWinlogonVersion;
+   }
 
-    //
-    // Negotiate with MSGINA for version that we can support.
-    //
-    if (!pfWlxNegotiate(dwWlxVersion, &dwWlxVersion))
-    {
-        return FALSE;
-    }
+   //
+   // Negotiate with MSGINA for version that we can support.
+   //
+   if (!pfWlxNegotiate(dwWlxVersion, &dwWlxVersion))
+   {
+      return FALSE;
+   }
 
-    //
-    // Load the rest of the WLX functions from the real MSGINA.
-    //
-    if (!MyInitialize(hDll, dwWlxVersion))
-    {
-        return FALSE;
-    }
+   //
+   // Load the rest of the WLX functions from the real MSGINA.
+   //
+   if (!MyInitialize(hDll, dwWlxVersion))
+   {
+      return FALSE;
+   }
 
-    //
-    // Inform Winlogon which version to use.
-    //
-    *pdwDllVersion = g_dwVersion = dwWlxVersion;
+   //
+   // Inform Winlogon which version to use.
+   //
+   *pdwDllVersion = g_dwVersion = dwWlxVersion;
 
-    return TRUE;
+   return TRUE;
 }
 
 
 BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID pWinlogonFunctions, PVOID * pWlxContext)
 {
-	BOOL result;
-    //
-    // Save pointer to dispatch table.
-    //
-    // Note that g_pWinlogon will need to be properly casted to the
-    // appropriate version when used to call function in the dispatch
-    // table.
-    //
-    // For example, assuming we are at WLX_VERSION_1_3, we would call
-    // WlxSasNotify() as follows:
-    //
-    // ((PWLX_DISPATCH_VERSION_1_3) g_pWinlogon)->WlxSasNotify(hWlx, MY_SAS);
-    //
-    g_pWinlogon = pWinlogonFunctions;
+   BOOL result;
 
-    WinlogonHandle = hWlx;
+	TRACE(eDEBUG, L"WlxInitialize\n");
+   //
+   // Save pointer to dispatch table.
+   //
+   // Note that g_pWinlogon will need to be properly casted to the
+   // appropriate version when used to call function in the dispatch
+   // table.
+   //
+   // For example, assuming we are at WLX_VERSION_1_3, we would call
+   // WlxSasNotify() as follows:
+   //
+   // ((PWLX_DISPATCH_VERSION_1_3) g_pWinlogon)->WlxSasNotify(hWlx, MY_SAS);
+   //
+   g_pWinlogon = pWinlogonFunctions;
 
-    //
-    // Now hook the WlxDialogBoxParam() dispatch function.
-    //
-    HookWlxDialogBoxParam(g_pWinlogon, g_dwVersion);
+   WinlogonHandle = hWlx;
 
-    *pWlxContext = &gAucunContext;
-    gAucunContext.Winlogon = hWlx;
-    result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, &gAucunContext.mHookedContext);
+   //
+   // Now hook the WlxDialogBoxParam() dispatch function.
+   //
+   HookWlxDialogBoxParam(g_pWinlogon, g_dwVersion);
 
-	if(result == TRUE)
-	{
-		gAucunContext.mLSA = 0; //safety
-		RegisterLogonProcess(LOGON_PROCESS_NAME, &gAucunContext.mLSA);
-	}
+   *pWlxContext = &gAucunContext;
+   gAucunContext.Winlogon = hWlx;
+   result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, &gAucunContext.mHookedContext);
 
-	return result;
+   if (result == TRUE)
+   {
+      gAucunContext.mLSA = 0; //safety
+      RegisterLogonProcess(LOGON_PROCESS_NAME, &gAucunContext.mLSA);
+   }
+
+   return result;
 }
 
 
 VOID WINAPI WlxDisplaySASNotice(PVOID pWlxContext)
 {
-	BOOL remotedeb = FALSE; 
+   BOOL remotedeb = FALSE;
 
-	if(!CheckRemoteDebuggerPresent(GetCurrentProcess(), &remotedeb))
-	{
-		TRACE(L"Unable to check the presence of a remote debugger (0x%08X)\n", GetLastError());
-	}
+	TRACE(eDEBUG, L"WlxDisplaySASNotice\n");
 
-	TRACE(L"Process is ");
+   if (!CheckRemoteDebuggerPresent(GetCurrentProcess(), &remotedeb))
+   {
+      TRACE(eERROR, L"Unable to check the presence of a remote debugger (0x%08X)\n", GetLastError());
+   }
 
-	if(remotedeb)
-	{
-		TRACEMORE(L"running under a remote debugger\n");
-	}
-	else if(IsDebuggerPresent())
-	{
-		TRACEMORE(L"running under a local debugger\n");
-	}
-	else
-	{
-		TRACEMORE(L"not running under a debugger\n");
-	}
+   TRACE(eERROR, L"Process is ");
 
-	//Tant pis...
-	DebugBreak();
+   if (remotedeb)
+   {
+      TRACEMORE(eERROR, L"running under a remote debugger\n");
+   }
+   else if (IsDebuggerPresent())
+   {
+      TRACEMORE(eERROR, L"running under a local debugger\n");
+   }
+   else
+   {
+      TRACEMORE(eERROR, L"not running under a debugger\n");
+   }
 
-    pfWlxDisplaySASNotice(GetHookedContext(pWlxContext));
+   //Tant pis...
+   DebugBreak();
+
+   pfWlxDisplaySASNotice(GetHookedContext(pWlxContext));
 }
 
 
 int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthenticationId, PSID pLogonSid, PDWORD pdwOptions, PHANDLE phToken, PWLX_MPR_NOTIFY_INFO pMprNotifyInfo, PVOID * pProfile)
 {
-    int result;
+   int result;
 
-    TRACE(L"Logon attemp\n");
+	TRACE(eDEBUG, L"WlxLoggedOutSAS\n");
 
-	//TODO : Save last logon user in
+   //TODO : Save last logon user in
 
-    result =  pfWlxLoggedOutSAS(GetHookedContext(pWlxContext), dwSasType, pAuthenticationId, pLogonSid, pdwOptions, phToken, pMprNotifyInfo, pProfile);
+   result =  pfWlxLoggedOutSAS(GetHookedContext(pWlxContext), dwSasType, pAuthenticationId, pLogonSid, pdwOptions, phToken, pMprNotifyInfo, pProfile);
 
-    if (result == WLX_SAS_ACTION_LOGON)
-    {
-        //DuplicateToken(*phToken, SecurityIdentification, &(((MyGinaContext*)pWlxContext)->mCurrentUser));
-        ((MyGinaContext*)pWlxContext)->mCurrentUser = *phToken;
-    }
-    else
-	{
-        TRACE(L"Logon failed or cancelled.\n");
-	}
+   if (result == WLX_SAS_ACTION_LOGON)
+   {
+      //DuplicateToken(*phToken, SecurityIdentification, &(((MyGinaContext*)pWlxContext)->mCurrentUser));
+      ((MyGinaContext*)pWlxContext)->mCurrentUser = *phToken;
+   }
+   else
+   {
+      TRACE(eERROR, L"Logon failed or cancelled.\n");
+   }
 
-    return result;
+   return result;
 }
 
 
 BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR pszMprLogonScript, PVOID pEnvironment)
 {
-	BOOL result = FALSE;
-	wchar_t current_username[512];
+   BOOL result = FALSE;
 
-	//TODO : Restore last logon user
+	TRACE(eDEBUG, L"WlxActivateUserShell\n");
+   //TODO : Restore last logon user
 
-	if(ImpersonateAndGetUserName(((MyGinaContext*)pWlxContext)->mCurrentUser, current_username, sizeof current_username / sizeof *current_username))
-	{
-		wchar_t selfservice_username[512];
+   if (gSelfServeLogon)
+   {
+      wchar_t shell[MAX_PATH];
 
-		if(GetSelfServeSetting(L"Username", selfservice_username, sizeof selfservice_username / sizeof *selfservice_username) == S_OK)
-		{
-				  if(wcsstr(current_username, selfservice_username))
-				  {
-						wchar_t shell[MAX_PATH];
+      if (GetSelfServeSetting(L"Shell", shell, sizeof shell / sizeof *shell) == S_OK)
+      {
+         TRACE(eERROR, L"Switching to selfservice account\n");
+         //TODO : Deny Administrator group in token (not sure it will work)
+         //TODO : Allow for command line parameters (could be in the registry, with placemarks ?)
+         result = CreateProcessAsUserOnDesktop(((MyGinaContext*)pWlxContext)->mCurrentUser, shell, pszDesktopName, pEnvironment);
+      }
+   }
 
-						if(GetSelfServeSetting(L"Shell", shell, sizeof shell / sizeof *shell) == S_OK)
-						{
-								 TRACE(L"Switching to selfservice account\n");
-								 //TODO : Deny Administrator group in token (not sure it will work)
-								 //TODO : Allow for command line parameters (could be in the registry, with placemarks ?)
-								 result = CreateProcessAsUserOnDesktop(((MyGinaContext*)pWlxContext)->mCurrentUser, shell, pszDesktopName, pEnvironment);
-						}
-				  }
-		  }
-	}
-		
-	if(!result)
-		result = pfWlxActivateUserShell(GetHookedContext(pWlxContext), pszDesktopName, pszMprLogonScript, pEnvironment);
+   if (!result)
+      result = pfWlxActivateUserShell(GetHookedContext(pWlxContext), pszDesktopName, pszMprLogonScript, pEnvironment);
 
-	return result;
+   return result;
 }
 
 
 int WINAPI WlxLoggedOnSAS(PVOID pWlxContext, DWORD dwSasType, PVOID pReserved)
 {
-    int result;
+   int result;
 
-    TRACE(L"LoggedOn SAS type %d\n", dwSasType);
+	TRACE(eDEBUG, L"WlxLoggedOnSAS, type %d\n", dwSasType);
 
-	//TODO : Handle SAS if in the self service shell. CTRL-ALT-DEL closes the application, screen saver logs out
+   //TODO : Handle SAS if in the self service shell. CTRL-ALT-DEL closes the application, screen saver logs out
+   if (gSelfServeLogon)
+   {
+      TRACEMORE(eERROR, L" received in a selfservice context\n");
+      //TODO : Read string from registry
+      if (((PWLX_DISPATCH_VERSION_1_3) g_pWinlogon)->WlxMessageBox(GetHookedContext(pWlxContext), 0, L"Done ?", L"Title", MB_ICONASTERISK|MB_OKCANCEL) == IDOK)
+      {
+         result = WLX_SAS_ACTION_LOGOFF;
+      }
+      else
+      {
+         result = WLX_SAS_ACTION_NONE;
+      }
 
-    result = pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
+   }
+   else
+   {
+      TRACEMORE(eERROR, L"\n");
+      result = pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
+   }
 
-    TRACE(L"Going back to windows.\n");
-
-
-    return result;
+   return result;
 }
 
 
 VOID WINAPI WlxDisplayLockedNotice(PVOID pWlxContext)
 {
-    pfWlxDisplayLockedNotice(GetHookedContext(pWlxContext));
+	TRACE(eDEBUG, L"WlxDisplayLockedNotice\n");
+   pfWlxDisplayLockedNotice(GetHookedContext(pWlxContext));
 }
 
 
 BOOL WINAPI WlxIsLockOk(PVOID pWlxContext)
 {
-    return pfWlxIsLockOk(GetHookedContext(pWlxContext));
+	TRACE(eDEBUG, L"WlxIsLockOk\n");
+   return pfWlxIsLockOk(GetHookedContext(pWlxContext));
 }
 
 
 int WINAPI WlxWkstaLockedSAS(PVOID pWlxContext, DWORD dwSasType)
 {
-    int result;
+   int result;
 
-    result = pfWlxWkstaLockedSAS(GetHookedContext(pWlxContext), dwSasType);
+	TRACE(eDEBUG, L"WlxWkstaLockedSAS\n");
 
-    if (result == WLX_SAS_ACTION_LOGOFF)
-    {
-        TRACE(L"Proceding with a force logoff (comming from AUCUN).\n");
+   result = pfWlxWkstaLockedSAS(GetHookedContext(pWlxContext), dwSasType);
 
-        result = WLX_SAS_ACTION_FORCE_LOGOFF;
-    }
+   if (result == WLX_SAS_ACTION_LOGOFF)
+   {
+      TRACE(eERROR, L"Proceding with a force logoff (comming from AUCUN).\n");
 
-    return result;
+      result = WLX_SAS_ACTION_FORCE_LOGOFF;
+   }
+
+   return result;
 }
 
 
 BOOL WINAPI WlxIsLogoffOk(PVOID pWlxContext)
 {
-    return pfWlxIsLogoffOk(GetHookedContext(pWlxContext));
+	TRACE(eDEBUG, L"WlxIsLogoffOk\n");
+   return pfWlxIsLogoffOk(GetHookedContext(pWlxContext));
 }
 
 
 VOID WINAPI WlxLogoff(PVOID pWlxContext)
 {
-    pfWlxLogoff(GetHookedContext(pWlxContext));
+	TRACE(eDEBUG, L"WlxLogoff\n");
+   pfWlxLogoff(GetHookedContext(pWlxContext));
 
-    TRACE(L"User logged off.\n");
-    ((MyGinaContext*)pWlxContext)->mCurrentUser = 0;
+   ((MyGinaContext*)pWlxContext)->mCurrentUser = 0;
 }
 
 
 VOID WINAPI WlxShutdown(PVOID pWlxContext, DWORD ShutdownType)
 {
-    pfWlxShutdown(GetHookedContext(pWlxContext), ShutdownType);
-	LsaDeregisterLogonProcess(((MyGinaContext*)pWlxContext)->mLSA);
-    FreeLibrary(hDll);
+	TRACE(eDEBUG, L"WlxShutdown\n");
+   pfWlxShutdown(GetHookedContext(pWlxContext), ShutdownType);
+   LsaDeregisterLogonProcess(((MyGinaContext*)pWlxContext)->mLSA);
+   FreeLibrary(hDll);
 }
 
 
@@ -528,13 +544,14 @@ VOID WINAPI WlxShutdown(PVOID pWlxContext, DWORD ShutdownType)
 //
 BOOL WINAPI WlxScreenSaverNotify(PVOID  pWlxContext, BOOL * pSecure)
 {
-    TRACE(L"Screen saver notification.\n");
-    return pfWlxScreenSaverNotify(GetHookedContext(pWlxContext), pSecure);
+	TRACE(eDEBUG, L"WlxScreenSaverNotify\n");
+   return pfWlxScreenSaverNotify(GetHookedContext(pWlxContext), pSecure);
 }
 
 BOOL WINAPI WlxStartApplication(PVOID pWlxContext, PWSTR pszDesktopName, PVOID pEnvironment, PWSTR pszCmdLine)
 {
-    return pfWlxStartApplication(GetHookedContext(pWlxContext), pszDesktopName, pEnvironment, pszCmdLine);
+	TRACE(eDEBUG, L"WlxStartApplication\n");
+   return pfWlxStartApplication(GetHookedContext(pWlxContext), pszDesktopName, pEnvironment, pszCmdLine);
 }
 
 
@@ -544,25 +561,29 @@ BOOL WINAPI WlxStartApplication(PVOID pWlxContext, PWSTR pszDesktopName, PVOID p
 
 BOOL WINAPI WlxNetworkProviderLoad(PVOID pWlxContext, PWLX_MPR_NOTIFY_INFO pNprNotifyInfo)
 {
-    return pfWlxNetworkProviderLoad(GetHookedContext(pWlxContext), pNprNotifyInfo);
+	TRACE(eDEBUG, L"WlxNetworkProviderLoad\n");
+   return pfWlxNetworkProviderLoad(GetHookedContext(pWlxContext), pNprNotifyInfo);
 }
 
 
 BOOL WINAPI WlxDisplayStatusMessage(PVOID pWlxContext, HDESK hDesktop, DWORD dwOptions, PWSTR pTitle, PWSTR pMessage)
 {
-    return pfWlxDisplayStatusMessage(GetHookedContext(pWlxContext), hDesktop, dwOptions, pTitle, pMessage);
+	TRACE(eDEBUG, L"WlxDisplayStatusMessage\n");
+   return pfWlxDisplayStatusMessage(GetHookedContext(pWlxContext), hDesktop, dwOptions, pTitle, pMessage);
 }
 
 
 BOOL WINAPI WlxGetStatusMessage(PVOID pWlxContext, DWORD * pdwOptions, PWSTR pMessage, DWORD dwBufferSize)
 {
-    return pfWlxGetStatusMessage(GetHookedContext(pWlxContext), pdwOptions, pMessage, dwBufferSize);
+	TRACE(eDEBUG, L"WlxGetStatusMessage\n");
+   return pfWlxGetStatusMessage(GetHookedContext(pWlxContext), pdwOptions, pMessage, dwBufferSize);
 }
 
 
 BOOL WINAPI WlxRemoveStatusMessage(PVOID pWlxContext)
 {
-    return pfWlxRemoveStatusMessage(GetHookedContext(pWlxContext));
+	TRACE(eDEBUG, L"WlxRemoveStatusMessage\n");
+   return pfWlxRemoveStatusMessage(GetHookedContext(pWlxContext));
 }
 
 
@@ -571,15 +592,18 @@ BOOL WINAPI WlxRemoveStatusMessage(PVOID pWlxContext)
 //
 BOOL WINAPI WlxGetConsoleSwitchCredentials(PVOID pWlxContext, PVOID pCredInfo)
 {
-    return pfWlxGetConsoleSwitchCredentials(GetHookedContext(pWlxContext), pCredInfo);
+	TRACE(eDEBUG, L"WlxGetConsoleSwitchCredentials\n");
+   return pfWlxGetConsoleSwitchCredentials(GetHookedContext(pWlxContext), pCredInfo);
 }
 
 VOID WINAPI WlxReconnectNotify(PVOID pWlxContext)
 {
-    pfWlxReconnectNotify(GetHookedContext(pWlxContext));
+	TRACE(eDEBUG, L"WlxReconnectNotify\n");
+   pfWlxReconnectNotify(GetHookedContext(pWlxContext));
 }
 
 VOID WINAPI WlxDisconnectNotify(PVOID pWlxContext)
 {
-    pfWlxDisconnectNotify(GetHookedContext(pWlxContext));
+	TRACE(eDEBUG, L"WlxDisconnectNotify\n");
+   pfWlxDisconnectNotify(GetHookedContext(pWlxContext));
 }

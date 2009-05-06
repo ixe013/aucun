@@ -45,8 +45,6 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 	//CreateSimpleStatusBar();
 	
-	//TODO: Load URL from the registry
-
 	TCHAR resurl[MAX_PATH+5];
 
    if((GetSettingText(L"SOFTWARE\\Paralint.com\\SelfServe\\Shell", L"URL", resurl, sizeof resurl / sizeof *resurl) != S_OK)

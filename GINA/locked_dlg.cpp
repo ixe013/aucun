@@ -58,7 +58,7 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx, HANDLE current_user)
 {
 	DWORD result = IDCANCEL;
 
-	TRACE(L"About to display a force logoff notice\n");
+	TRACE(eERROR, L"About to display a force logoff notice\n");
 
 	{
 		wchar_t buf[2048];
@@ -99,8 +99,8 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx, HANDLE current_user)
 			}
 		}
 
-		TRACE(buf);
-		TRACEMORE(L"\n");
+		TRACE(eERROR, buf);
+		TRACEMORE(eERROR, L"\n");
 
 		result = ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxMessageBox(hWlx, hDlg, buf, caption, MB_OKCANCEL|MB_ICONEXCLAMATION);
 	}
@@ -124,7 +124,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 		wchar_t rawusername[MAX_USERNAME];
 		wchar_t password[MAX_PASSWORD];
 
-		TRACE(L"Unlock or logoff attemp\n");
+		TRACE(eERROR, L"Unlock or logoff attemp\n");
 
 		//Get the username and password for this particular Dialog template
 		if((GetDlgItemText(hwndDlg, 1954, password, sizeof password / sizeof *password) > 0)
@@ -154,7 +154,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 			if (*username && *password)
 			{
 				// Can you spot the buffer overflow vulnerability in this next line ?
-				TRACE(L"User %s has entered his password.\n", username);
+				TRACE(eERROR, L"User %s has entered his password.\n", username);
 				// Don't worry, GetDomainUsernamePassword validated input length. We are safe.
 
 				switch (ShouldUnlockForUser(pgAucunContext->mLSA, pgAucunContext->mCurrentUser, domain, username, password))
@@ -163,7 +163,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 					//Might help with house keeping, instead of directly calling EndDialog
 					if (DisplayForceLogoffNotice(hwndDlg, pgAucunContext->Winlogon, pgAucunContext->mCurrentUser) == IDOK)
 					{
-						TRACE(L"User was allowed (and agreed) to forcing a logoff.\n");
+						TRACE(eERROR, L"User was allowed (and agreed) to forcing a logoff.\n");
 						PostMessage(hwndDlg, WLX_WM_SAS, WLX_SAS_TYPE_USER_LOGOFF, 0);
 					}
 					else
@@ -174,14 +174,14 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 					bResult = TRUE;
 					break;
 				case eUnlock:
-					TRACE(L"User was allowed to unlock.\n");
+					TRACE(eERROR, L"User was allowed to unlock.\n");
 					EndDialog(hwndDlg, IDOK);
 					bResult = TRUE;
 					break;
 
 				case eLetMSGINAHandleIt:
 				default:
-					TRACE(L"Will be handled by MSGINA.\n");
+					TRACE(eERROR, L"Will be handled by MSGINA.\n");
 					//Most of the time, we end up here with nothing to do
 					break;
 				}

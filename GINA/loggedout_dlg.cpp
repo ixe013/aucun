@@ -42,6 +42,7 @@
 
 #include "randpasswd.h"
 
+BOOL gSelfServeLogon = FALSE;
 
 static CStaticPromptCtrl gStaticPrompt;
 
@@ -69,6 +70,7 @@ void MoveControl(HWND hwndDlg, int id, int xoffset, int yoffset)
    MoveWindow(control, p.x+xoffset, p.y+yoffset, rect.right-rect.left, rect.bottom-rect.top, TRUE);
 }
 
+// Gets the margin between the control and the parent's window border
 int GetDialogLeftMargin(HWND hwndDlg, int control)
 {
    RECT rect;
@@ -83,6 +85,7 @@ int GetDialogLeftMargin(HWND hwndDlg, int control)
 }
 
 
+// Add a static control under between the password field and the ok button
 HWND AddStaticPrompt(HWND hwndDlg)
 {
    HWND hwndPrompt = 0;
@@ -112,10 +115,13 @@ HWND AddStaticPrompt(HWND hwndDlg)
 
       //We have the top left corner and the width. Let's create the dialog so we can
       //compute the height of the text
-      hwndPrompt = CreateWindowEx(0, L"STATIC", prompt, SS_LEFT|SS_NOTIFY|WS_CHILD,//|WS_VISIBLE,
+      hwndPrompt = CreateWindowEx(0, L"STATIC", L"", SS_LEFT|SS_NOTIFY|WS_CHILD,//|WS_VISIBLE,
                                   p.x, p.y, rect.right-rect.left, 100, hwndDlg, (HMENU)IDC_SELFSERVEPROMPT, 0, 0);
 
       gStaticPrompt.SubclassWindow(hwndPrompt);
+
+		SetWindowText(gStaticPrompt, prompt); //Setting the text with CreateWindowEx bypass the set window text routine
+															//where \n are converted to their binary equivalent
 
       increase = gStaticPrompt.ComputeRequiredHeight();
 
@@ -139,23 +145,39 @@ HWND AddStaticPrompt(HWND hwndDlg)
    return hwndPrompt;
 }
 
+#include "debug.h"
+
 INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
    static HWND hwndPrompt = 0;
+   static int password_chances = 0;
    bool handled = false;
    INT_PTR result = 0;
+
+   TRACE(eINFO, L"0x%08X %s WP=0x%04X, LP=0x%08X\n", uMsg, GetWindowsMessageName(uMsg), wParam, lParam);
 
    switch (uMsg)
    {
       case WM_INITDIALOG :
       {
+         wchar_t buf[32];
+         if(GetSelfServeSetting(L"Attemps", buf, sizeof buf / sizeof *buf) == S_OK)
+			{
+         password_chances = _wtoi(buf);
+
+         if ((password_chances <= 0) || password_chances > 16)
+            password_chances = 3;
+			}
+			else
+{
+         hwndPrompt = AddStaticPrompt(hwndDlg);
+}
+
+         gSelfServeLogon = FALSE;
          SetWindowPos(hwndDlg, 0, 287, 298, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
 
          result = gDialogsProc[LOGGED_OUT_SAS_dlg].originalproc(hwndDlg, uMsg, wParam, lParam);;
          handled = true;
-
-         //TODO : Do no display all the time, detect a bad password attempt
-         hwndPrompt = AddStaticPrompt(hwndDlg);
       }
       break;
 
@@ -185,26 +207,45 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             SetWindowPos(hwndDlg, 0, 0, 0, rect.right-rect.left, rect.bottom-rect.top-decrease-margin, SWP_NOMOVE|SWP_FRAMECHANGED);
 
             GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username);
-            TRACE(L"Switching to selfservice user %s\n", username);
+            TRACE(eERROR, L"Switching to selfservice user %s\n", username);
 
             ShowWindow(GetDlgItem(hwndDlg, 1502), SW_HIDE); //Username
             ShowWindow(GetDlgItem(hwndDlg, 1503), SW_HIDE); //Password
             ShowWindow(GetDlgItem(hwndDlg, 1504), SW_HIDE); //Domain
 
-            USER_INFO_1003 ui;
-            wchar_t randpasswd[20];
-            GenerateRandomUnicodePassword(randpasswd, sizeof randpasswd / sizeof *randpasswd);
-            ui.usri1003_password = randpasswd;
-
-            NetUserSetInfo(0, username, 1003, (LPBYTE)&ui, 0);
             SetDlgItemText(hwndDlg, 1502, username);
-            SetDlgItemText(hwndDlg, 1503, ui.usri1003_password);
+            /*
+                    USER_INFO_1003 ui;
+                    wchar_t randpasswd[LM20_PWLEN];
+                    GenerateRandomUnicodePassword(randpasswd, LM20_PWLEN);
+                    ui.usri1003_password = randpasswd;
 
-				//No need to post a new message, change this click on the prompt
-				//to a click on OK
-				wParam = IDOK;
-				lParam = GetDlgItem(hwndDlg, IDOK);
+                    NetUserSetInfo(0, username, 1003, (LPBYTE)&ui, 0);
+                    SetDlgItemText(hwndDlg, 1503, ui.usri1003_password);
+            /*/
+            //TODO : Do not hardcode password
+            SetDlgItemText(hwndDlg, 1503, L"asdf1234");
+            //*/
+
+            //No need to post a new message, change this click on the prompt
+            //to a click on OK
+            wParam = IDOK;
+            lParam = (LPARAM)GetDlgItem(hwndDlg, IDOK);
+            gSelfServeLogon = TRUE;
          }
+         else if (wParam == IDOK)
+         {
+            --password_chances;
+         }
+         break;
+
+      case WM_ENABLE:
+         if ((wParam == TRUE) && !password_chances && !hwndPrompt)
+         {
+            TRACE(eINFO, L"Clicked OK but credential dialog is shown again.\n");
+            hwndPrompt = AddStaticPrompt(hwndDlg);
+         }
+
          break;
       case WM_DESTROY:
          hwndPrompt = 0;

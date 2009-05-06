@@ -137,6 +137,7 @@ public:
 	// Message map and handlers
 	BEGIN_MSG_MAP(thisClass)
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
+		MESSAGE_HANDLER(WM_SETTEXT, OnSetText)
 		MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
 		MESSAGE_HANDLER(WM_PAINT, OnPaint)
 		MESSAGE_HANDLER(WM_PRINTCLIENT, OnPaint)
@@ -152,6 +153,30 @@ public:
 	{
 		return 1; // We're painting it all
 	}
+	LRESULT OnSetText(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL& bHandled)
+	{
+         wchar_t *read = (wchar_t *)lParam;
+         wchar_t *write = (wchar_t *)lParam;
+
+         //Insert real \n caracters from the \n found in the string.
+         while (*read)
+         {
+            if ((*read == '\\') && (*(read+1) == 'n'))
+            {
+               *write++ = '\n';
+               read += 2;
+            }
+            else
+            {
+               *write++ = *read++;
+            }
+         }
+
+         *write = 0;
+
+		return DefWindowProc();
+	}
+
 	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 	{
 		T* pT = static_cast<T*>(this);

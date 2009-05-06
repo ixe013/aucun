@@ -82,7 +82,7 @@ NTSTATUS NTAPI LsaApLogonUser(
 {
 	NTSTATUS result = STATUS_LOGON_FAILURE;
 
-	TRACE(L"LsaApLogonUser called, logon type %d\n", LogonType);
+	TRACE(eERROR, L"LsaApLogonUser called, logon type %d\n", LogonType);
 
 	if(LogonType == Unlock)
 	{

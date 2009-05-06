@@ -244,7 +244,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StaticPrompt.h"
+				RelativePath="..\GINA\StaticPrompt.h"
 				>
 			</File>
 			<File

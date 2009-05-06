@@ -73,7 +73,7 @@ int _tmain(int argc, _TCHAR* argv[])
    HANDLE lsa = 0;
    //wchar_t unlock[MAX_GROUPNAME] = L"";
 
-   TRACE(L"-------------------------\n");
+   TRACE(eERROR, L"-------------------------\n");
 
    //EnablePrivilege(L"SeTcbPrivilege");
    if (!RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa))
@@ -95,7 +95,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
          if (ShouldHookUnlockPasswordDialog(current_user))
          {
-            TRACE(L"Should hook.\n");
+            TRACE(eERROR, L"Should hook.\n");
          }
 
          if (_getws_s(passwd, MAX_PASSWORD) == passwd)
@@ -105,22 +105,22 @@ int _tmain(int argc, _TCHAR* argv[])
             switch (result)
             {
                case eLetMSGINAHandleIt:
-                  TRACE(L"TEST result is eLetMSGINAHandleIt\n");
+                  TRACE(eERROR, L"TEST result is eLetMSGINAHandleIt\n");
                   wprintf(L"Actual result   : eLetMSGINAHandleIt\n");
                   break;
                case eUnlock:
-                  TRACE(L"TEST result is eUnlock\n");
+                  TRACE(eERROR, L"TEST result is eUnlock\n");
                   wprintf(L"Actual result   : eUnlock\n");
                   break;
                case eForceLogoff:
-                  TRACE(L"TEST result is eForceLogoff\n");
+                  TRACE(eERROR, L"TEST result is eForceLogoff\n");
                   wprintf(L"Actual result   : eForceLogoff\n");
                   break;
             }
          }
          else
          {
-            TRACE(L"Unable to read password\n");
+            TRACE(eERROR, L"Unable to read password\n");
             break;
          }
 
@@ -128,7 +128,6 @@ int _tmain(int argc, _TCHAR* argv[])
       }
    else
    {
-	/*
 	   HMODULE msginadll = LoadLibraryEx(_T("msgina.dll"), 0, LOAD_LIBRARY_AS_DATAFILE);
 
 	   if(msginadll)
@@ -138,15 +137,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		   FreeLibrary(msginadll);
 		   msginadll = 0;
 	   }
-	*/
-	wchar_t password[20];
-
-	for(int z=0; z<5; ++z)
-	{
-		GenerateRandomUnicodePassword(password, 20);
-
-		MessageBox(0, password, L"Crazy password", MB_OK);
-	}
    }
 
    if(lsa)

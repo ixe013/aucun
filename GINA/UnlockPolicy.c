@@ -76,7 +76,7 @@ EXTERN int ShouldUnlockForUser(HANDLE lsa, HANDLE current_user, const wchar_t *d
 	{
 		BOOL logged_on = FALSE;
         DWORD win32Error;
-		TRACE(L"We have the %s and %s group.\n", (unlock&&*unlock)?unlock:L"--", (logoff&&*logoff)?logoff:L"--");
+		TRACE(eERROR, L"We have the %s and %s group.\n", (unlock&&*unlock)?unlock:L"--", (logoff&&*logoff)?logoff:L"--");
 
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
 		if(lsa)
@@ -93,7 +93,7 @@ EXTERN int ShouldUnlockForUser(HANDLE lsa, HANDLE current_user, const wchar_t *d
 		{
 			BOOL is_same_user;
 
-			TRACE(L"User logged in.\n");
+			TRACE(eERROR, L"User logged in.\n");
 			token = ConvertToImpersonationToken(token);
 
 			//Sometimes, AUCUN failed to get the current logged on user
@@ -105,25 +105,25 @@ EXTERN int ShouldUnlockForUser(HANDLE lsa, HANDLE current_user, const wchar_t *d
 
 				if(is_same_user)
 				{
-					TRACE(L"Same user, unlocking.\n");
+					TRACE(eERROR, L"Same user, unlocking.\n");
 					result = eUnlock; 
 				}
 				else
 				{
-					TRACE(L"Different user, ");
+					TRACE(eERROR, L"Different user, ");
 					if(UsagerEstDansGroupe(token, unlock) == S_OK)
 					{
-						TRACEMORE(L"in the unlock group, unlocking.\n");
+						TRACEMORE(eERROR, L"in the unlock group, unlocking.\n");
 						result = eUnlock;
 					}
 					else if(UsagerEstDansGroupe(token, logoff) == S_OK)
 					{
-						TRACEMORE(L"in the logoff group, forcing a logoff.\n");
+						TRACEMORE(eERROR, L"in the logoff group, forcing a logoff.\n");
 						result = eForceLogoff;
 					}
 					else
 					{
-						TRACEMORE(L"no privileges we can handle.\n");
+						TRACEMORE(eERROR, L"no privileges we can handle.\n");
 					}
 				}
 			}
@@ -204,31 +204,31 @@ BOOLEAN ShouldHookUnlockPasswordDialog(HANDLE token)
 	if((GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
 	|| (GetGroupName(gForceLogoffGroupName, forcelogoff, sizeof forcelogoff / sizeof *forcelogoff) == S_OK))
 	{
-		TRACE(L"Groups are set, ");
+		TRACE(eERROR, L"Groups are set, ");
 		//User must not be in the excluded group
 		if(GetGroupName(gExcludedGroupName, excluded, sizeof excluded / sizeof *excluded) == S_OK)
 		{
 			//If is not blacklisted, return TRUE (so the dialog will be hooked)
 			if(UsagerEstDansGroupe(token, excluded) != S_OK)
 			{
-				TRACEMORE(L"user is not excluded, should hook.\n");
+				TRACEMORE(eERROR, L"user is not excluded, should hook.\n");
 				result = TRUE;
 			}
 			else
 			{
-				TRACEMORE(L"user is excluded and will get standard MSGINA behavior.\n");
+				TRACEMORE(eERROR, L"user is excluded and will get standard MSGINA behavior.\n");
 			}
 		}
 		else
 		{
 			//There is no excluded group, let's hook !
-			TRACEMORE(L"but there is no excluded group, should hook.\n");
+			TRACEMORE(eERROR, L"but there is no excluded group, should hook.\n");
 			result = TRUE;
 		}
 	}
 	else
 	{
-		TRACE(L"Neither %s or %s group present, shouldn't hook.\n", gUnlockGroupName, gForceLogoffGroupName);
+		TRACE(eERROR, L"Neither %s or %s group present, shouldn't hook.\n", gUnlockGroupName, gForceLogoffGroupName);
 	}
 
 	return result;

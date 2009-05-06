@@ -94,7 +94,7 @@ int GenerateRandomUnicodePassword(wchar_t *buffer, size_t size)
    }
 
    if (!result)
-      TRACE(L"Unable to generate a random password\n");
+      TRACE(eERROR, L"Unable to generate a random password\n");
 
 	return result;
 } 

@@ -24,7 +24,7 @@ DWORD DisplayUnlockNotice(HWND hDlg, HANDLE hWlx)
          wchar_t *read = text;
          wchar_t *write = text;
 
-         TRACE(L"Unlock notice will be displayed.\n");
+         TRACE(eERROR, L"Unlock notice will be displayed.\n");
 
          //Insert real \n caracters from the \n found in the string.
          while (*read)
@@ -58,7 +58,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
    // We hook a click on OK
    if ((uMsg == WM_COMMAND) && (wParam == 1800))
    {
-      TRACE(L"User locking workstation.\n");
+      TRACE(eERROR, L"User locking workstation.\n");
       /*
       There is a race condition here (time of check, time of use).
       We check for a certain condition and display a warning. Then we let go
@@ -74,7 +74,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
       */
       if (ShouldHookUnlockPasswordDialog(pgAucunContext->mCurrentUser))
       {
-         TRACE(L"Will hook dialog if allowed to.\n");
+         TRACE(eERROR, L"Will hook dialog if allowed to.\n");
          switch (DisplayUnlockNotice(hwndDlg, pgAucunContext->Winlogon))
          {
                //We said that a custom Gina was installed, and asked "do you want
@@ -83,14 +83,14 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
                //Why 113 ? I didn't find this value anywhere in the header files,
                //but it is the value returned by the original MSGINA DialogProc
                //When you click YES on the "Are you sure you want to log off" dialog box.
-               TRACE(L"User wants to logoff instead.\n");
+               TRACE(eERROR, L"User wants to logoff instead.\n");
                EndDialog(hwndDlg, 113);
                bResult = TRUE;
                break;
 
                //Forget about it, I am not locking at all
             case IDCANCEL:
-               TRACE(L"Lock request cancelled.\n");
+               TRACE(eERROR, L"Lock request cancelled.\n");
                bResult = TRUE;
                break;
 
