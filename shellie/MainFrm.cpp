@@ -47,7 +47,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	
 	TCHAR resurl[MAX_PATH+5];
 
-   if((GetSettingText(L"SOFTWARE\\Paralint.com\\SelfServe\\Shell", L"URL", resurl, sizeof resurl / sizeof *resurl) != S_OK)
+   if((GetSettingText(L"SOFTWARE\\Paralint.com\\Shellie\\Shell", L"URL", resurl, sizeof resurl / sizeof *resurl) != S_OK)
 	   || !*resurl)
 	{
 		CRESHelper::GetURLForID(IDR_HTMLDEFAULT, resurl, MAX_PATH+5);

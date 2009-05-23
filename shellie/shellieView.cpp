@@ -7,7 +7,7 @@
 
 #include "shellieView.h"
 
-BOOL CshellieView::PreTranslateMessage(MSG* pMsg)
+BOOL CShellieView::PreTranslateMessage(MSG* pMsg)
 {
 	if((pMsg->message < WM_KEYFIRST || pMsg->message > WM_KEYLAST) &&
 	   (pMsg->message < WM_MOUSEFIRST || pMsg->message > WM_MOUSELAST))

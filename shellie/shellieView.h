@@ -4,14 +4,14 @@
 
 #pragma once
 
-class CshellieView : public CWindowImpl<CshellieView, CAxWindow>
+class CShellieView : public CWindowImpl<CShellieView, CAxWindow>
 {
 public:
 	DECLARE_WND_SUPERCLASS(NULL, CAxWindow::GetWndClassName())
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 
-	BEGIN_MSG_MAP(CshellieView)
+	BEGIN_MSG_MAP(CShellieView)
 	END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):

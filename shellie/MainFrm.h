@@ -17,7 +17,7 @@ public:
 	typedef CFrameWindowImpl<CMainFrame, CWindow, CMainFrameTraits> baseFrameClass ;
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 
-	CSelfserviceshellView m_view;
+	CShellieView m_view;
 
 	//CCommandBarCtrl m_CmdBar;
 
