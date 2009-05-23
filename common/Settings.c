@@ -40,22 +40,22 @@ const wchar_t* gExcludedGroupName = L"excluded";
 //E_FAIL We have not retrieved a value
 HRESULT GetGroupName(const wchar_t *name, wchar_t *group, DWORD size)
 {
-	return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Groups", name, group, size);
+   return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Groups", name, group, size);
 }
 
 HRESULT GetNoticeText(const wchar_t *name, wchar_t *text, DWORD size)
 {
-	return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Notice", name, text, size);
+   return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Notice", name, text, size);
 }
 
 HRESULT GetDebugSetting(const wchar_t *name, wchar_t *text, DWORD size)
 {
-	return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Debug", name, text, size);
+   return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\Debug", name, text, size);
 }
 
 HRESULT GetSelfServeSetting(const wchar_t *name, wchar_t *text, DWORD size)
 {
-	return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\SelfServe", name, text, size);
+   return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\SelfServe", name, text, size);
 }
 
 HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, DWORD size)
@@ -66,19 +66,45 @@ HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, D
 
    HKEY reg;
 
-   if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_READ, &reg) == ERROR_SUCCESS)
+   if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_READ, &reg) == ERROR_SUCCESS)
    {
-	   if (RegQueryValueEx(reg, name, 0, &type, (LPBYTE)text, &returnedsize) == ERROR_SUCCESS)
-	   {
-		  if ((type == REG_SZ) && (returnedsize < size) && (returnedsize > 0))
-		  {
-			 result = S_OK;
-		  }
-	   }
+      if (RegQueryValueEx(reg, name, 0, &type, (LPBYTE)text, &returnedsize) == ERROR_SUCCESS)
+      {
+         if ((type == REG_SZ) && (returnedsize < size) && (returnedsize > 0))
+         {
+            result = S_OK;
+         }
+      }
 
-		RegCloseKey(reg);
+      RegCloseKey(reg);
    }
 
    return result;
+}
+
+//Replaces any \n in the string with 0x0d 0x0a
+//return the pointer to the received string
+wchar_t *InterpretCarriageReturn(wchar_t *text)
+{
+   wchar_t *read = (wchar_t *)text;
+   wchar_t *write = (wchar_t *)text;
+
+   //Insert real \n caracters from the \n found in the string.
+   while (*read)
+   {
+      if ((*read == '\\') && (*(read+1) == 'n'))
+      {
+         *write++ = '\n';
+         read += 2;
+      }
+      else
+      {
+         *write++ = *read++;
+      }
+   }
+
+   *write = 0;
+
+   return text;
 }
 

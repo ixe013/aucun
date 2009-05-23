@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "resource.h"
 
-#include "selfserviceshellView.h"
+#include "shellieView.h"
 #include "MainFrm.h"
 #include "RESHelper.h"
 #include "Settings.h"

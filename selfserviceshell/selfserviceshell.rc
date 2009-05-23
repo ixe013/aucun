@@ -108,7 +108,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About selfserviceshell...",              ID_APP_ABOUT
+        MENUITEM "&About shellie...",              ID_APP_ABOUT
     END
 END
 
@@ -126,7 +126,7 @@ IDR_HTMLDEFAULT            HTML    DISCARDABLE     "Default.html"
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\selfserviceshell.ico"
+IDR_MAINFRAME           ICON                    "res\\shellie.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -139,7 +139,7 @@ CAPTION "About"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,130,81,50,14
-    CTEXT           "selfserviceshell Application v1.0\n\n(c) Copyright 2009",IDC_STATIC,25,57,78,
+    CTEXT           "shellie Application v1.0\n\n(c) Copyright 2009",IDC_STATIC,25,57,78,
                     32
     ICON            IDR_MAINFRAME,IDC_STATIC,55,26,18,20
     GROUPBOX        "",IDC_STATIC,7,7,115,88
@@ -214,12 +214,12 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "selfserviceshell Module\0"
+            VALUE "FileDescription", "shellie Module\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "selfserviceshell\0"
+            VALUE "InternalName", "shellie\0"
             VALUE "LegalCopyright", "Copyright 2009\0"
-            VALUE "OriginalFilename", "selfserviceshell.exe\0"
-            VALUE "ProductName", "selfserviceshell Module\0"
+            VALUE "OriginalFilename", "shellie.exe\0"
+            VALUE "ProductName", "shellie Module\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
         END
     END
@@ -236,7 +236,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME	"selfserviceshell"
+    IDR_MAINFRAME	"shellie"
 END
 
 STRINGTABLE 

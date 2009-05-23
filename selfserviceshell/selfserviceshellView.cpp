@@ -1,13 +1,13 @@
-// selfserviceshellView.cpp : implementation of the CSelfserviceshellView class
+// shellieView.cpp : implementation of the CshellieView class
 //
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "resource.h"
 
-#include "selfserviceshellView.h"
+#include "shellieView.h"
 
-BOOL CSelfserviceshellView::PreTranslateMessage(MSG* pMsg)
+BOOL CshellieView::PreTranslateMessage(MSG* pMsg)
 {
 	if((pMsg->message < WM_KEYFIRST || pMsg->message > WM_KEYLAST) &&
 	   (pMsg->message < WM_MOUSEFIRST || pMsg->message > WM_MOUSELAST))

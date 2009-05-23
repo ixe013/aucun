@@ -1,11 +1,11 @@
-// selfserviceshell.cpp : main source file for selfserviceshell.exe
+// shellie.cpp : main source file for shellie.exe
 //
 
 #include "stdafx.h"
 
 #include "resource.h"
 
-#include "selfserviceshellView.h"
+#include "shellieView.h"
 #include "MainFrm.h"
 #include "RESHelper.h"
 #include "toolhelp_iterator.h"

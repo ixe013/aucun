@@ -49,6 +49,8 @@ EXTERN HRESULT GetSelfServeSetting(const wchar_t *name, wchar_t *text, DWORD siz
 
 EXTERN HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, DWORD size);
 
+EXTERN wchar_t *InterpretCarriageReturn(wchar_t *text);
+
 EXTERN const wchar_t* gUnlockGroupName;
 EXTERN const wchar_t* gForceLogoffGroupName;
 EXTERN const wchar_t* gExcludedGroupName;

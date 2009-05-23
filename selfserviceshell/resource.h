@@ -1,13 +1,13 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by selfserviceshell.RC
+// Used by shellie.RC
 //
 
 
 #define IDD_ABOUTBOX				100
 #define IDR_MAINFRAME				128
 #define IDR_HTMLDEFAULT				129
-//#define IDR_SELFSERVICESHELLTYPE	130
+//#define IDR_shellieTYPE	130
 
 // Next default values for new objects
 // 

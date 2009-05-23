@@ -27,22 +27,8 @@ DWORD DisplayUnlockNotice(HWND hDlg, HANDLE hWlx)
          TRACE(eERROR, L"Unlock notice will be displayed.\n");
 
          //Insert real \n caracters from the \n found in the string.
-         while (*read)
-         {
-            if ((*read == '\\') && (*(read+1) == 'n'))
-            {
-               *write++ = '\n';
-               read += 2;
-            }
-            else
-            {
-               *write++ = *read++;
-            }
-         }
+         wsprintf(message, InterpretCarriageReturn(text), unlock); //Will insert group name if there is a %s in the message
 
-         *write = 0;
-
-         wsprintf(message, text, unlock); //Will insert group name if there is a %s in the message
          result = ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxMessageBox(hWlx, hDlg, message, caption, MB_YESNOCANCEL|MB_ICONEXCLAMATION);
       }
    }

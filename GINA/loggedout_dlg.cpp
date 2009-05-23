@@ -115,13 +115,10 @@ HWND AddStaticPrompt(HWND hwndDlg)
 
       //We have the top left corner and the width. Let's create the dialog so we can
       //compute the height of the text
-      hwndPrompt = CreateWindowEx(0, L"STATIC", L"", SS_LEFT|SS_NOTIFY|WS_CHILD,//|WS_VISIBLE,
+      hwndPrompt = CreateWindowEx(0, L"STATIC", InterpretCarriageReturn(prompt), SS_LEFT|SS_NOTIFY|WS_CHILD,//|WS_VISIBLE,
                                   p.x, p.y, rect.right-rect.left, 100, hwndDlg, (HMENU)IDC_SELFSERVEPROMPT, 0, 0);
 
       gStaticPrompt.SubclassWindow(hwndPrompt);
-
-		SetWindowText(gStaticPrompt, prompt); //Setting the text with CreateWindowEx bypass the set window text routine
-															//where \n are converted to their binary equivalent
 
       increase = gStaticPrompt.ComputeRequiredHeight();
 
@@ -150,34 +147,36 @@ HWND AddStaticPrompt(HWND hwndDlg)
 INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
    static HWND hwndPrompt = 0;
-   static int password_chances = 0;
+   static int password_chances = -1;
    bool handled = false;
    INT_PTR result = 0;
-
-   TRACE(eINFO, L"0x%08X %s WP=0x%04X, LP=0x%08X\n", uMsg, GetWindowsMessageName(uMsg), wParam, lParam);
 
    switch (uMsg)
    {
       case WM_INITDIALOG :
       {
          wchar_t buf[32];
-         if(GetSelfServeSetting(L"Attemps", buf, sizeof buf / sizeof *buf) == S_OK)
-			{
-         password_chances = _wtoi(buf);
-
-         if ((password_chances <= 0) || password_chances > 16)
-            password_chances = 3;
-			}
-			else
-{
-         hwndPrompt = AddStaticPrompt(hwndDlg);
-}
-
-         gSelfServeLogon = FALSE;
-         SetWindowPos(hwndDlg, 0, 287, 298, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
 
          result = gDialogsProc[LOGGED_OUT_SAS_dlg].originalproc(hwndDlg, uMsg, wParam, lParam);;
          handled = true;
+
+         if (GetSelfServeSetting(L"Attemps", buf, sizeof buf / sizeof *buf) == S_OK)
+         {
+            password_chances = _wtoi(buf);
+
+            if (password_chances > 16)   //Some hardcoded limit to 16
+               password_chances = 3;
+				else if(password_chances == 0)
+            	hwndPrompt = AddStaticPrompt(hwndDlg); //Add the prompt right away
+         }
+         else 
+         {
+				password_chances = -1;
+         }
+
+         gSelfServeLogon = FALSE;
+         //SetWindowPos(hwndDlg, 0, 287, 298, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
+
       }
       break;
 
@@ -235,12 +234,13 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
          }
          else if (wParam == IDOK)
          {
-            --password_chances;
+            if (password_chances > 0)
+               --password_chances;
          }
          break;
 
       case WM_ENABLE:
-         if ((wParam == TRUE) && !password_chances && !hwndPrompt)
+         if ((wParam == TRUE) && (password_chances == 0) && !hwndPrompt)
          {
             TRACE(eINFO, L"Clicked OK but credential dialog is shown again.\n");
             hwndPrompt = AddStaticPrompt(hwndDlg);

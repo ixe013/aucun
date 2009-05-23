@@ -1,17 +1,17 @@
-// selfserviceshellView.h : interface of the CSelfserviceshellView class
+// shellieView.h : interface of the CshellieView class
 //
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-class CSelfserviceshellView : public CWindowImpl<CSelfserviceshellView, CAxWindow>
+class CshellieView : public CWindowImpl<CshellieView, CAxWindow>
 {
 public:
 	DECLARE_WND_SUPERCLASS(NULL, CAxWindow::GetWndClassName())
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 
-	BEGIN_MSG_MAP(CSelfserviceshellView)
+	BEGIN_MSG_MAP(CshellieView)
 	END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
