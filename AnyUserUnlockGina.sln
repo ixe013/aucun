@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcproj", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unlockap", "unlockap\unlockap.vcproj", "{222774C2-2A9E-4CAB-A0D3-B2588EA2E076}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "selfserviceshell", "selfserviceshell\selfserviceshell.vcproj", "{E6A575D7-5211-416B-B5FF-7E99D37FB97E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shellie", "shellie\shellie.vcproj", "{E6A575D7-5211-416B-B5FF-7E99D37FB97E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
