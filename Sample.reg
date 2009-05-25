@@ -30,14 +30,14 @@ REGEDIT4
 ;****************************************************************************
 ;* After so many attemps, a message is displayed allowing the user to launch
 ;* the self service application. That application can be anything, but the 
-;* companion application, selfserviceshell.exe, is a locked down internet
-;* explorer shell that can go to your selfservice interal web site.
+;* companion application, shellie.exe, is a locked down internet
+;* explorer shell that can go to your self-service interal web site.
 ;* 
 ;****************************************************************************
 [HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Selfserve]
 "Attemps"=3
 "Text"="Click here to recover your password."
-"Shell"="%windir%\system32\selfserviceshell.exe"
+"Shell"="%windir%\system32\shellie.exe"
 "Username"=".\selfserviceuser"
 
 ;****************************************************************************
@@ -49,7 +49,7 @@ REGEDIT4
 ;* Don't forget to use HTTPS for the target url !
 ;* 
 ;****************************************************************************
-[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\SelfServe\Shell]
+[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Shellie\Shell]
 "URL"="http://www.paralint.com/projets/aucun/sampleselfserve/"
 
 ;****************************************************************************
