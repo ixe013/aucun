@@ -2,7 +2,9 @@
 #define __DLGDEFS_H__
 
 #include <windows.h>
+#include "selfserve_sas_dlg.h"
 #include "extern.h"
+#include "resource.h"
 
 typedef struct
 {
@@ -21,6 +23,7 @@ enum
 {
 	LOGGED_OUT_SAS_dlg,
 	LOGGED_ON_SAS_dlg,
+	LOGGED_ON_SAS_SELFSERVE_dlg,
 	LOCKED_SAS_dlg
 };
 

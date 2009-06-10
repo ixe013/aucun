@@ -1,10 +1,10 @@
 #include "build_stats.h"
 #include <windows.h>
+#include <global.h>
 
-#define asd
 void OutputBuildStats()
 {
-	OutputDebugString(L"Aucun, build timestamp : ");
+   OutputDebugString(L"Aucun, build timestamp : ");
    OutputDebugStringA(__TIMESTAMP__);
    OutputDebugStringA("\n");
    OutputDebugStringA("http://www.paralint.com/projects/aucun/\n");

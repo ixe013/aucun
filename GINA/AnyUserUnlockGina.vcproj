@@ -240,6 +240,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\selfserve_sas_dlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\common\Settings.c"
 				>
 			</File>
@@ -307,6 +311,10 @@
 			</File>
 			<File
 				RelativePath=".\SecurityHelper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\selfserve_sas_dlg.h"
 				>
 			</File>
 			<File
