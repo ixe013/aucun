@@ -1,6 +1,6 @@
 #include "build_stats.h"
 #include <windows.h>
-#include <global.h>
+#include "global.h"
 
 void OutputBuildStats()
 {
