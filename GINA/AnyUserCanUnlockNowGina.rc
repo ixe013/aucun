@@ -33,7 +33,7 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,206,164,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,260,164,50,14
-    LTEXT           "Static",IDC_PROMPT,7,7,303,93
+    LTEXT           "WTF tabarnak ?",IDC_PROMPT,7,7,303,93
 END
 
 

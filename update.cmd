@@ -41,8 +41,8 @@ dir /od %windir%\system32\aucun*.* | findstr /I /c:aucun
 
 pendmoves 
 
-copy debug\selfserviceshell.exe %windir%\system32
-copy debug\selfserviceshell.pdb %windir%\system32
+copy debug\shellie.exe %windir%\system32
+copy debug\shellie.pdb %windir%\system32
 
 popd
 

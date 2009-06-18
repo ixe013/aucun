@@ -65,10 +65,10 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx, HANDLE current_user)
 		wchar_t caption[512];
 
 		//Start with the caption
-		LoadString(hDll, 1501, caption, sizeof caption / sizeof *caption);
+		LoadString(hMsginaDll, 1501, caption, sizeof caption / sizeof *caption);
 
 		//Windows XP has a plain vanilla message, no insert. Let's start with that
-		LoadString(hDll, 1528, buf, sizeof buf / sizeof *buf);
+		LoadString(hMsginaDll, 1528, buf, sizeof buf / sizeof *buf);
 
 		//The format of the message is different on Windows Server. This test is somewhat short sighted,
 		//but we know that in the future versions there is no Gina at all ! That's why we shortcut
@@ -86,13 +86,13 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx, HANDLE current_user)
 			{
 			case 2:
 				{
-					LoadString(hDll, 1528, format, sizeof format / sizeof *format);
+					LoadString(hMsginaDll, 1528, format, sizeof format / sizeof *format);
 					wsprintf(buf, format, domain, username, L"some time");
 				}
 				break;
 			case 1:
 				{
-					LoadString(hDll, 1561, format, sizeof format / sizeof *format);
+					LoadString(hMsginaDll, 1561, format, sizeof format / sizeof *format);
 					wsprintf(buf, format, username, L"some time");
 				}
 				break;
@@ -160,10 +160,11 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 				switch (ShouldUnlockForUser(pgAucunContext->mLSA, pgAucunContext->mCurrentUser, domain, username, password))
 				{
 				case eForceLogoff:
-					//Might help with house keeping, instead of directly calling EndDialog
+               //Warn the user that they are killing active programs
 					if (DisplayForceLogoffNotice(hwndDlg, pgAucunContext->Winlogon, pgAucunContext->mCurrentUser) == IDOK)
 					{
 						TRACE(eERROR, L"User was allowed (and agreed) to forcing a logoff.\n");
+					   //Might help with house keeping, instead of directly calling EndDialog
 						PostMessage(hwndDlg, WLX_WM_SAS, WLX_SAS_TYPE_USER_LOGOFF, 0);
 					}
 					else

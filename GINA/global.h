@@ -43,7 +43,8 @@ typedef struct
 
 EXTERN PVOID g_pWinlogon;
 EXTERN MyGinaContext *pgAucunContext;
-EXTERN HINSTANCE hDll;
+EXTERN HINSTANCE hAucunDll;
+EXTERN HINSTANCE hMsginaDll;
 
 #endif
 

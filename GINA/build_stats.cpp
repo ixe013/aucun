@@ -2,6 +2,8 @@
 #include <windows.h>
 #include "global.h"
 
+HINSTANCE hAucunDll;
+
 void OutputBuildStats()
 {
    OutputDebugString(L"Aucun, build timestamp : ");
@@ -10,7 +12,7 @@ void OutputBuildStats()
    OutputDebugStringA("http://www.paralint.com/projects/aucun/\n");
 }
 
-BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
+BOOLEAN WINAPI DllMain(HINSTANCE hDll, DWORD nReason, LPVOID Reserved)
 {
    BOOLEAN bSuccess = TRUE;
 
@@ -18,8 +20,10 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
    {
       case DLL_PROCESS_ATTACH:
          //  For optimization.
-         DisableThreadLibraryCalls(hDllHandle);
+         DisableThreadLibraryCalls(hDll);
+         
          OutputBuildStats();
+         hAucunDll = hDll;  
          break;
 
       case DLL_PROCESS_DETACH:
