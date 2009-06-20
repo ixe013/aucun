@@ -1,3 +1,5 @@
+//$Id$
+//$URL$
 #include "build_stats.h"
 #include <windows.h>
 #include "global.h"
