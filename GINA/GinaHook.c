@@ -431,32 +431,16 @@ int WINAPI WlxLoggedOnSAS(PVOID pWlxContext, DWORD dwSasType, PVOID pReserved)
 
    TRACE(eDEBUG, L"WlxLoggedOnSAS, type %d\n", dwSasType);
 
-   //TODO : Handle SAS if in the self service shell. CTRL-ALT-DEL closes the application, screen saver logs out
+   //TODO : Handle SAS if in the self service shell. CTRL-ALT-DEL or screen saver sends the user back to the secure desktop
    if (gSelfServeLogon)
    {
-      TRACEMORE(eERROR, L" received in a selfservice context\n");
+      TRACEMORE(eDEBUG, L" received in a selfservice context\n");
 
-      if (dwSasType == WLX_SAS_TYPE_CTRL_ALT_DEL)
-      {
-         //TODO : Read string from registry
-		   if(((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxMessageBox(gAucunContext.Winlogon, 0, L"Logoff tabarnak ?", L"Eille, chose!", MB_OKCANCEL|MB_ICONEXCLAMATION) == IDOK)
-         //if(((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxDialogBox(GetHookedContext(pWlxContext), hAucunDll, MAKEINTRESOURCE(IDD_LOGGED_ON_SAS_SELFSERVE), 0, MyLoggedOnSelfserveSASProc) == IDOK)
-         {
-            result = WLX_SAS_ACTION_LOGOFF;
-         }
-         else
-         {
-            result = WLX_SAS_ACTION_NONE;
-         }
-      }
-      else
-      {
-         result = WLX_SAS_ACTION_LOGOFF;
-      }
+      result = WLX_SAS_ACTION_LOGOFF;
    }
    else
    {
-      TRACEMORE(eERROR, L"\n");
+      TRACEMORE(eDEBUG, L"\n");
       result = pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
    }
 
@@ -475,19 +459,19 @@ BOOL WINAPI WlxIsLockOk(PVOID pWlxContext)
 {
    BOOL result = TRUE;
 
-   TRACE(eDEBUG, L"WlxIsLockOk");
+   TRACE(eDEBUG, L"WlxIsLockOk\n");
 
    //TODO : Fix this code so that the selfserve user is logged off (maybe put that code in shellie ?)
+   //*
    //Lock is not OK in self serve mode. Else let MSGINA decide
    if (gSelfServeLogon)
    {
-      TRACEMORE(eERROR, L" received in a selfservice context\n");
-
       //Lock is not allowed, we just log off
 		result = FALSE;
-		((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxSasNotify(gAucunContext.Winlogon, WLX_SAS_TYPE_SCRNSVR_TIMEOUT);
+		((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxSasNotify(gAucunContext.Winlogon, WLX_SAS_TYPE_CTRL_ALT_DEL);
    }
    else
+   //*/
    {
        result = pfWlxIsLockOk(GetHookedContext(pWlxContext));
    }
@@ -527,6 +511,7 @@ VOID WINAPI WlxLogoff(PVOID pWlxContext)
    pfWlxLogoff(GetHookedContext(pWlxContext));
 
    ((MyGinaContext*)pWlxContext)->mCurrentUser = 0;
+    gSelfServeLogon = FALSE;
 }
 
 

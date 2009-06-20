@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <security.h>
 #include <lm.h>
+#include <sddl.h>
 #include "settings.h"
 #include "unlockpolicy.h"
 #include "trace.h"
@@ -20,9 +21,9 @@
 
 INT_PTR CALLBACK DefDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
-DialogAndProcs gDialogsProc[] = 
+DialogAndProcs gDialogsProc[] =
 {
-	{ IDD_LOGGED_OUT_SAS,  MyWlxWkstaLoggedOutSASDlgProc, DefDialogProc},
+   { IDD_LOGGED_OUT_SAS,  MyWlxWkstaLoggedOutSASDlgProc, DefDialogProc},
 };
 
 const int nbDialogsAndProcs = sizeof gDialogsProc / sizeof *gDialogsProc;
@@ -51,18 +52,18 @@ BOOL IsWindowsServer()
 // Message handler for about box.
 INT_PTR CALLBACK DefDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	UNREFERENCED_PARAMETER(lParam);
-	switch (message)
-	{
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-		{
-			EndDialog(hDlg, LOWORD(wParam));
-			return (INT_PTR)TRUE;
-		}
-		break;
-	}
-	return (INT_PTR)FALSE;
+   UNREFERENCED_PARAMETER(lParam);
+   switch (message)
+   {
+      case WM_COMMAND:
+         if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+         {
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+         }
+         break;
+   }
+   return (INT_PTR)FALSE;
 }
 
 
@@ -93,6 +94,30 @@ int _tmain(int argc, _TCHAR* argv[])
 
          GetUsernameAndDomainFromToken(current_user, username, sizeof username / sizeof *username, domain, sizeof domain / sizeof *domain);
 
+		 PSID sid1 = 0;
+		 PSID sid2 = 0;
+
+		 GetTokenUserSID(current_user, &sid1);
+		 FetchSID(argv[i], &sid2);
+
+		 if(EqualSid(sid1, sid2))
+		 {
+			 TRACE(eINFO, L"Meme criss de SID\n");
+		 }
+
+
+		 LPTSTR tsid = 0;
+		 ConvertSidToStringSid(sid1, &tsid);
+		 wprintf(L"LogonSID : %s\n", tsid);
+		 LocalFree(tsid);
+
+		 ConvertSidToStringSid(sid2, &tsid);
+		 wprintf(L"User SID : %s\n", tsid);
+		 LocalFree(tsid);
+
+		 HeapFree(GetProcessHeap(), 0, sid1);
+		 HeapFree(GetProcessHeap(), 0, sid2);
+		 
          if (ShouldHookUnlockPasswordDialog(current_user))
          {
             TRACE(eERROR, L"Should hook.\n");
@@ -125,22 +150,22 @@ int _tmain(int argc, _TCHAR* argv[])
          }
 
          CloseHandle(current_user);
-      }
+   }
    else
    {
-	   HMODULE msginadll = LoadLibraryEx(_T("msgina.dll"), 0, LOAD_LIBRARY_AS_DATAFILE);
+      HMODULE msginadll = LoadLibraryEx(_T("msgina.dll"), 0, LOAD_LIBRARY_AS_DATAFILE);
 
-	   if(msginadll)
-	   {
-			DialogBox(msginadll, MAKEINTRESOURCE(1500), 0, MyWlxWkstaLoggedOutSASDlgProc);
+      if (msginadll)
+      {
+         DialogBox(msginadll, MAKEINTRESOURCE(1500), 0, MyWlxWkstaLoggedOutSASDlgProc);
 
-		   FreeLibrary(msginadll);
-		   msginadll = 0;
-	   }
+         FreeLibrary(msginadll);
+         msginadll = 0;
+      }
    }
 
-   if(lsa)
-     LsaDeregisterLogonProcess(lsa);
+   if (lsa)
+      LsaDeregisterLogonProcess(lsa);
 
    return result;
 }

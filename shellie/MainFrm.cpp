@@ -89,6 +89,13 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 	return 1;
 }
 
+LRESULT CMainFrame::OnSysCommand(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+{
+	if(wParam == SC_SCREENSAVE)
+	    OutputDebugString(L"Screen saver starting \n");
+	return 0;
+}
+
 LRESULT CMainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	PostMessage(WM_CLOSE);
