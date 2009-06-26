@@ -119,6 +119,7 @@ BEGIN
             VALUE "Comments", "http://www.paralint.com/projects/aucun/"
             VALUE "CompanyName", "Paralint.com"
             VALUE "FileDescription", "Replacement GINA DLL that allows ordinary users to unlock or force logoff a locked workstation"
+//TODO : Use Subversion $Id$ version here
             VALUE "FileVersion", "1.5.0"
             VALUE "InternalName", "aucun.dll"
             VALUE "LegalCopyright", "Copyright (C) 2008"

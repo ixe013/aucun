@@ -28,7 +28,7 @@ EXTERN BOOL IsSameUser(HANDLE hToken1, HANDLE hToken2, BOOL* pbIsSameUser);
 EXTERN BOOL CreateProcessAsUserOnDesktop(HANDLE hToken, wchar_t* programImage, wchar_t* desktop, void* env);
 EXTERN BOOL ImpersonateAndGetUserName(HANDLE hToken, wchar_t* name, int cch);
 EXTERN int GetUsernameAndDomainFromToken(HANDLE token, wchar_t *domain, DWORD domain_len, wchar_t *username, DWORD username_len);
-BOOL GetTokenUserSID(HANDLE token, PSID *ppsid);
-EXTERN BOOL FetchSID(LPTSTR username, PSID *sid);
+EXTERN BOOL GetSIDFromToken(HANDLE token, PSID *ppsid);
+EXTERN BOOL GetSIDFromUsername(LPTSTR username, PSID *sid);
 
 #endif

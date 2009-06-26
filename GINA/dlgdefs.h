@@ -2,7 +2,6 @@
 #define __DLGDEFS_H__
 
 #include <windows.h>
-#include "selfserve_sas_dlg.h"
 #include "extern.h"
 #include "resource.h"
 

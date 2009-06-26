@@ -4,6 +4,5 @@
 #include "extern.h"
 EXTERN INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-EXTERN BOOL gSelfServeLogon;
 
 #endif

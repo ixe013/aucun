@@ -50,7 +50,6 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
-				UseFullPaths="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -69,7 +68,7 @@
 				LinkIncremental="2"
 				GenerateManifest="false"
 				UACUIAccess="true"
-				ModuleDefinitionFile=".\GinaHook.def"
+				ModuleDefinitionFile="..\gina\GinaHook.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				SetChecksum="false"
@@ -98,9 +97,11 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+			/>
+         <!-- 
 				Description="Stamping the build number in the resource"
 				CommandLine="stampver -v&quot;$(ProjectDir)\aucun.stampver&quot; -i4 $(OutDir)\aucun.dll"
-			/>
+			/-->
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
@@ -151,7 +152,7 @@
 				OutputFile="$(OutDir)\aucun.dll"
 				LinkIncremental="1"
 				GenerateManifest="false"
-				ModuleDefinitionFile=".\GinaHook.def"
+				ModuleDefinitionFile="..\gina\GinaHook.def"
 				GenerateDebugInformation="true"
 				GenerateMapFile="true"
 				SubSystem="2"
@@ -182,9 +183,11 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+			/>
+			<!-- 
 				Description="Stamping the build number in the resource"
 				CommandLine="stampver -v&quot;$(ProjectDir)\aucun.stampver&quot; -i4 $(OutDir)\aucun.dll"
-			/>
+			/-->
 		</Configuration>
 	</Configurations>
 	<References>
@@ -196,51 +199,47 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\build_stats.cpp"
+				RelativePath="..\gina\build_stats.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\debug.c"
+				RelativePath="..\gina\debug.c"
 				>
 			</File>
 			<File
-				RelativePath=".\dlgdefs.cpp"
+				RelativePath="..\gina\dlgdefs.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GinaDlg.c"
+				RelativePath="..\gina\GinaDlg.c"
 				>
 			</File>
 			<File
-				RelativePath=".\GinaHook.c"
+				RelativePath="..\gina\GinaHook.c"
 				>
 			</File>
 			<File
-				RelativePath=".\GinaHook.Def"
+				RelativePath="..\gina\GinaHook.Def"
 				>
 			</File>
 			<File
-				RelativePath=".\locked_dlg.cpp"
+				RelativePath="..\gina\locked_dlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\loggedon_dlg.cpp"
+				RelativePath="..\gina\loggedon_dlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\loggedout_dlg.cpp"
+				RelativePath="..\gina\loggedout_dlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\randpasswd.cpp"
+				RelativePath="..\gina\randpasswd.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\SecurityHelper.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\selfserve_sas_dlg.cpp"
+				RelativePath="..\gina\SecurityHelper.cpp"
 				>
 			</File>
 			<File
@@ -252,7 +251,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UnlockPolicy.c"
+				RelativePath="..\gina\UnlockPolicy.c"
 				>
 			</File>
 		</Filter>
@@ -262,59 +261,55 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\build_stats.h"
+				RelativePath="..\gina\build_stats.h"
 				>
 			</File>
 			<File
-				RelativePath=".\debug.h"
+				RelativePath="..\gina\debug.h"
 				>
 			</File>
 			<File
-				RelativePath=".\dlgdefs.h"
+				RelativePath="..\gina\dlgdefs.h"
 				>
 			</File>
 			<File
-				RelativePath=".\extern.h"
+				RelativePath="..\gina\extern.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GinaDlg.h"
+				RelativePath="..\gina\GinaDlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\GinaHook.h"
+				RelativePath="..\gina\GinaHook.h"
 				>
 			</File>
 			<File
-				RelativePath=".\global.h"
+				RelativePath="..\gina\global.h"
 				>
 			</File>
 			<File
-				RelativePath=".\locked_dlg.h"
+				RelativePath="..\gina\locked_dlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\loggedon_dlg.h"
+				RelativePath="..\gina\loggedon_dlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\loggedout_dlg.h"
+				RelativePath="..\gina\loggedout_dlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\randpasswd.h"
+				RelativePath="..\gina\randpasswd.h"
 				>
 			</File>
 			<File
-				RelativePath=".\resource.h"
+				RelativePath="..\gina\resource.h"
 				>
 			</File>
 			<File
-				RelativePath=".\SecurityHelper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\selfserve_sas_dlg.h"
+				RelativePath="..\gina\SecurityHelper.h"
 				>
 			</File>
 			<File
@@ -322,7 +317,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\StaticPrompt.h"
+				RelativePath="..\gina\StaticPrompt.h"
 				>
 			</File>
 			<File
@@ -330,7 +325,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UnlockPolicy.h"
+				RelativePath="..\gina\UnlockPolicy.h"
 				>
 			</File>
 		</Filter>
@@ -340,7 +335,7 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\AnyUserCanUnlockNowGina.rc"
+				RelativePath="..\gina\AnyUserCanUnlockNowGina.rc"
 				>
 			</File>
 		</Filter>

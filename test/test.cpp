@@ -97,10 +97,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		 PSID sid1 = 0;
 		 PSID sid2 = 0;
 
-		 GetTokenUserSID(current_user, &sid1);
-		 FetchSID(argv[i], &sid2);
+		 GetSIDFromToken(current_user, &sid1);
+		 GetSIDFromUsername(argv[i], &sid2);
 
-		 if(EqualSid(sid1, sid2))
+		 if(sid1 && sid2 && EqualSid(sid1, sid2))
 		 {
 			 TRACE(eINFO, L"Meme criss de SID\n");
 		 }

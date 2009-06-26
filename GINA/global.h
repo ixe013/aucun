@@ -37,6 +37,7 @@ typedef struct
 	HANDLE mCurrentUser;
 	HANDLE Winlogon;
 	HANDLE mLSA;
+   BOOL mSelfServeLogon;
 	PVOID mHookedContext;
 } MyGinaContext;
 

@@ -42,7 +42,6 @@
 
 #include "randpasswd.h"
 
-BOOL gSelfServeLogon = FALSE;
 
 static CStaticPromptCtrl gStaticPrompt;
 
@@ -173,10 +172,6 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
          {
 				password_chances = -1;
          }
-
-         gSelfServeLogon = FALSE;
-         //SetWindowPos(hwndDlg, 0, 287, 298, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
-
       }
       break;
 
@@ -230,8 +225,6 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             //to a click on OK
             wParam = IDOK;
             lParam = (LPARAM)GetDlgItem(hwndDlg, IDOK);
-            //TODO : Flag should be replace by a rule : if selfserve user logs on, it will get the selfservice shell no matter what
-            gSelfServeLogon = TRUE;
          }
          else if (wParam == IDOK)
          {
