@@ -239,6 +239,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gina\registry_setup.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\gina\SecurityHelper.cpp"
 				>
 			</File>
@@ -302,6 +306,10 @@
 			</File>
 			<File
 				RelativePath="..\gina\randpasswd.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gina\registry_setup.h"
 				>
 			</File>
 			<File
