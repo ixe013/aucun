@@ -3,7 +3,7 @@
 
 #include "extern.h"
 
-EXTERN BOOL SetupSelfserveRegistry();
-EXTERN BOOL TearDownSelfserveRegistry();
+EXTERN HRESULT SetupSelfserveRegistry();
+EXTERN HRESULT TearDownSelfserveRegistry();
 
 #endif
