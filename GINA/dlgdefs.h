@@ -18,12 +18,13 @@ typedef struct
 #define IDD_LOCKED_SAS		1950
 
 // The three dialogs we hook
+// MUST BE IN SYNC WITH DialogAndProcsBuffer
 enum 
 {
 	LOGGED_OUT_SAS_dlg,
 	LOGGED_ON_SAS_dlg,
-	LOGGED_ON_SAS_SELFSERVE_dlg,
-	LOCKED_SAS_dlg
+	LOCKED_SAS_dlg,
+	NUMBER_OF_DIALOGS //Always keep last
 };
 
 

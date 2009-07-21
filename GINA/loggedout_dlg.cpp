@@ -27,11 +27,11 @@
 */
 
 #include <windows.h>
-#include <lm.h>
 #include "loggedout_dlg.h"
 #include "dlgdefs.h"
 #include "trace.h"
 #include "settings.h"
+#include "global.h"
 
 #define _SECURE_ATL 1
 
@@ -40,8 +40,9 @@
 #include <atlctrls.h>
 #include "StaticPrompt.h"
 
-#include "randpasswd.h"
 
+wchar_t gUsername[512] = L"";
+size_t gUsername_len = sizeof gUsername / sizeof *gUsername;
 
 static CStaticPromptCtrl gStaticPrompt;
 
@@ -141,7 +142,6 @@ HWND AddStaticPrompt(HWND hwndDlg)
    return hwndPrompt;
 }
 
-#include "debug.h"
 
 INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -200,6 +200,11 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
             SetWindowPos(hwndDlg, 0, 0, 0, rect.right-rect.left, rect.bottom-rect.top-decrease-margin, SWP_NOMOVE|SWP_FRAMECHANGED);
 
+				//Save the username that user tried to logon
+				GetDlgItemText(hwndDlg, 1502, gUsername, gUsername_len);
+
+
+				//TODO : Provide a safe default if registry is misconfigured
             GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username);
             TRACE(eERROR, L"Switching to selfservice user %s\n", username);
 
@@ -208,15 +213,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             ShowWindow(GetDlgItem(hwndDlg, 1504), SW_HIDE); //Domain
 
             SetDlgItemText(hwndDlg, 1502, username);
-            /*
-                    USER_INFO_1003 ui;
-                    wchar_t randpasswd[LM20_PWLEN];
-                    GenerateRandomUnicodePassword(randpasswd, LM20_PWLEN);
-                    ui.usri1003_password = randpasswd;
-
-                    NetUserSetInfo(0, username, 1003, (LPBYTE)&ui, 0);
-                    SetDlgItemText(hwndDlg, 1503, ui.usri1003_password);
-            /*/
+            //
             //TODO : Do not hardcode password
             SetDlgItemText(hwndDlg, 1503, L"asdf1234");
             //*/
@@ -251,3 +248,4 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
    return result;
 }
+

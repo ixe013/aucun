@@ -214,20 +214,8 @@ public:
 	LRESULT OnSetCursor(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
 	{
 		//TODO: Set cursor code does not work, fix it or destroy it
-		if(!m_hand)	
-		{
-			m_hand = LoadCursor(0, IDC_HAND);
-		}
-
-		if(m_hand)	
-		{
-			SetCursor(m_hand);
-			bHandled = TRUE;
-		}
-		else
-		{
-			bHandled = FALSE;
-		}
+		SetCursor(LoadCursor(0, IDC_HAND));
+		bHandled = TRUE;
 
 		return 1;
 	}

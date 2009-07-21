@@ -58,6 +58,11 @@ HRESULT GetSelfServeSetting(const wchar_t *name, wchar_t *text, DWORD size)
    return GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\SelfServe", name, text, size);
 }
 
+HRESULT SetSelfServeSetting(const wchar_t *name, wchar_t *text)
+{
+   return SetSettingText(L"SOFTWARE\\Paralint.com\\Aucun\\SelfServe", name, text);
+}
+
 HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, DWORD size)
 {
    HRESULT result = E_FAIL;
@@ -74,6 +79,25 @@ HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, D
          {
             result = S_OK;
          }
+      }
+
+      RegCloseKey(reg);
+   }
+
+   return result;
+}
+
+HRESULT SetSettingText(const wchar_t *key, const wchar_t *name, const wchar_t *text)
+{
+   HRESULT result = E_FAIL;
+
+   HKEY reg;
+
+   if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_WRITE, &reg) == ERROR_SUCCESS)
+   {
+      if (RegSetValueEx(reg, name, 0, REG_SZ, (LPBYTE)text, wcslen(text)+1) == ERROR_SUCCESS)
+      {
+            result = S_OK;
       }
 
       RegCloseKey(reg);

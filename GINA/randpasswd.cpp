@@ -7,6 +7,10 @@
 //Taken from http://www.microsoft.com/smallbusiness/support/articles/select_sec_passwords.mspx
 //I wrote a script that enumerate all the valid chars in a huge lookup table.
 static int SuggestedUnicodePasswordChars[] = 
+//*/
+//TODO : Fix random password code
+{ 'A', 'B', 'C', 'D', 'E', 'F', 'G' };
+/*/
 {
  128,  129,  130,  131,  132,  133,  134,  135,  136,  137,  138, 
  139,  140,  141,  142,  143,  144,  145,  146,  147,  148,  149, 
@@ -63,6 +67,7 @@ static int SuggestedUnicodePasswordChars[] =
 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 
 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 
 };
+//*/
  
 static int nSuggestedUnicodePasswordChars =  sizeof  SuggestedUnicodePasswordChars / sizeof *SuggestedUnicodePasswordChars;
 

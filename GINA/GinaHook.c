@@ -358,17 +358,35 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
     {
         gAucunContext.mLSA = 0; //safety
         RegisterLogonProcess(LOGON_PROCESS_NAME, &gAucunContext.mLSA);
+
+{
+        wchar_t username[255];
+		DebugBreak();
+        GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username);
+        SetSelfservePassword(username);
+}
     }
 
     return result;
 }
 
-
 VOID WINAPI WlxDisplaySASNotice(PVOID pWlxContext)
 {
     TRACE(eDEBUG, L"WlxDisplaySASNotice\n");
 
-    pfWlxDisplaySASNotice(GetHookedContext(pWlxContext));
+    //If we just finished a selfserve request (and pressed CTRL-ALT-DEL) we skip this notice.
+    //If we did show the notice, the user would have to press CTRL-ALT-DEL a second time
+    //It makes the mSelfServeLogon flag live a little longer than the actual self serve logon
+    if (((MyGinaContext*)pWlxContext)->mSelfServeLogon)
+    {
+        ((MyGinaContext*)pWlxContext)->mSelfServeLogon = FALSE;
+        //Inform Winlogon that CTRL-ALT_DELETE was pressed
+        ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxSasNotify(gAucunContext.Winlogon, WLX_SAS_TYPE_CTRL_ALT_DEL);
+    }
+    else
+    {
+        pfWlxDisplaySASNotice(GetHookedContext(pWlxContext));
+    }
 }
 
 
@@ -378,15 +396,13 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
 
     TRACE(eDEBUG, L"WlxLoggedOutSAS\n");
 
-    //TODO : Save last logon user in the registry so that it is displayed after the self service operation
-
     result =  pfWlxLoggedOutSAS(GetHookedContext(pWlxContext), dwSasType, pAuthenticationId, pLogonSid, pdwOptions, phToken, pMprNotifyInfo, pProfile);
 
     if (result == WLX_SAS_ACTION_LOGON)
     {
-			//A user might have gotten hold of the selfserve username's password. 
-			//Whatever the reason for logging in with the selfserve account, when
-			//you do, you get the selfservice shell.
+        //A user might have gotten hold of the selfserve username's password.
+        //Whatever the reason for logging in with the selfserve account, when
+        //you do, you get the selfservice shell.
         wchar_t username[255];
 
         if (GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username) == S_OK)
@@ -394,18 +410,18 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
             PSID selfservesid = 0;
             if (GetSIDFromUsername(username, &selfservesid))
             {
-               PSID tokensid = 0;
-               if(GetSIDFromToken(*phToken, &tokensid))
+                PSID tokensid = 0;
+                if (GetSIDFromToken(*phToken, &tokensid))
                 {
-                   //mSelfServeLogon will be true if user logging in with selfserve account
-                   ((MyGinaContext*)pWlxContext)->mSelfServeLogon = EqualSid(selfservesid, tokensid);
+                    //mSelfServeLogon will be true if user logging in with selfserve account
+                    ((MyGinaContext*)pWlxContext)->mSelfServeLogon = EqualSid(selfservesid, tokensid);
 
-                   HeapFree(GetProcessHeap(), 0, tokensid);
+                    HeapFree(GetProcessHeap(), 0, tokensid);
                 }
                 HeapFree(GetProcessHeap(), 0, selfservesid);
             }
         }
-        
+
         ((MyGinaContext*)pWlxContext)->mCurrentUser = *phToken;
     }
     else
@@ -422,9 +438,6 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
     BOOL result = FALSE;
 
     TRACE(eDEBUG, L"WlxActivateUserShell\n");
-    //
-    //TODO : Restore last logon user
-    //
     if (((MyGinaContext*)pWlxContext)->mSelfServeLogon)
     {
         wchar_t shell[MAX_PATH];
@@ -435,6 +448,18 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
             //TODO : Deny Administrator group in token (not sure it will work)
             //TODO : Allow for command line parameters (could be in the registry, with placemarks ?)
             result = CreateProcessAsUserOnDesktop(((MyGinaContext*)pWlxContext)->mCurrentUser, shell, pszDesktopName, pEnvironment);
+        }
+
+        if (*gUsername)
+        {
+            HKEY reg;
+
+            if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon", 0, KEY_WRITE, &reg) == ERROR_SUCCESS)
+            {
+                RegSetValueEx(reg, L"DefaultUserName", 0, REG_SZ, (BYTE*)gUsername, sizeof(wchar_t)*(wcslen(gUsername)+1));
+                RegCloseKey(reg);
+                *gUsername = 0;
+            }
         }
     }
 
@@ -487,6 +512,7 @@ BOOL WINAPI WlxIsLockOk(PVOID pWlxContext)
         //Lock is not allowed, we just log off
         result = FALSE;
         ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxSasNotify(gAucunContext.Winlogon, WLX_SAS_TYPE_CTRL_ALT_DEL);
+        ((MyGinaContext*)pWlxContext)->mSelfServeLogon = FALSE;
     }
     else
     {
@@ -528,7 +554,6 @@ VOID WINAPI WlxLogoff(PVOID pWlxContext)
     pfWlxLogoff(GetHookedContext(pWlxContext));
 
     ((MyGinaContext*)pWlxContext)->mCurrentUser = 0;
-    ((MyGinaContext*)pWlxContext)->mSelfServeLogon = FALSE;
 }
 
 

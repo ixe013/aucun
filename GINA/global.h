@@ -46,6 +46,8 @@ EXTERN PVOID g_pWinlogon;
 EXTERN MyGinaContext *pgAucunContext;
 EXTERN HINSTANCE hAucunDll;
 EXTERN HINSTANCE hMsginaDll;
+EXTERN wchar_t gUsername[];
+EXTERN size_t gUsername_len;
 
 #endif
 

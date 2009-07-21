@@ -30,5 +30,6 @@ EXTERN BOOL ImpersonateAndGetUserName(HANDLE hToken, wchar_t* name, int cch);
 EXTERN int GetUsernameAndDomainFromToken(HANDLE token, wchar_t *domain, DWORD domain_len, wchar_t *username, DWORD username_len);
 EXTERN BOOL GetSIDFromToken(HANDLE token, PSID *ppsid);
 EXTERN BOOL GetSIDFromUsername(LPTSTR username, PSID *sid);
+EXTERN int SetSelfservePassword(const wchar_t *username);
 
 #endif
