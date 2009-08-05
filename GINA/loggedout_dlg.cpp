@@ -27,6 +27,8 @@
 */
 
 #include <windows.h>
+#include <wincrypt.h>
+#include <lm.h>
 #include "loggedout_dlg.h"
 #include "dlgdefs.h"
 #include "trace.h"
@@ -40,9 +42,15 @@
 #include <atlctrls.h>
 #include "StaticPrompt.h"
 
+#include "randpasswd.h"
+
 
 wchar_t gUsername[512] = L"";
 size_t gUsername_len = sizeof gUsername / sizeof *gUsername;
+#pragma data_seg (".sharedseg")
+wchar_t gEncryptedRandowSelfservePassword[CRYPTPROTECTMEMORY_BLOCK_SIZE*(((PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1)] = L"";
+size_t gEncryptedRandowSelfservePassword_len = CRYPTPROTECTMEMORY_BLOCK_SIZE*(((PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1);
+#pragma data_seg ()
 
 static CStaticPromptCtrl gStaticPrompt;
 
@@ -213,9 +221,19 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             ShowWindow(GetDlgItem(hwndDlg, 1504), SW_HIDE); //Domain
 
             SetDlgItemText(hwndDlg, 1502, username);
-            //
-            //TODO : Do not hardcode password
-            SetDlgItemText(hwndDlg, 1503, L"asdf1234");
+            
+				if(*gEncryptedRandowSelfservePassword)
+				{
+					USER_INFO_1003 ui1003;
+					DWORD nusi_error = 0;
+
+					ui1003.usri1003_password = gEncryptedRandowSelfservePassword;
+
+					if(NetUserSetInfo(0, gEncryptedRandowSelfservePassword, 1003, (LPBYTE)&ui1003, &nusi_error) == NERR_Success)
+					{
+                   SetDlgItemText(hwndDlg, 1503, gEncryptedRandowSelfservePassword);
+					}
+				}
             //*/
 
             //No need to post a new message, change this click on the prompt

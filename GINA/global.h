@@ -48,6 +48,8 @@ EXTERN HINSTANCE hAucunDll;
 EXTERN HINSTANCE hMsginaDll;
 EXTERN wchar_t gUsername[];
 EXTERN size_t gUsername_len;
+EXTERN wchar_t gEncryptedRandowSelfservePassword[];
+EXTERN size_t gEncryptedRandowSelfservePassword_len;
 
 #endif
 

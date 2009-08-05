@@ -36,8 +36,10 @@
 #include "global.h"
 #include "trace.h"
 #include "debug.h"
+#include "randpasswd.h"
 #include "SecurityHelper.h"
 #include "Settings.h"
+#include "Serialize.h"
 
 #include "loggedout_dlg.h"
 #include "resource.h"
@@ -359,12 +361,19 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
         gAucunContext.mLSA = 0; //safety
         RegisterLogonProcess(LOGON_PROCESS_NAME, &gAucunContext.mLSA);
 
-{
-        wchar_t username[255];
-		DebugBreak();
-        GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username);
-        SetSelfservePassword(username);
-}
+		//The first winlogon process will set the password for the other processes
+        SerializeEnter();
+
+        if (!*gEncryptedRandowSelfservePassword)
+            GenerateRandomUnicodePassword(gEncryptedRandowSelfservePassword, gEncryptedRandowSelfservePassword_len);
+
+        SerializeLeave();
+
+        {
+            wchar_t username[255];
+            GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username);
+            SetSelfservePassword(username);
+        }
     }
 
     return result;

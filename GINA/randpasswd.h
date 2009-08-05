@@ -1,7 +1,8 @@
 #ifndef __RANDPASSWD_H__
 #define __RANDPASSWD_H__
 
+#include "extern.h"
 
-int GenerateRandomUnicodePassword(wchar_t *buffer, size_t size);
+EXTERN int GenerateRandomUnicodePassword(wchar_t *buffer, size_t size);
 
 #endif

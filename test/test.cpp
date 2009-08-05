@@ -153,6 +153,7 @@ int _tmain(int argc, _TCHAR* argv[])
    }
    else
    {
+	   /*
       HMODULE msginadll = LoadLibraryEx(_T("msgina.dll"), 0, LOAD_LIBRARY_AS_DATAFILE);
 
       if (msginadll)
@@ -162,6 +163,10 @@ int _tmain(int argc, _TCHAR* argv[])
          FreeLibrary(msginadll);
          msginadll = 0;
       }
+	  /*/
+	   wchar_t buf[14];
+	   GenerateRandomUnicodePassword(buf, sizeof buf / sizeof *buf);
+	   //*/
    }
 
    if (lsa)
