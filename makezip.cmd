@@ -6,7 +6,7 @@ SET PROJECT_NAME=aucun
 
 echo Getting repository URL
 SET TEMP_FILE=%RANDOM%-%RANDOM%.tmp
-svn info | findstr URL | gawk '{print $2}' > %TEMP_FILE%
+svn info | findstr URL | gawk "{print $2}" > %TEMP_FILE%
 
 SET /P SVN_URL= < %TEMP_FILE%
 del %TEMP_FILE%
