@@ -9,97 +9,198 @@
 #include <lm.h>
 #include "settings.h"
 #include "unlockpolicy.h"
+#include "trace.h"
 #include "debug.h"
+#include "SecurityHelper.h"
 
 
-void ErrorExit(DWORD dw) 
-{ 
-	//wchar_t buf[2048];
-	LPVOID lpMsgBuf;
+//BEGIN - Found on Google Code search, now 404 http://www.cybertech.net/~sh0ksh0k/projects_new/TRET-1.0-PUBSRC/Shared/utils/security.c
+BOOL EnablePrivilegeInToken(HANDLE hToken, const wchar_t *PrivilegeName)
+{
+	LUID Privilege;
+	TOKEN_PRIVILEGES TokenPrivileges;
 
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-		FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL,
-		dw,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR) &lpMsgBuf,
-		0, NULL );
-
-	wprintf(L"failed with error %d: %s", dw, lpMsgBuf); 
-	//OutputDebugString(buf);
-
-	LocalFree(lpMsgBuf);
+	if (!LookupPrivilegeValue(NULL, PrivilegeName, &Privilege)) return FALSE;
+	TokenPrivileges.PrivilegeCount = 1;
+	TokenPrivileges.Privileges[0].Luid = Privilege;
+	TokenPrivileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	if (!AdjustTokenPrivileges(hToken, FALSE, &TokenPrivileges, sizeof(TokenPrivileges), NULL, NULL)) return FALSE;
+	else if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) return FALSE;
+	return TRUE;
 }
+
+
+
+BOOL EnablePrivilege(const wchar_t *PrivilegeName)
+{
+	BOOL Result;
+	HANDLE hToken;
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) return FALSE;
+	Result = EnablePrivilegeInToken(hToken, PrivilegeName);
+	CloseHandle(hToken);
+	return Result;
+}
+
+BOOL DisablePrivilegeInToken(HANDLE hToken, const wchar_t *PrivilegeName)
+{
+	LUID Privilege;
+	TOKEN_PRIVILEGES TokenPrivileges;
+
+	if (!LookupPrivilegeValue(NULL, PrivilegeName, &Privilege)) return FALSE;
+	TokenPrivileges.PrivilegeCount = 1;
+	TokenPrivileges.Privileges[0].Luid = Privilege;
+	TokenPrivileges.Privileges[0].Attributes = 0;
+	if (!AdjustTokenPrivileges(hToken, FALSE, &TokenPrivileges, sizeof(TokenPrivileges), NULL, NULL)) return FALSE;
+	else if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) return FALSE;
+	return TRUE;
+}
+
+BOOL DisablePrivilege(const wchar_t *PrivilegeName)
+{
+	BOOL Result;
+	HANDLE hToken;
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) return FALSE;
+	Result = DisablePrivilegeInToken(hToken, PrivilegeName);
+	CloseHandle(hToken);
+	return Result;
+}
+
+
+//END - Found on Google Code search, now 404 http://www.cybertech.net/~sh0ksh0k/projects_new/TRET-1.0-PUBSRC/Shared/utils/security.c
+
+
+
+BOOL IsWindowsServer()
+{
+	OSVERSIONINFOEX osvi;
+	DWORDLONG dwlConditionMask = 0;
+
+	// Initialize the OSVERSIONINFOEX structure.
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+	osvi.dwMajorVersion = 5;
+	osvi.wProductType = VER_NT_SERVER;
+
+	// Initialize the condition mask.
+	VER_SET_CONDITION(dwlConditionMask, VER_MAJORVERSION, VER_GREATER_EQUAL);
+	VER_SET_CONDITION(dwlConditionMask, VER_PRODUCT_TYPE, VER_EQUAL);
+
+	// Perform the test.
+	return VerifyVersionInfo(&osvi, VER_MAJORVERSION | VER_PRODUCT_TYPE, dwlConditionMask);
+}
+
 
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	wchar_t unlock[MAX_GROUPNAME] = L"";
+	int result = -1;
 
-	if(GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
+	HANDLE lsa = 0;
+	//wchar_t unlock[MAX_GROUPNAME] = L"";
+
+	TRACE(L"-------------------------\n");
+
+	//EnablePrivilege(L"SeTcbPrivilege");
+	if(!RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa))
+		TRACEMSG(GetLastError());
+
+	if(IsWindowsServer())
 	{
-		wchar_t caption[512];
-		wchar_t text[2048];
-
-		OutputDebugString(L"Group name ");
-		OutputDebugString(unlock);
-		OutputDebugString(L"\n");
-
-		if((GetNoticeText(L"Caption", caption, sizeof caption / sizeof *caption) == S_OK)
-		&& (GetNoticeText(L"Text", text, sizeof text / sizeof *text) == S_OK))
-		{
-			wchar_t message[MAX_USERNAME + sizeof text / sizeof *text];
-			wchar_t *read = text;
-			wchar_t *write = text;
-
-			while(*read)
-			{
-				if((*read == '\\') && (*(read+1) == 'n'))
-				{
-					*write++ = '\n';
-					read += 2;
-				}
-				else
-				{
-					*write++ = *read++;
-				}
-			}
-
-			*write = 0;
-
-			wsprintf(message, text, unlock); //Will insert group name if there is a %s in the message
-			MessageBox(0, message, caption, MB_YESNOCANCEL|MB_ICONEXCLAMATION);
-		}
+		TRACE(L"Windows Server\n");
+	}
+	else
+	{
+		TRACE(L"Windows pas Server\n");
 	}
 
+	/*
+	if(GetGroupName(gUnlockGroupName, unlock, sizeof unlock / sizeof *unlock) == S_OK)
+	{
+	wchar_t caption[512];
+	wchar_t text[2048];
+
+	OutputDebugString(L"Group name ");
+	OutputDebugString(unlock);
+	OutputDebugString(L"\n");
+
+	if((GetNoticeText(L"Caption", caption, sizeof caption / sizeof *caption) == S_OK)
+	&& (GetNoticeText(L"Text", text, sizeof text / sizeof *text) == S_OK))
+	{
+	wchar_t message[MAX_USERNAME + sizeof text / sizeof *text];
+	wchar_t *read = text;
+	wchar_t *write = text;
+
+	while(*read)
+	{
+	if((*read == '\\') && (*(read+1) == 'n'))
+	{
+	*write++ = '\n';
+	read += 2;
+	}
+	else
+	{
+	*write++ = *read++;
+	}
+	}
+
+	*write = 0;
+
+	wsprintf(message, text, unlock); //Will insert group name if there is a %s in the message
+	MessageBox(0, message, caption, MB_YESNOCANCEL|MB_ICONEXCLAMATION);
+	}
+	}
+	*/
 	if(argc > 1) for(int i=1; i<argc; ++i)
 	{
-//		wchar_t user[MAX_USERNAME];
-//		wchar_t domain[MAX_DOMAIN];
+		//		wchar_t user[MAX_USERNAME];
+		//		wchar_t domain[MAX_DOMAIN];
 		wchar_t passwd[MAX_PASSWORD];
+		wchar_t username[512];
+		wchar_t domain[512];
 
-		HANDLE token = 0;
+		HANDLE current_user = 0;
 
-		wprintf(L"Enter password for %s : ", argv[i]);
+		OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &current_user);
+
+		GetUsernameAndDomainFromToken(current_user, username, sizeof username / sizeof *username, domain, sizeof domain / sizeof *domain);
+
+		if(ShouldHookUnlockPasswordDialog(current_user))
+		{
+			TRACE(L"Should hook.\n");
+		}
+
 		if (_getws_s(passwd, MAX_PASSWORD) == passwd)
 		{
-			//if(ShouldUnlockForUser(L"HYDRO-YN4PUBYPI", argv[i], passwd))
-			//if(ShouldUnlockForUser(domain, user, passwd))
-			switch(ShouldUnlockForUser(L"", argv[i], passwd))
+			result = ShouldUnlockForUser(lsa, current_user, L".", argv[i], passwd);
+
+			switch(result)
 			{
-			case eLetMSGINAHandleIt: wprintf(L"eLetMSGINAHandleIt\n"); break;
-			case eUnlock: wprintf(L"eUnlock\n"); break;
-			case eForceLogoff: wprintf(L"eForceLogoff\n"); break;
+			case eLetMSGINAHandleIt: 
+				TRACE(L"TEST result is eLetMSGINAHandleIt\n"); 
+				wprintf(L"Actual result   : eLetMSGINAHandleIt\n");
+				break;
+			case eUnlock: 
+				TRACE(L"TEST result is eUnlock\n"); 
+				wprintf(L"Actual result   : eUnlock\n"); 
+				break;
+			case eForceLogoff: 
+				TRACE(L"TEST result is eForceLogoff\n"); 
+				wprintf(L"Actual result   : eForceLogoff\n"); 
+				break;
 			}
 		}
 		else
 		{
+			TRACE(L"Unable to read password\n");
 			break;
 		}
+
+		CloseHandle(current_user); 
 	}
 
+	LsaDeregisterLogonProcess(lsa);
+	//DisablePrivilege(L"SeTcbPrivilege");
 
-	return 0;
+	return result;
 }
 

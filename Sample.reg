@@ -1,10 +1,36 @@
 REGEDIT4
 
+;****************************************************************************
+;* The groups whose members will be able to either unlock or force logoff
+;* any user, unless the currently logged on user is a member of the unlock                                                                      
+;* group.
+;*
+;* Delete or leave empty any entry you do not use.
+;* 
+;****************************************************************************
 [HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Groups]
-"Unlock"="My domain\\The unlockers"
+"Unlock"="My domain\\the-users-that-can-unlock-session"
+"Force logoff"="My domain\\the-regular-users-that-can-kill-a-session"
 "Excluded"="Administrators"
-"Force logoff"="My domain\\The unloggers"
 
+;****************************************************************************
+;* This is to display a message to users warning them that their session
+;* could be unlocked by users of a given group. This setting has an effect
+;* only if the "Unlock" group is set and the logged on user is NOT a member
+;* of the "Excluded" group.
+;* 
+;* If present, the %s will be replaced by the name of the Unlock group. See 
+;* online docs for details.
+;* 
+;****************************************************************************
 [HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Notice]
 "Caption"="Security warning"
-"Text"="A custom unlogging software is installed. It could allow someone to unlock your workstation and impersonate you."
+"Text"="A custom unlocking software is installed. It allows anybody from the %s group to unlock your workstation and impersonate you.\n\nWould you like to log off instead ?"
+
+;****************************************************************************
+;* Should things go bad, you can enable a trace by adding this to the registry. 
+;* Send the trace to me (guillaume@paralint.com) along with a description and
+;* we will work it out
+;****************************************************************************
+;[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Debug]
+;"Output"="OutputDebugString"
