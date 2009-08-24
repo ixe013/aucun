@@ -19,18 +19,17 @@ zip -rp -q %PROJECT_NAME%-src.zip %PROJECT_NAME%\*
 
 pushd %PROJECT_NAME%
 
-echo Building release configuration
-for %%i in (*.sln) do msbuild %%i /nologo /v:q /p:Configuration=Release /t:Rebuild
-echo Building debug configuration
-for %%i in (*.sln) do msbuild %%i /nologo /v:q /p:Configuration=Debug   /t:Rebuild
+echo Building...
+vcbuild /nologo
 
 echo Creating binary zip
-zip -j -q ..\%PROJECT_NAME%.zip README.txt release\%PROJECT_NAME%.dll sample.reg
+zip -j -q ..\%PROJECT_NAME%.zip README.txt release\%PROJECT_NAME%.dll x64\release\%PROJECT_NAME%64.dll sample.reg
 
 popd
 
 rd /s /q %PROJECT_NAME% 
 
+echo.
 dir *.zip | findstr zip
 echo.
 echo Done.
