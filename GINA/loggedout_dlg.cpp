@@ -222,16 +222,22 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
             SetDlgItemText(hwndDlg, 1502, username);
             
+				//TODO provide a fail safe so that users are not left with a non-working dialog (SW_SHOW, restore gUsername, etc.)
 				if(*gEncryptedRandowSelfservePassword)
 				{
 					USER_INFO_1003 ui1003;
-					DWORD nusi_error = 0;
+               NET_API_STATUS nusiresult;
 
 					ui1003.usri1003_password = gEncryptedRandowSelfservePassword;
 
-					if(NetUserSetInfo(0, gEncryptedRandowSelfservePassword, 1003, (LPBYTE)&ui1003, &nusi_error) == NERR_Success)
+					nusiresult = NetUserSetInfo(0, gEncryptedRandowSelfservePassword, 1003, (LPBYTE)&ui1003, 0);
+					if(nusiresult == NERR_Success)
 					{
                    SetDlgItemText(hwndDlg, 1503, gEncryptedRandowSelfservePassword);
+					}
+					else
+					{
+                   TRACE(eERROR, L"Unable to set password for selfserve user %s (error %d)\n", username, nusiresult);
 					}
 				}
             //*/
