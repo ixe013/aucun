@@ -447,10 +447,16 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 	LPARAM lparam2use = dwInitParam;
 	DialogLParamHook myInitParam = {0};
 	DWORD dlgid = 0;
+	int result = 0;
+   DLGPROC saved_pfWlxWkstaLockedSASDlgProc;
 
 	//We might doint this for nothing (if dialog is not hooked)
 	myInitParam.HookedLPARAM = dwInitParam;
 	myInitParam.Winlogon = hWlx;
+
+	//First user-reported bug !!!
+	//This function was not re-entrant with regards to pfWlxWkstaLockedSASDlgProc
+   saved_pfWlxWkstaLockedSASDlgProc = pfWlxWkstaLockedSASDlgProc;
 
 	pfWlxWkstaLockedSASDlgProc = dlgprc;
 
@@ -504,5 +510,7 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 		TRACE(L"(%d). it was not hooked.\n", dlgid);
 	}
 
-	return pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, lparam2use);
+	result = pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, lparam2use);
+   pfWlxWkstaLockedSASDlgProc = saved_pfWlxWkstaLockedSASDlgProc;
+	return result;
 }
