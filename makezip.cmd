@@ -4,33 +4,29 @@ setlocal
 
 SET PROJECT_NAME=aucun
 
-echo Getting repository URL
-SET TEMP_FILE=%RANDOM%-%RANDOM%.tmp
-svn info | findstr URL | gawk "{print $2}" > %TEMP_FILE%
+echo Zipping versioned project files
+if exist %PROJECT_NAME%-src.zip del %PROJECT_NAME%-src.zip
+svn st -v | findstr /V /B "[\?CDIX\!\~]" | gawk "{ $0 = substr($0, 6); print $4 }" | zip %PROJECT_NAME%-src.zip -@ 
 
-SET /P SVN_URL= < %TEMP_FILE%
-del %TEMP_FILE%
 
-echo Checking out files
-svn co -q %SVN_URL% %PROJECT_NAME%
-
-echo Creating source zip
-zip -rp -q %PROJECT_NAME%-src.zip %PROJECT_NAME%\*
+echo Preparing for build
+md %PROJECT_NAME%
 
 pushd %PROJECT_NAME%
 
-echo Building release configuration
-for %%i in (*.sln) do msbuild %%i /nologo /v:q /p:Configuration=Release /t:Rebuild
-echo Building debug configuration
-for %%i in (*.sln) do msbuild %%i /nologo /v:q /p:Configuration=Debug   /t:Rebuild
+unzip -q ..\%PROJECT_NAME%-src.zip
+
+echo Building...
+vcbuild /nologo
 
 echo Creating binary zip
-zip -j -q ..\%PROJECT_NAME%.zip README.txt release\%PROJECT_NAME%.dll sample.reg
+zip -j -q ..\%PROJECT_NAME%.zip README.txt release\%PROJECT_NAME%.dll x64\release\%PROJECT_NAME%64.dll sample.reg
 
 popd
 
 rd /s /q %PROJECT_NAME% 
 
+echo.
 dir *.zip | findstr zip
 echo.
 echo Done.
