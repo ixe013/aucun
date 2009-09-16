@@ -364,8 +364,8 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
 		//The first winlogon process will set the password for the other processes
         SerializeEnter();
 
-        if (!*gEncryptedRandowSelfservePassword)
-            GenerateRandomUnicodePassword(gEncryptedRandowSelfservePassword, gEncryptedRandowSelfservePassword_len);
+        if (!*gEncryptedRandomSelfservePassword)
+            GenerateRandomUnicodePassword(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len);
 
         SerializeLeave();
 

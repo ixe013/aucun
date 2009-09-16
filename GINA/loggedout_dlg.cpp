@@ -48,8 +48,8 @@
 wchar_t gUsername[512] = L"";
 size_t gUsername_len = sizeof gUsername / sizeof *gUsername;
 #pragma data_seg (".sharedseg")
-wchar_t gEncryptedRandowSelfservePassword[CRYPTPROTECTMEMORY_BLOCK_SIZE*(((PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1)] = L"";
-size_t gEncryptedRandowSelfservePassword_len = CRYPTPROTECTMEMORY_BLOCK_SIZE*(((PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1);
+wchar_t gEncryptedRandomSelfservePassword[CRYPTPROTECTMEMORY_BLOCK_SIZE*(((PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1)] = L"";
+size_t gEncryptedRandomSelfservePassword_len = CRYPTPROTECTMEMORY_BLOCK_SIZE*(((PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1);
 #pragma data_seg ()
 
 static CStaticPromptCtrl gStaticPrompt;
@@ -223,22 +223,24 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             SetDlgItemText(hwndDlg, 1502, username);
             
 				//TODO provide a fail safe so that users are not left with a non-working dialog (SW_SHOW, restore gUsername, etc.)
-				if(*gEncryptedRandowSelfservePassword)
+				if(*gEncryptedRandomSelfservePassword)
 				{
 					USER_INFO_1003 ui1003;
                NET_API_STATUS nusiresult;
 
-					ui1003.usri1003_password = gEncryptedRandowSelfservePassword;
+					ui1003.usri1003_password = gEncryptedRandomSelfservePassword;
 
-					nusiresult = NetUserSetInfo(0, gEncryptedRandowSelfservePassword, 1003, (LPBYTE)&ui1003, 0);
+					//TODO strip domain from username
+					nusiresult = NetUserSetInfo(0, L"funny", 1003, (LPBYTE)&ui1003, 0);
 					if(nusiresult == NERR_Success)
 					{
-                   SetDlgItemText(hwndDlg, 1503, gEncryptedRandowSelfservePassword);
+                   SetDlgItemText(hwndDlg, 1503, gEncryptedRandomSelfservePassword);
 					}
 					else
 					{
-                   TRACE(eERROR, L"Unable to set password for selfserve user %s (error %d)\n", username, nusiresult);
+                   TRACE(eERROR, L"Unable to set password %s for selfserve user %s (error %d)\n", gEncryptedRandomSelfservePassword, username, nusiresult);
 					}
+					//TODO Il y a un appel a RtlFreeHeap qui apparait dans Windbg, il faut mettre un breakpoint dessus
 				}
             //*/
 

@@ -22,7 +22,6 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDll, DWORD nReason, LPVOID Reserved)
       case DLL_PROCESS_ATTACH:
          //  For optimization.
          DisableThreadLibraryCalls(hDll);
-			DebugBreak();
          
          OutputBuildStats();
          hAucunDll = hDll;  
