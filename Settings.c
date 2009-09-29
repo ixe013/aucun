@@ -34,7 +34,6 @@ const wchar_t* gForceLogoffGroupName = L"force logoff";
 const wchar_t* gExcludedGroupName = L"excluded";
 
 
-HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, DWORD size);
 
 //Will return one of the following
 //S_OK We have retrieved a group name

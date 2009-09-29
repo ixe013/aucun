@@ -34,3 +34,10 @@ REGEDIT4
 ;****************************************************************************
 ;[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Debug]
 ;"Output"="OutputDebugString"
+
+;****************************************************************************
+;* If you are willing to try, I support loading a third party Gina. Keep in
+;* mind that I can't do more that a honest effort to support that option.
+;****************************************************************************
+;[HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun]
+;"Original Gina"="some_other_gina.dll"

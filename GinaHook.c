@@ -37,6 +37,7 @@
 #include "trace.h"
 #include "debug.h"
 #include "SecurityHelper.h"
+#include "Settings.h"
 
 //
 // Location of the real MSGINA.
@@ -278,7 +279,14 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
     //
     // Load MSGINA.DLL.
     //
-    if (!(hDll = LoadLibrary(REALGINA_PATH)))
+    wchar_t original_gina[MAX_PATH];
+
+    DebugBreak();
+
+	 if(GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun", L"Original Gina", original_gina, MAX_PATH) != S_OK)
+		wcscpy(original_gina, REALGINA_PATH);
+
+    if (!(hDll = LoadLibrary(original_gina)))
     {
         return FALSE;
     }
