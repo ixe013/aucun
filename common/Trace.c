@@ -76,7 +76,7 @@ WriteBufferProc GetOutputWriter(int level)
 }
 
 
-void Trace(int level, const wchar_t* file, int line, const wchar_t *format, ...)
+void Trace(int level, const wchar_t* file, const char *function, int line, const wchar_t *format, ...)
 {
    WriteBufferProc output_proc = GetOutputWriter(level);
 
@@ -87,7 +87,7 @@ void Trace(int level, const wchar_t* file, int line, const wchar_t *format, ...)
 
       if (file && line)
       {
-         swprintf_s(buffer, sizeof buffer / sizeof *buffer, L"[%s:%ld] (%d)", file, line, level);
+         swprintf_s(buffer, sizeof buffer / sizeof *buffer, L"[%s:%S:%ld] (%d) ", file, function, line, level);
          output_proc(buffer);
       }
 
@@ -100,7 +100,7 @@ void Trace(int level, const wchar_t* file, int line, const wchar_t *format, ...)
    }
 }
 
-void TraceMessage(const wchar_t* file, int line, DWORD dw)
+void TraceMessage(const wchar_t* file, const char* function, int line, DWORD dw)
 {
    LPVOID lpMsgBuf;
 
@@ -113,7 +113,7 @@ void TraceMessage(const wchar_t* file, int line, DWORD dw)
       (LPTSTR) &lpMsgBuf,
       0, NULL);
 
-   Trace(eERROR, file, line, L"0x%08X: %s", dw, lpMsgBuf);
+   Trace(eERROR, file, function, line, L"0x%08X: %s", dw, lpMsgBuf);
 
    LocalFree(lpMsgBuf);
 }

@@ -7,7 +7,11 @@ HINSTANCE hAucunDll;
 
 void OutputBuildStats()
 {
+#ifdef _WIN64
+   OutputDebugString(L"Aucun 64 bits, build timestamp : ");
+#else
    OutputDebugString(L"Aucun, build timestamp : ");
+#endif
    OutputDebugStringA(__TIMESTAMP__);
    OutputDebugStringA("\n");
    OutputDebugStringA("http://www.paralint.com/projects/aucun/\n");

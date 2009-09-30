@@ -73,8 +73,11 @@ int _tmain(int argc, _TCHAR* argv[])
 
    HANDLE lsa = 0;
    //wchar_t unlock[MAX_GROUPNAME] = L"";
-
+DebugBreak();
    TRACE(eERROR, L"-------------------------\n");
+
+   wprintf(L"Fonction %s\n", _T( __FUNCTION__ ) );
+   wprintf(L"Fonction %s\n", _T( __FUNCSIG__ ) );
 
    //EnablePrivilege(L"SeTcbPrivilege");
    if (!RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa))
