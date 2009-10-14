@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\common"
+				AdditionalIncludeDirectories="..\common;..\gina"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0501;_DEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -128,7 +128,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\common"
+				AdditionalIncludeDirectories="..\common;..\gina"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0501;NDEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -211,7 +211,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\common"
+				AdditionalIncludeDirectories="..\common;..\gina"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0501;_DEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -295,7 +295,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\common"
+				AdditionalIncludeDirectories="..\common;..\gina"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0501;NDEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -393,7 +393,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gina\loggedout_dlg.cpp"
+				RelativePath="..\$(ProjectName)\loggedout_dlg.cpp"
 				>
 			</File>
 			<File

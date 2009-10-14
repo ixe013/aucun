@@ -365,7 +365,10 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
         SerializeEnter();
 
         if (!*gEncryptedRandomSelfservePassword)
+		  {
+				//TODO Encrypt password to memory
             GenerateRandomUnicodePassword(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len);
+        }
 
         SerializeLeave();
 

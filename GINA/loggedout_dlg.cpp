@@ -228,10 +228,12 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 					USER_INFO_1003 ui1003;
                NET_API_STATUS nusiresult;
 
+					//TODO Decrypt password from memory
 					ui1003.usri1003_password = gEncryptedRandomSelfservePassword;
 
 					//TODO strip domain from username
-					nusiresult = NetUserSetInfo(0, L"funny", 1003, (LPBYTE)&ui1003, 0);
+					nusiresult = NetUserSetInfo(0, FindUserNameInString(username), 1003, (LPBYTE)&ui1003, 0);
+
 					if(nusiresult == NERR_Success)
 					{
                    SetDlgItemText(hwndDlg, 1503, gEncryptedRandomSelfservePassword);
