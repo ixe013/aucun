@@ -393,7 +393,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\$(ProjectName)\loggedout_dlg.cpp"
+				RelativePath="..\gina\loggedout_dlg.cpp"
 				>
 			</File>
 			<File

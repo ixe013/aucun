@@ -43,6 +43,7 @@
 #include "StaticPrompt.h"
 
 #include "randpasswd.h"
+#include "securityhelper.h"
 
 
 wchar_t gUsername[512] = L"";

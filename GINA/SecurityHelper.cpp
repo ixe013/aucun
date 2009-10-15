@@ -493,11 +493,11 @@ const wchar_t *FindUserNameInString(const wchar_t *rawusername)
 	const wchar_t *result = 0;
 
 			//TODO : Replace this hack with CredUIParseUserName
-			username = wcsstr(rawusername, L"\\");
+			result = wcsstr(rawusername, L"\\");
 
-			if (!username)
+			if (!result)
 			{
-				*username = rawusername; //No domain entered, so point directly to the supplied buffer
+				result = rawusername; //No domain entered, so point directly to the supplied buffer
 			}
 
 	return result;
