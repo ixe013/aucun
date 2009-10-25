@@ -1,5 +1,6 @@
 SECTIONS
-  .sharedseg READ WRITE SHARED
+  .shared READ WRITE SHARED
+
 EXPORTS
     DllMain
     WlxNegotiate                        

@@ -73,7 +73,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
    HANDLE lsa = 0;
    //wchar_t unlock[MAX_GROUPNAME] = L"";
-DebugBreak();
    TRACE(eERROR, L"-------------------------\n");
 
    wprintf(L"Fonction %s\n", _T( __FUNCTION__ ) );
@@ -167,8 +166,12 @@ DebugBreak();
          msginadll = 0;
       }
 	  /*/
-	   wchar_t buf[14];
-	   GenerateRandomUnicodePassword(buf, sizeof buf / sizeof *buf);
+	   for(int i=0; i<125; ++i)
+	   {
+		   wchar_t buf[62];
+		   GenerateRandomUnicodePassword(buf, sizeof buf / sizeof *buf);
+		   wprintf(L"%s\n", buf);
+	   }
 	   //*/
    }
 

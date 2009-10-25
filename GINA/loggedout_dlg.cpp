@@ -48,9 +48,11 @@
 
 wchar_t gUsername[512] = L"";
 size_t gUsername_len = sizeof gUsername / sizeof *gUsername;
-#pragma data_seg (".sharedseg")
-wchar_t gEncryptedRandomSelfservePassword[CRYPTPROTECTMEMORY_BLOCK_SIZE*(((PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1)] = L"";
-size_t gEncryptedRandomSelfservePassword_len = CRYPTPROTECTMEMORY_BLOCK_SIZE*(((PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1);
+#pragma data_seg (".shared")
+//See http://msdn.microsoft.com/en-us/library/h90dkhs0%28VS.80%29.aspx
+#define AUCUN_PWLEN 16
+wchar_t gEncryptedRandomSelfservePassword[CRYPTPROTECTMEMORY_BLOCK_SIZE*(((AUCUN_PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1)] = L"";
+size_t gEncryptedRandomSelfservePassword_len = CRYPTPROTECTMEMORY_BLOCK_SIZE*(((AUCUN_PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1);
 #pragma data_seg ()
 
 static CStaticPromptCtrl gStaticPrompt;
@@ -168,7 +170,9 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
          result = gDialogsProc[LOGGED_OUT_SAS_dlg].originalproc(hwndDlg, uMsg, wParam, lParam);;
          handled = true;
 
-         if (GetSelfServeSetting(L"Attemps", buf, sizeof buf / sizeof *buf) == S_OK)
+
+			if(*gEncryptedRandomSelfservePassword
+         &&(GetSelfServeSetting(L"Attemps", buf, sizeof buf / sizeof *buf) == S_OK))
          {
             password_chances = _wtoi(buf);
 

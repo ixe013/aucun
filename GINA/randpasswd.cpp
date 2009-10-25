@@ -8,9 +8,13 @@
 //Taken from http://www.microsoft.com/smallbusiness/support/articles/select_sec_passwords.mspx
 //I wrote a script that enumerate all the valid chars in a huge lookup table.
 static wchar_t SuggestedUnicodePasswordChars[] = 
-L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-=_@#$%^&;:,.<>/~\\[](){}?!|";
+		  L"abcdefghijklmnopqrstuvwxyz"
+		  L"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		  L"0123456789"
+		  L"+-=_@#$%^&;:,.<>/~\\[](){}?!|"
+;
  
-static int nSuggestedUnicodePasswordChars =  sizeof  SuggestedUnicodePasswordChars / sizeof *SuggestedUnicodePasswordChars;
+static int nSuggestedUnicodePasswordChars = sizeof  SuggestedUnicodePasswordChars / sizeof *SuggestedUnicodePasswordChars;
 
 
 int GenerateRandomUnicodePassword(wchar_t *buffer, size_t size)
@@ -31,7 +35,7 @@ int GenerateRandomUnicodePassword(wchar_t *buffer, size_t size)
 				//I reuse the buffer for two purpose : on the right hand side, buffer contains a 
 				//random number. I use it as an index to the suggested char table and replace the
 				//random by a random, valid password char.
-				buffer[i] = SuggestedUnicodePasswordChars[buffer[i]%nSuggestedUnicodePasswordChars];
+				buffer[i] = SuggestedUnicodePasswordChars[buffer[i]%(nSuggestedUnicodePasswordChars-1)];
 			}
          result = size;
 			buffer[size] = 0;
@@ -44,4 +48,3 @@ int GenerateRandomUnicodePassword(wchar_t *buffer, size_t size)
 
 	return result;
 } 
-
