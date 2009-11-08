@@ -48,12 +48,16 @@
 
 wchar_t gUsername[512] = L"";
 size_t gUsername_len = sizeof gUsername / sizeof *gUsername;
-#pragma data_seg (".shared")
-//See http://msdn.microsoft.com/en-us/library/h90dkhs0%28VS.80%29.aspx
-#define AUCUN_PWLEN 16
-wchar_t gEncryptedRandomSelfservePassword[CRYPTPROTECTMEMORY_BLOCK_SIZE*(((AUCUN_PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1)] = L"";
-size_t gEncryptedRandomSelfservePassword_len = CRYPTPROTECTMEMORY_BLOCK_SIZE*(((AUCUN_PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1);
-#pragma data_seg ()
+
+//We want a long password (16 chars) that changes at every boot
+//But we also need a beacon (5 chars) to know if its a left over password
+//from a previous boot.
+const wchar_t gEncryptedTag[] = L"AUCUN";
+const size_t gEncryptedTag_len = sizeof gEncryptedTag / sizeof *gEncryptedTag;
+#define TAGGED_AUCUN_PWLEN (AUCUN_PWLEN+gEncryptedTag_len)
+//And the buffer must be multiple of the  block size (I guess)
+wchar_t gEncryptedRandomSelfservePassword[CRYPTPROTECTMEMORY_BLOCK_SIZE*(((TAGGED_AUCUN_PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1)] = L"";
+const size_t gEncryptedRandomSelfservePassword_len = CRYPTPROTECTMEMORY_BLOCK_SIZE*(((TAGGED_AUCUN_PWLEN-1)/CRYPTPROTECTMEMORY_BLOCK_SIZE)+1);
 
 static CStaticPromptCtrl gStaticPrompt;
 
@@ -170,7 +174,6 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
          result = gDialogsProc[LOGGED_OUT_SAS_dlg].originalproc(hwndDlg, uMsg, wParam, lParam);;
          handled = true;
 
-
 			if(*gEncryptedRandomSelfservePassword
          &&(GetSelfServeSetting(L"Attemps", buf, sizeof buf / sizeof *buf) == S_OK))
          {
@@ -227,16 +230,18 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
             SetDlgItemText(hwndDlg, 1502, username);
             
-				//TODO provide a fail safe so that users are not left with a non-working dialog (SW_SHOW, restore gUsername, etc.)
 				if(*gEncryptedRandomSelfservePassword)
 				{
 					USER_INFO_1003 ui1003;
                NET_API_STATUS nusiresult;
 
-					//TODO Decrypt password from memory
-					ui1003.usri1003_password = gEncryptedRandomSelfservePassword;
+				   CryptUnprotectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
 
-					//TODO strip domain from username
+					TRACE(eINFO, gEncryptedRandomSelfservePassword);
+
+					ui1003.usri1003_password = gEncryptedRandomSelfservePassword+gEncryptedTag_len-1;
+					TRACE(eINFO, ui1003.usri1003_password);
+
 					nusiresult = NetUserSetInfo(0, FindUserNameInString(username), 1003, (LPBYTE)&ui1003, 0);
 
 					if(nusiresult == NERR_Success)
@@ -247,6 +252,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 					{
                    TRACE(eERROR, L"Unable to set password %s for selfserve user %s (error %d)\n", gEncryptedRandomSelfservePassword, username, nusiresult);
 					}
+				   CryptProtectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
 					//TODO Il y a un appel a RtlFreeHeap qui apparait dans Windbg, il faut mettre un breakpoint dessus
 				}
             //*/

@@ -366,9 +366,12 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
 
         if (!*gEncryptedRandomSelfservePassword)
 		  {
-				//TODO Encrypt password to memory
-            GenerateRandomUnicodePassword(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len);
-				TRACE(eINFO, L"Random password is %s\n", gEncryptedRandomSelfservePassword);
+				wcscpy(gEncryptedRandomSelfservePassword, gEncryptedTag);
+            GenerateRandomUnicodePassword(gEncryptedRandomSelfservePassword+gEncryptedTag_len-1, AUCUN_PWLEN); //-1 to overwrite the trailing null
+
+				TRACE(eINFO, gEncryptedRandomSelfservePassword);
+
+				CryptProtectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
         }
 
         SerializeLeave();

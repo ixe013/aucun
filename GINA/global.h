@@ -48,8 +48,12 @@ EXTERN HINSTANCE hAucunDll;
 EXTERN HINSTANCE hMsginaDll;
 EXTERN wchar_t gUsername[];
 EXTERN size_t gUsername_len;
+EXTERN const wchar_t gEncryptedTag[];
+EXTERN const size_t gEncryptedTag_len;
 EXTERN wchar_t gEncryptedRandomSelfservePassword[];
-EXTERN size_t gEncryptedRandomSelfservePassword_len;
+EXTERN const size_t gEncryptedRandomSelfservePassword_len;
+
+#define AUCUN_PWLEN (16)
 
 #endif
 
