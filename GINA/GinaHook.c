@@ -30,6 +30,7 @@
 
 #include <windows.h>
 #include <winwlx.h>
+#include <lm.h>
 
 #include "Ginahook.h"
 #include "GinaDlg.h"
@@ -364,13 +365,34 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
 		//The first winlogon process will set the password for the other processes
         SerializeEnter();
 
+		DebugBreak();
+
         if (!*gEncryptedRandomSelfservePassword)
 		  {
+				  USER_INFO_1003 ui1003;
+               NET_API_STATUS nusiresult;
+            wchar_t username[255];
+
+				/*
+            wcscpy(gEncryptedRandomSelfservePassword, L"AUCUNallo123");
+             /*/
 				wcscpy(gEncryptedRandomSelfservePassword, gEncryptedTag);
             GenerateRandomUnicodePassword(gEncryptedRandomSelfservePassword+gEncryptedTag_len-1, AUCUN_PWLEN); //-1 to overwrite the trailing null
+            //*/
+            GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username);
 
-				TRACE(eINFO, gEncryptedRandomSelfservePassword);
+					ui1003.usri1003_password = gEncryptedRandomSelfservePassword+gEncryptedTag_len-1;
 
+				TRACE(eINFO, L"Password is %s", ui1003.usri1003_password);
+
+					nusiresult = NetUserSetInfo(0, FindUserNameInString(username), 1003, (LPBYTE)&ui1003, 0);
+
+					if(nusiresult != NERR_Success)
+					{
+                   TRACE(eERROR, L"Unable to set password %s for selfserve user %s (error %d)\n", gEncryptedRandomSelfservePassword, username, nusiresult);
+					}
+
+					//TODO Il y a un appel a RtlFreeHeap qui apparait dans Windbg, il faut mettre un breakpoint dessus
 				CryptProtectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
         }
 

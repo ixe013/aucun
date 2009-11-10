@@ -28,7 +28,6 @@
 
 #include <windows.h>
 #include <wincrypt.h>
-#include <lm.h>
 #include "loggedout_dlg.h"
 #include "dlgdefs.h"
 #include "trace.h"
@@ -232,28 +231,13 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             
 				if(*gEncryptedRandomSelfservePassword)
 				{
-					USER_INFO_1003 ui1003;
-               NET_API_STATUS nusiresult;
-
 				   CryptUnprotectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
 
-					TRACE(eINFO, gEncryptedRandomSelfservePassword);
+					TRACE(eINFO, L"Password is %s", gEncryptedRandomSelfservePassword+gEncryptedTag_len-1);
 
-					ui1003.usri1003_password = gEncryptedRandomSelfservePassword+gEncryptedTag_len-1;
-					TRACE(eINFO, ui1003.usri1003_password);
+               SetDlgItemText(hwndDlg, 1503, gEncryptedRandomSelfservePassword+gEncryptedTag_len-1);
 
-					nusiresult = NetUserSetInfo(0, FindUserNameInString(username), 1003, (LPBYTE)&ui1003, 0);
-
-					if(nusiresult == NERR_Success)
-					{
-                   SetDlgItemText(hwndDlg, 1503, gEncryptedRandomSelfservePassword);
-					}
-					else
-					{
-                   TRACE(eERROR, L"Unable to set password %s for selfserve user %s (error %d)\n", gEncryptedRandomSelfservePassword, username, nusiresult);
-					}
 				   CryptProtectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
-					//TODO Il y a un appel a RtlFreeHeap qui apparait dans Windbg, il faut mettre un breakpoint dessus
 				}
             //*/
 
