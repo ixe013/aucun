@@ -3,6 +3,7 @@
 setlocal
 
 SET PROJECT_NAME=aucun
+SET VCBUILD_DEFAULT_CFG=
 
 echo Zipping versioned project files
 if exist %PROJECT_NAME%.zip del %PROJECT_NAME%.zip
