@@ -281,8 +281,6 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
     //
     wchar_t original_gina[MAX_PATH];
 
-    DebugBreak();
-
 	 if(GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun", L"Original Gina", original_gina, MAX_PATH) != S_OK)
 		wcscpy(original_gina, REALGINA_PATH);
 
