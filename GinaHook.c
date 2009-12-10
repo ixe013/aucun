@@ -472,7 +472,12 @@ VOID WINAPI WlxShutdown(PVOID pWlxContext, DWORD ShutdownType)
 {
     pfWlxShutdown(GetHookedContext(pWlxContext), ShutdownType);
 	LsaDeregisterLogonProcess(((MyGinaContext*)pWlxContext)->mLSA);
-    FreeLibrary(hDll);
+    //The original Ginahook sample didn't release the DLL before shutting down.
+    //A user noticed a crash when the machine was shutdown. Turns out that WlxShutdown
+    //is not the last function called by Winlogon. WlxDisplayStatusMessage might be
+    //called a few more times. 
+    //Since we are shutting down anyway, cleaning up is more trouble than its worth.
+    //FreeLibrary(hDll);
 }
 
 
