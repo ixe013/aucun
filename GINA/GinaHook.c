@@ -64,6 +64,13 @@ static DWORD g_dwVersion = WLX_VERSION_1_4;
 static MyGinaContext gAucunContext = {0};
 MyGinaContext *pgAucunContext = &gAucunContext;
 
+enum
+{
+	eRegularLogon,
+	eSelfServeLogon,
+	eSelfServeLogonTimeout,
+};
+
 //
 // Pointers to the real MSGINA functions.
 //
@@ -107,9 +114,14 @@ static PWLXGETCONSOLESWITCHCREDENTIALS pfWlxGetConsoleSwitchCredentials = NULL;
 static PWLXRECONNECTNOTIFY pfWlxReconnectNotify  = NULL;
 static PWLXDISCONNECTNOTIFY pfWlxDisconnectNotify = NULL;
 
+MyGinaContext *GetMyContext(PVOID pWlxContext)
+{                                  
+	return ((MyGinaContext*)pWlxContext);
+}
+
 PVOID GetHookedContext(PVOID pWlxContext)
 {
-    return ((MyGinaContext*)pWlxContext)->mHookedContext;
+    return GetMyContext(pWlxContext)->mHookedContext;
 }
 
 //
@@ -353,6 +365,7 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
     //
     HookWlxDialogBoxParam(g_pWinlogon, g_dwVersion);
 
+	gAucunContext.mHookedContext = 0;
     *pWlxContext = &gAucunContext;
     gAucunContext.Winlogon = hWlx;
     result = pfWlxInitialize(lpWinsta, hWlx, pvReserved, pWinlogonFunctions, &gAucunContext.mHookedContext);
@@ -367,21 +380,20 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
 
 		DebugBreak();
 
+            GetSelfServeSetting(L"Password", gEncryptedRandomSelfservePassword, );
+
         if (!*gEncryptedRandomSelfservePassword)
 		  {
 				  USER_INFO_1003 ui1003;
                NET_API_STATUS nusiresult;
             wchar_t username[255];
 
-				/*
-            wcscpy(gEncryptedRandomSelfservePassword, L"AUCUNallo123");
-             /*/
 				wcscpy(gEncryptedRandomSelfservePassword, gEncryptedTag);
             GenerateRandomUnicodePassword(gEncryptedRandomSelfservePassword+gEncryptedTag_len-1, AUCUN_PWLEN); //-1 to overwrite the trailing null
             //*/
             GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username);
 
-					ui1003.usri1003_password = gEncryptedRandomSelfservePassword+gEncryptedTag_len-1;
+		  		ui1003.usri1003_password = gEncryptedRandomSelfservePassword+gEncryptedTag_len-1;
 
 				TRACE(eINFO, L"Password is %s", ui1003.usri1003_password);
 
@@ -415,14 +427,16 @@ VOID WINAPI WlxDisplaySASNotice(PVOID pWlxContext)
     //If we just finished a selfserve request (and pressed CTRL-ALT-DEL) we skip this notice.
     //If we did show the notice, the user would have to press CTRL-ALT-DEL a second time
     //It makes the mSelfServeLogon flag live a little longer than the actual self serve logon
-    if (((MyGinaContext*)pWlxContext)->mSelfServeLogon)
+    if (GetMyContext(pWlxContext)->mSelfServeLogon == eSelfServeLogon)
     {
-        ((MyGinaContext*)pWlxContext)->mSelfServeLogon = FALSE;
+        GetMyContext(pWlxContext)->mSelfServeLogon = eRegularLogon;
         //Inform Winlogon that CTRL-ALT_DELETE was pressed
         ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxSasNotify(gAucunContext.Winlogon, WLX_SAS_TYPE_CTRL_ALT_DEL);
     }
     else
     {
+			//pfWlxDisplaySASNotice might be reentrant
+        GetMyContext(pWlxContext)->mSelfServeLogon = eRegularLogon;
         pfWlxDisplaySASNotice(GetHookedContext(pWlxContext));
     }
 }
@@ -452,7 +466,10 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
                 if (GetSIDFromToken(*phToken, &tokensid))
                 {
                     //mSelfServeLogon will be true if user logging in with selfserve account
-                    ((MyGinaContext*)pWlxContext)->mSelfServeLogon = EqualSid(selfservesid, tokensid);
+                    if(EqualSid(selfservesid, tokensid))
+							{
+                        GetMyContext(pWlxContext)->mSelfServeLogon = eSelfServeLogon;
+							}
 
                     HeapFree(GetProcessHeap(), 0, tokensid);
                 }
@@ -460,7 +477,7 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
             }
         }
 
-        ((MyGinaContext*)pWlxContext)->mCurrentUser = *phToken;
+        GetMyContext(pWlxContext)->mCurrentUser = *phToken;
     }
     else
     {
@@ -476,7 +493,7 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
     BOOL result = FALSE;
 
     TRACE(eDEBUG, L"WlxActivateUserShell\n");
-    if (((MyGinaContext*)pWlxContext)->mSelfServeLogon)
+    if (GetMyContext(pWlxContext)->mSelfServeLogon == eSelfServeLogon)
     {
         wchar_t shell[MAX_PATH];
 
@@ -485,7 +502,7 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
             TRACE(eERROR, L"Switching to selfservice account\n");
             //TODO : Deny Administrator group in token (not sure it will work)
             //TODO : Allow for command line parameters (could be in the registry, with placemarks ?)
-            result = CreateProcessAsUserOnDesktop(((MyGinaContext*)pWlxContext)->mCurrentUser, shell, pszDesktopName, pEnvironment);
+            result = CreateProcessAsUserOnDesktop(GetMyContext(pWlxContext)->mCurrentUser, shell, pszDesktopName, pEnvironment);
         }
 
         if (*gUsername)
@@ -515,7 +532,8 @@ int WINAPI WlxLoggedOnSAS(PVOID pWlxContext, DWORD dwSasType, PVOID pReserved)
     TRACE(eDEBUG, L"WlxLoggedOnSAS, type %d\n", dwSasType);
 
     //If you press CTRL-ALT-DEL in the selfservice shell, the user is logged off
-    if (((MyGinaContext*)pWlxContext)->mSelfServeLogon)
+    if((GetMyContext(pWlxContext)->mSelfServeLogon == eSelfServeLogon)
+    || (GetMyContext(pWlxContext)->mSelfServeLogon == eSelfServeLogonTimeout)) 
     {
         TRACEMORE(eDEBUG, L" received in a selfservice context\n");
 
@@ -545,12 +563,13 @@ BOOL WINAPI WlxIsLockOk(PVOID pWlxContext)
     TRACE(eDEBUG, L"WlxIsLockOk\n");
 
     //Lock is not OK in self serve mode. Else let MSGINA decide
-    if (((MyGinaContext*)pWlxContext)->mSelfServeLogon)
+    if (GetMyContext(pWlxContext)->mSelfServeLogon == eSelfServeLogon)
     {
         //Lock is not allowed, we just log off
         result = FALSE;
         ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxSasNotify(gAucunContext.Winlogon, WLX_SAS_TYPE_CTRL_ALT_DEL);
-        ((MyGinaContext*)pWlxContext)->mSelfServeLogon = FALSE;
+			//We clear the flag right now, so the next user has to press CTRL-ALT-DEL
+        GetMyContext(pWlxContext)->mSelfServeLogon = eSelfServeLogonTimeout;
     }
     else
     {
@@ -591,7 +610,7 @@ VOID WINAPI WlxLogoff(PVOID pWlxContext)
     TRACE(eDEBUG, L"WlxLogoff\n");
     pfWlxLogoff(GetHookedContext(pWlxContext));
 
-    ((MyGinaContext*)pWlxContext)->mCurrentUser = 0;
+    GetMyContext(pWlxContext)->mCurrentUser = 0;
 }
 
 
@@ -599,8 +618,8 @@ VOID WINAPI WlxShutdown(PVOID pWlxContext, DWORD ShutdownType)
 {
     TRACE(eDEBUG, L"WlxShutdown\n");
     pfWlxShutdown(GetHookedContext(pWlxContext), ShutdownType);
-    LsaDeregisterLogonProcess(((MyGinaContext*)pWlxContext)->mLSA);
-    FreeLibrary(hMsginaDll);
+    LsaDeregisterLogonProcess(GetMyContext(pWlxContext)->mLSA);
+    //FreeLibrary(hMsginaDll);
 }
 
 

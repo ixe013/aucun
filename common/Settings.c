@@ -106,6 +106,44 @@ HRESULT SetSettingText(const wchar_t *key, const wchar_t *name, const wchar_t *t
    return result;
 }
 
+HRESULT SetSettingBinary(const wchar_t *key, const wchar_t *name, const wchar_t *text)
+{
+   HRESULT result = E_FAIL;
+
+   HKEY reg;
+
+   if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_WRITE, &reg) == ERROR_SUCCESS)
+   {
+      if (RegSetValueEx(reg, name, 0, REG_SZ, (LPBYTE)text, wcslen(text)+1) == ERROR_SUCCESS)
+      {
+            result = S_OK;
+      }
+
+      RegCloseKey(reg);
+   }
+
+   return result;
+}
+
+HRESULT SetSetting(const wchar_t *key, const wchar_t *name, LPBYTE data, DWORD len)
+{
+   HRESULT result = E_FAIL;
+
+   HKEY reg;
+
+   if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_WRITE, &reg) == ERROR_SUCCESS)
+   {
+      if (RegSetValueEx(reg, name, 0, REG_SZ, (LPBYTE)text, wcslen(data)+1) == ERROR_SUCCESS)
+      {
+            result = S_OK;
+      }
+
+      RegCloseKey(reg);
+   }
+
+   return result;
+}
+
 //Replaces any \n in the string with 0x0d 0x0a
 //return the pointer to the received string
 wchar_t *InterpretCarriageReturn(wchar_t *text)

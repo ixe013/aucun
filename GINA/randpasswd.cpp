@@ -6,12 +6,11 @@
 
 
 //Taken from http://www.microsoft.com/smallbusiness/support/articles/select_sec_passwords.mspx
-//I wrote a script that enumerate all the valid chars in a huge lookup table.
 static wchar_t SuggestedUnicodePasswordChars[] = 
 		  L"abcdefghijklmnopqrstuvwxyz"
 		  L"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		  L"0123456789"
-		  L"+-=_@#$%^&;:,.<>/~\\[](){}?!|"
+		  //L"+-=_@#$%^&;:,.<>/~\\[](){}?!|"
 ;
  
 static int nSuggestedUnicodePasswordChars = sizeof  SuggestedUnicodePasswordChars / sizeof *SuggestedUnicodePasswordChars;
