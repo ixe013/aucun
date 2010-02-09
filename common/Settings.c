@@ -106,17 +106,22 @@ HRESULT SetSettingText(const wchar_t *key, const wchar_t *name, const wchar_t *t
    return result;
 }
 
-HRESULT SetSettingBinary(const wchar_t *key, const wchar_t *name, const wchar_t *text)
+HRESULT GetSettingBinary(const wchar_t *key, const wchar_t *name, LPBYTE text, DWORD size)
 {
    HRESULT result = E_FAIL;
+   DWORD type;
+   DWORD returnedsize = size;
 
    HKEY reg;
 
-   if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_WRITE, &reg) == ERROR_SUCCESS)
+   if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_READ, &reg) == ERROR_SUCCESS)
    {
-      if (RegSetValueEx(reg, name, 0, REG_SZ, (LPBYTE)text, wcslen(text)+1) == ERROR_SUCCESS)
+      if (RegQueryValueEx(reg, name, 0, &type, (LPBYTE)text, &returnedsize) == ERROR_SUCCESS)
       {
+         if ((type == REG_BINARY) && (returnedsize <= size) && (returnedsize > 0))
+         {
             result = S_OK;
+         }
       }
 
       RegCloseKey(reg);
@@ -125,7 +130,7 @@ HRESULT SetSettingBinary(const wchar_t *key, const wchar_t *name, const wchar_t 
    return result;
 }
 
-HRESULT SetSetting(const wchar_t *key, const wchar_t *name, LPBYTE data, DWORD len)
+HRESULT SetSettingBinary(const wchar_t *key, const wchar_t *name, LPBYTE data, DWORD len)
 {
    HRESULT result = E_FAIL;
 
@@ -133,7 +138,7 @@ HRESULT SetSetting(const wchar_t *key, const wchar_t *name, LPBYTE data, DWORD l
 
    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_WRITE, &reg) == ERROR_SUCCESS)
    {
-      if (RegSetValueEx(reg, name, 0, REG_SZ, (LPBYTE)text, wcslen(data)+1) == ERROR_SUCCESS)
+      if (RegSetValueEx(reg, name, 0, REG_BINARY, data, len) == ERROR_SUCCESS)
       {
             result = S_OK;
       }
