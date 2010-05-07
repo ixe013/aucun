@@ -51,6 +51,7 @@
 
 //Hooked instance of MSGINA
 HINSTANCE hDll;
+HINSTANCE hResourceDll;
 
 //
 // Winlogon function dispatch table.
@@ -281,13 +282,17 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
     //
     wchar_t original_gina[MAX_PATH];
 
-	 if(GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun", L"Original Gina", original_gina, MAX_PATH) != S_OK)
+	if(GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun", L"Original Gina", original_gina, MAX_PATH) != S_OK)
 		wcscpy(original_gina, REALGINA_PATH);
 
     if (!(hDll = LoadLibrary(original_gina)))
     {
         return FALSE;
     }
+
+    //Chances are this call will not result in a module load, because either aucun or a third party Gina chained
+    //to us will have already loaded it. 
+    hResourceDll = LoadLibraryEx(REALGINA_PATH, 0, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE|LOAD_LIBRARY_AS_IMAGE_RESOURCE);
 
     //
     // Get pointers to WlxNegotiate function in the real MSGINA.
@@ -416,8 +421,7 @@ int WINAPI WlxLoggedOnSAS(PVOID pWlxContext, DWORD dwSasType, PVOID pReserved)
 
     result = pfWlxLoggedOnSAS(GetHookedContext(pWlxContext), dwSasType, pReserved);
 
-    TRACE(L"Going back to windows.\n");
-
+    TRACE(L"Going back to windows (%d)\n", result);
 
     return result;
 }
@@ -478,6 +482,7 @@ VOID WINAPI WlxShutdown(PVOID pWlxContext, DWORD ShutdownType)
     //called a few more times. 
     //Since we are shutting down anyway, cleaning up is more trouble than its worth.
     //FreeLibrary(hDll);
+    //FreeLibrary(hResourceDll);
 }
 
 
@@ -492,7 +497,13 @@ BOOL WINAPI WlxScreenSaverNotify(PVOID  pWlxContext, BOOL * pSecure)
 
 BOOL WINAPI WlxStartApplication(PVOID pWlxContext, PWSTR pszDesktopName, PVOID pEnvironment, PWSTR pszCmdLine)
 {
-    return pfWlxStartApplication(GetHookedContext(pWlxContext), pszDesktopName, pEnvironment, pszCmdLine);
+    BOOL result;
+
+    result = pfWlxStartApplication(GetHookedContext(pWlxContext), pszDesktopName, pEnvironment, pszCmdLine);
+
+    TRACE(L"WlxStartApplication returned %d\n", result);
+    
+    return result;
 }
 
 

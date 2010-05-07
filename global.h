@@ -34,6 +34,7 @@
 EXTERN PVOID g_pWinlogon;
 EXTERN MyGinaContext *pgAucunContext;
 EXTERN HINSTANCE hDll;
+EXTERN HINSTANCE hResourceDll;
 
 #endif
 
