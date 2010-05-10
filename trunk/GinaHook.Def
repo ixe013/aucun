@@ -1,0 +1,22 @@
+EXPORTS
+    DllMain
+    WlxNegotiate                        
+    WlxInitialize                       
+    WlxDisplaySASNotice                 
+    WlxLoggedOutSAS                     
+    WlxActivateUserShell                
+    WlxLoggedOnSAS                      
+    WlxDisplayLockedNotice              
+    WlxWkstaLockedSAS                   
+    WlxIsLockOk                         
+    WlxIsLogoffOk                       
+    WlxLogoff                           
+    WlxShutdown                         
+    WlxNetworkProviderLoad              
+    WlxDisplayStatusMessage             
+    WlxGetStatusMessage                 
+    WlxRemoveStatusMessage              
+    WlxGetConsoleSwitchCredentials      
+    WlxReconnectNotify                  
+    WlxStartApplication
+    WlxDisconnectNotify                 
