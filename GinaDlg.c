@@ -217,10 +217,10 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx, HANDLE current_user)
 		wchar_t caption[512];
 
 		//Start with the caption
-		LoadString(hDll, gDialogsAndControls[gCurrentDlgIndex].IDS_CAPTION, caption, sizeof caption / sizeof *caption);
+		LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_CAPTION, caption, sizeof caption / sizeof *caption);
 
 		//Windows XP has a plain vanilla message, no insert. Let's start with that
-		LoadString(hDll, gDialogsAndControls[gCurrentDlgIndex].IDS_GENERIC_UNLOCK, buf, sizeof buf / sizeof *buf);
+		LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_GENERIC_UNLOCK, buf, sizeof buf / sizeof *buf);
 
 		//The format of the message is different on Windows Server. This test is somewhat short sighted,
 		//but we know that in the future versions there is no Gina at all ! That's why we shortcut
@@ -238,13 +238,13 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx, HANDLE current_user)
 			{
 			case 2:
 				{
-					LoadString(hDll, gDialogsAndControls[gCurrentDlgIndex].IDS_DOMAIN_USERNAME, format, sizeof format / sizeof *format);
+					LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_DOMAIN_USERNAME, format, sizeof format / sizeof *format);
 					wsprintf(buf, format, domain, username, L"some time");
 				}
 				break;
 			case 1:
 				{
-					LoadString(hDll, gDialogsAndControls[gCurrentDlgIndex].IDS_USERNAME, format, sizeof format / sizeof *format);
+					LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_USERNAME, format, sizeof format / sizeof *format);
 					wsprintf(buf, format, username, L"some time");
 				}
 				break;
@@ -332,6 +332,10 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
 			}
 		}
 	}
+	else if (uMsg == WM_COMMAND)
+    {
+        TRACE(L"User clicked on %d\n", wParam);
+    }
 
 	if (!bResult)
 		bResult = pfWlxWkstaLockedSASDlgProc(hwndDlg, uMsg, wParam, lParam);
@@ -511,6 +515,16 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
 	}
 
 	result = pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, lparam2use);
-   pfWlxWkstaLockedSASDlgProc = saved_pfWlxWkstaLockedSASDlgProc;
+    pfWlxWkstaLockedSASDlgProc = saved_pfWlxWkstaLockedSASDlgProc;
+    
+	if (proc2use != dlgprc)
+    {
+        TRACE(L"Hooked dialog returned %d\n", result);
+    }
+    else
+    {
+        TRACE(L"Regular dialog returned %d\n", result);
+    }
+
 	return result;
 }

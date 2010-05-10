@@ -39,6 +39,16 @@ rd /s /q %PROJECT_NAME%
 
 echo.
 dir *.zip | findstr zip
+
+echo.
+unzip -l %PROJECT_NAME%.zip *.dll
+if NOT ERRORLEVEL 0 (
+echo.
+echo Binary not found in distribution. Fix it or die.
+if exist ..\%PROJECT_NAME%.zip del ..\%PROJECT_NAME%.zip
+if exist ..\%PROJECT_NAME%-src.zip del ..\%PROJECT_NAME%-src.zip
+)
+
 echo.
 echo Done.
 endlocal
