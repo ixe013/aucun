@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="AnyUserCanUnlockNowGina"
 	ProjectGUID="{D818D87C-2DFB-47CE-8944-49A220F2F365}"
 	RootNamespace="RemoteUnlockGina"
@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\common;..\gina"
+				AdditionalIncludeDirectories="..\common;..\gina;..\wtl"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0501;_DEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -59,6 +59,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="..\wtl"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -128,7 +129,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\common;..\gina"
+				AdditionalIncludeDirectories="..\common;..\gina;..\wtl"
 				PreprocessorDefinitions="WIN32;_WIN32_WINNT=0x0501;NDEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -140,6 +141,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="..\wtl"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
