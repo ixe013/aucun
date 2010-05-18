@@ -37,8 +37,8 @@
 #define _SECURE_ATL 1
 
 #include <atlbase.h>
-#include <atlapp.h>
-#include <atlctrls.h>
+#include "atlapp.h"
+#include "atlctrls.h"
 #include "StaticPrompt.h"
 
 #include "randpasswd.h"
