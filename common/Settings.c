@@ -95,7 +95,7 @@ HRESULT SetSettingText(const wchar_t *key, const wchar_t *name, const wchar_t *t
 
    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key, 0, KEY_WRITE, &reg) == ERROR_SUCCESS)
    {
-      if (RegSetValueEx(reg, name, 0, REG_SZ, (LPBYTE)text, wcslen(text)+1) == ERROR_SUCCESS)
+      if (RegSetValueEx(reg, name, 0, REG_SZ, (LPBYTE)text, (DWORD)wcslen(text)+1) == ERROR_SUCCESS)
       {
             result = S_OK;
       }

@@ -27,7 +27,7 @@ int GenerateRandomUnicodePassword(wchar_t *buffer, size_t size)
 
    if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_MACHINE_KEYSET|CRYPT_VERIFYCONTEXT))
    {
-      if (CryptGenRandom(hCryptProv, sizeof(wchar_t)*size, (BYTE*)buffer))
+      if (CryptGenRandom(hCryptProv, (DWORD)sizeof(wchar_t)*size, (BYTE*)buffer))
       {
 			for(size_t i=0; i<size; ++i)
 			{
@@ -36,8 +36,8 @@ int GenerateRandomUnicodePassword(wchar_t *buffer, size_t size)
 				//random by a random, valid password char.
 				buffer[i] = SuggestedUnicodePasswordChars[buffer[i]%(nSuggestedUnicodePasswordChars-1)];
 			}
-         result = size;
-			buffer[size] = 0;
+         result = (int)size;
+		 buffer[size] = 0;
          CryptReleaseContext(hCryptProv, 0);
       }
    }

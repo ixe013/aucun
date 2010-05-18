@@ -7,7 +7,7 @@
 #include <atlstr.h>
 
 TCHAR CRESHelper::mURL[MAX_PATH+24] = _T("res://");
-int CRESHelper::len = 0;
+size_t CRESHelper::len = 0;
 
 void CRESHelper::Initialize(HINSTANCE dll)
 {

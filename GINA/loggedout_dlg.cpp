@@ -215,11 +215,10 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
 
             SetWindowPos(hwndDlg, 0, 0, 0, rect.right-rect.left, rect.bottom-rect.top-decrease-margin, SWP_NOMOVE|SWP_FRAMECHANGED);
 
-				//Save the username that user tried to logon
-				GetDlgItemText(hwndDlg, 1502, gUsername, gUsername_len);
+			//Save the username that user tried to logon
+			GetDlgItemText(hwndDlg, 1502, gUsername, (int)gUsername_len);
 
-
-				//TODO : Provide a safe default if registry is misconfigured
+			//TODO : Provide a safe default if registry is misconfigured
             GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username);
             TRACE(eERROR, L"Switching to selfservice user %s\n", username);
 

@@ -522,7 +522,7 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
 
          if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon", 0, KEY_WRITE, &reg) == ERROR_SUCCESS)
          {
-            RegSetValueEx(reg, L"DefaultUserName", 0, REG_SZ, (BYTE*)gUsername, sizeof(wchar_t)*(wcslen(gUsername)+1));
+            RegSetValueEx(reg, L"DefaultUserName", 0, REG_SZ, (BYTE*)gUsername, (DWORD)sizeof(wchar_t)*(wcslen(gUsername)+1));
             RegCloseKey(reg);
             *gUsername = 0;
          }
