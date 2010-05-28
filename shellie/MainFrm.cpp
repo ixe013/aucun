@@ -9,6 +9,7 @@
 #include "MainFrm.h"
 #include "RESHelper.h"
 #include "Settings.h"
+#include "BrowserLockDown.h"
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
@@ -30,6 +31,16 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	SetMenu(NULL);
 
 	TCHAR resurl[MAX_PATH+5];
+
+    CComObject<CBrowserLockDown> *pUIH = NULL;
+    HRESULT hr = CComObject<CBrowserLockDown>::CreateInstance (&pUIH);
+    if (SUCCEEDED(hr))
+    {
+        // Make our custom DocHostUIHandler the window.external handler
+        CComQIPtr<IDocHostUIHandlerDispatch> pIUIH = pUIH;
+        hr = m_view.SetExternalUIHandler(pIUIH) ;
+    }
+    ATLASSERT(SUCCEEDED(hr)) ;
 
    if((GetSettingText(L"SOFTWARE\\Paralint.com\\Shellie\\Shell", L"URL", resurl, sizeof resurl / sizeof *resurl) != S_OK)
 	   || !*resurl)

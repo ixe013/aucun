@@ -13,7 +13,7 @@ class CRESHelper
 {
 protected:
 	static TCHAR mURL[MAX_PATH+24];
-	static int len;
+	static size_t len;
 
 public:
 	static void Initialize(HINSTANCE dll);

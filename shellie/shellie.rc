@@ -108,16 +108,17 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About shellie...",              ID_APP_ABOUT
+        MENUITEM "&About shellie...",           ID_APP_ABOUT
     END
 END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // HTML
 //
 
-IDR_HTMLDEFAULT            HTML    DISCARDABLE     "Default.html"
+IDR_HTMLDEFAULT         HTML                    "Default.html"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -134,18 +135,15 @@ IDR_MAINFRAME           ICON                    "res\\shellie.ico"
 //
 
 IDD_ABOUTBOX DIALOG  0, 0, 187, 102
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,130,81,50,14
-    CTEXT           "shellie Application v1.0\n\n(c) Copyright 2009",IDC_STATIC,25,57,78,
-                    32
+    CTEXT           "shellie Application v1.0\n\n(c) Copyright 2009",IDC_STATIC,25,57,78,32
     ICON            IDR_MAINFRAME,IDC_STATIC,55,26,18,20
     GROUPBOX        "",IDC_STATIC,7,7,115,88
 END
-
-
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -213,21 +211,21 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "shellie Module\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "shellie\0"
-            VALUE "LegalCopyright", "Copyright 2009\0"
-            VALUE "OriginalFilename", "shellie.exe\0"
-            VALUE "ProductName", "shellie Module\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "FileDescription", "shellie Module"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "shellie"
+            VALUE "LegalCopyright", "Copyright 2009"
+            VALUE "OriginalFilename", "shellie.exe"
+            VALUE "ProductName", "shellie Module"
+            VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x0409, 0x04B0
+        VALUE "Translation", 0x409, 1200
     END
 END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -236,7 +234,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME	"shellie"
+    IDR_MAINFRAME           "shellie"
 END
 
 STRINGTABLE 
@@ -316,6 +314,10 @@ END
 STRINGTABLE 
 BEGIN
     ATL_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE 
+BEGIN
     ATL_IDS_MRU_FILE        "Open this document"
 END
 
@@ -323,5 +325,22 @@ END
 /////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef APSTUDIO_INVOKED
-#endif    // not APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+// French (Canada) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRC)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH_CANADIAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// REGISTRY
+//
+
+IDR_BROWSERLOCKDOWN     REGISTRY                "BrowserLockDown.rgs"
+#endif    // French (Canada) resources
+/////////////////////////////////////////////////////////////////////////////
+
+

@@ -370,6 +370,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
 			>
 			<File
+				RelativePath=".\BrowserLockDown.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MainFrm.cpp"
 				>
 			</File>
@@ -416,6 +420,46 @@
 			<File
 				RelativePath=".\shellie.cpp"
 				>
+			</File>
+			<File
+				RelativePath=".\Shellie.idl"
+				>
+			</File>
+			<File
+				RelativePath=".\shellie_i.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\shellieView.cpp"
@@ -499,6 +543,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc"
 			>
 			<File
+				RelativePath=".\BrowserLockDown.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MainFrm.h"
 				>
 			</File>
@@ -532,6 +580,10 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;jpg;jpeg;jpe;manifest"
 			>
 			<File
+				RelativePath=".\BrowserLockDown.rgs"
+				>
+			</File>
+			<File
 				RelativePath=".\res\shellie.ico"
 				>
 			</File>
@@ -544,6 +596,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\default.html"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
