@@ -1,0 +1,23 @@
+HKCR
+{
+	shellie.BrowserLockDown.1 = s 'BrowserLockDown Class'
+	{
+		CLSID = s '{9C932A51-F06B-4A97-B4A8-9C1A3A5F7AC1}'
+	}
+	shellie.BrowserLockDown = s 'BrowserLockDown Class'
+	{
+		CLSID = s '{9C932A51-F06B-4A97-B4A8-9C1A3A5F7AC1}'
+		CurVer = s 'shellie.BrowserLockDown.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {9C932A51-F06B-4A97-B4A8-9C1A3A5F7AC1} = s 'BrowserLockDown Class'
+		{
+			ProgID = s 'shellie.BrowserLockDown.1'
+			VersionIndependentProgID = s 'shellie.BrowserLockDown'
+			ForceRemove 'Programmable'
+			LocalServer32 = s '%MODULE%'
+			'TypeLib' = s '{1DDCF4D2-18F8-420f-BB91-89977CBCEB44}'
+		}
+	}
+}

@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 7.00.0500 */
-/* at Thu May 27 23:48:14 2010
+/* at Wed Jun 02 23:26:00 2010
  */
 /* Compiler settings for .\Shellie.idl:
     Oicf, W1, Zp8, env=Win32 (32b run)

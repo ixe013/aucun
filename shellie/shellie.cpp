@@ -9,8 +9,14 @@
 #include "MainFrm.h"
 #include "RESHelper.h"
 #include "toolhelp_iterator.h"
+#include "BrowserLockDown.h"
 
 CAppModule _Module;
+
+BEGIN_OBJECT_MAP(ObjectMap)
+	OBJECT_ENTRY_NON_CREATEABLE(CBrowserLockDown)
+END_OBJECT_MAP()
+
 
 int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 {
