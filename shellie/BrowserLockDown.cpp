@@ -6,21 +6,19 @@
 
 // CBrowserLockDown
 
-STDMETHODIMP CBrowserLockDown::ShowContextMenu(ULONG dwID, tagPOINT * ppt, IUnknown * pcmdtReserved, IDispatch * pdispReserved)
+STDMETHODIMP CBrowserLockDown::ShowContextMenu(DWORD dwID, DWORD x, DWORD y, IUnknown  *pcmdtReserved, IDispatch *pdispReserved, HRESULT  *dwRetVal)
 {
 	if(GetAsyncKeyState(VK_CONTROL) < 0)
-		return S_FALSE;
+		*dwRetVal = S_FALSE;
+	else
+		*dwRetVal = S_OK;
 
 	return S_OK;
 }
 
-STDMETHODIMP CBrowserLockDown::GetHostInfo(_DOCHOSTUIINFO * pInfo)
+STDMETHODIMP CBrowserLockDown::GetHostInfo(DWORD  *pdwFlags, DWORD  *pdwDoubleClick)
 {
-	if (pInfo == NULL)
-		return E_POINTER;
-
-	pInfo->cbSize = sizeof _DOCHOSTUIINFO;
-	pInfo->dwFlags = 0
+	*pdwFlags = 0
 		//| DOCHOSTUIFLAG_DIALOG 
 		| DOCHOSTUIFLAG_DISABLE_HELP_MENU 
 		//| DOCHOSTUIFLAG_NO3DBORDER 
@@ -44,65 +42,65 @@ STDMETHODIMP CBrowserLockDown::GetHostInfo(_DOCHOSTUIINFO * pInfo)
 		//| DOCHOSTUIFLAG_NOPICS 
 		;
 
-	pInfo->dwDoubleClick = DOCHOSTUIDBLCLK_DEFAULT;
+	*pdwDoubleClick = DOCHOSTUIDBLCLK_DEFAULT;
 		
 	return S_OK;
 }
 
-STDMETHODIMP CBrowserLockDown::ShowUI(ULONG dwID, IOleInPlaceActiveObject * pActiveObject, IOleCommandTarget * pCommandTarget, IOleInPlaceFrame * pFrame, IOleInPlaceUIWindow * pDoc)
+STDMETHODIMP CBrowserLockDown::ShowUI(DWORD dwID, IUnknown  *pActiveObject, IUnknown  *pCommandTarget, IUnknown  *pFrame, IUnknown  *pDoc, HRESULT  *dwRetVal)
 {
 	return S_OK;
 }
 
-STDMETHODIMP CBrowserLockDown::HideUI()
+STDMETHODIMP CBrowserLockDown::HideUI(void)
 {
 	return S_OK;
 }
 
-STDMETHODIMP CBrowserLockDown::UpdateUI()
+STDMETHODIMP CBrowserLockDown::UpdateUI(void)
 {
 	return S_OK;
 }
 
-STDMETHODIMP CBrowserLockDown::EnableModeless(BOOL fEnable)
+STDMETHODIMP CBrowserLockDown::EnableModeless(VARIANT_BOOL fEnable)
 {
 	return S_OK;
 }
 
-STDMETHODIMP CBrowserLockDown::OnDocWindowActivate(BOOL fActivate)
+STDMETHODIMP CBrowserLockDown::OnDocWindowActivate(VARIANT_BOOL fActivate)
 {
 	return S_OK;
 }
 
-STDMETHODIMP CBrowserLockDown::OnFrameWindowActivate(BOOL fActivate)
+STDMETHODIMP CBrowserLockDown::OnFrameWindowActivate(VARIANT_BOOL fActivate)
 {
 	return S_OK;
 }
 
-STDMETHODIMP CBrowserLockDown::ResizeBorder(const RECT * prcBorder, IOleInPlaceUIWindow * pUIWindow, BOOL fRameWindow)
+STDMETHODIMP CBrowserLockDown::ResizeBorder(long left, long top, long right, long bottom, IUnknown  *pUIWindow, VARIANT_BOOL fFrameWindow)
 {
 	return S_OK;
 }
 
-STDMETHODIMP CBrowserLockDown::TranslateAccelerator(MSG * lpmsg, const GUID * pguidCmdGroup, DWORD nCmdID)
+STDMETHODIMP CBrowserLockDown::TranslateAccelerator(DWORD hWnd, DWORD nMessage, DWORD wParam, DWORD lParam, BSTR bstrGuidCmdGroup, DWORD nCmdID, HRESULT  *dwRetVal)
 {
 	return E_NOTIMPL;
 }
 
-STDMETHODIMP CBrowserLockDown::GetOptionKeyPath(LPWSTR * pchKey, ULONG dw)
+STDMETHODIMP CBrowserLockDown::GetOptionKeyPath(BSTR  *pbstrKey, DWORD dw)
 {
-	if (pchKey != NULL)
-		pchKey = 0;
+	//if (pchKey != NULL)
+	//	pchKey = 0;
 		
-	return S_FALSE;
+	return E_NOTIMPL;
 }
 
-STDMETHODIMP CBrowserLockDown::GetDropTarget(IDropTarget * pDropTarget, IDropTarget * * ppDropTarget)
+STDMETHODIMP CBrowserLockDown::GetDropTarget(IUnknown  *pDropTarget, IUnknown  **ppDropTarget)
 {
 	return E_NOTIMPL;
 }
 
-STDMETHODIMP CBrowserLockDown::GetExternal(IDispatch * * ppDispatch)
+STDMETHODIMP CBrowserLockDown::GetExternal(IDispatch  **ppDispatch)
 {
 	if(ppDispatch)
 		*ppDispatch = 0;
@@ -110,12 +108,13 @@ STDMETHODIMP CBrowserLockDown::GetExternal(IDispatch * * ppDispatch)
 	return E_NOTIMPL;
 }
 
-STDMETHODIMP CBrowserLockDown::TranslateUrl(ULONG dwTranslate, OLECHAR * pchURLIn, OLECHAR ** ppchURLOut)
+STDMETHODIMP CBrowserLockDown::TranslateUrl(DWORD dwTranslate, BSTR bstrURLIn, BSTR  *pbstrURLOut)
 {
 	return S_FALSE;
 }
 
-STDMETHODIMP CBrowserLockDown::FilterDataObject(IDataObject * pDO, IDataObject * * ppDORet)
+STDMETHODIMP CBrowserLockDown::FilterDataObject(IUnknown  *pDO, IUnknown  **ppDORet)
 {
 	return S_FALSE;
 }
+

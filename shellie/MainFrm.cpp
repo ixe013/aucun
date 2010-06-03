@@ -32,16 +32,6 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 	TCHAR resurl[MAX_PATH+5];
 
-    CComObject<CBrowserLockDown> *pUIH = NULL;
-    HRESULT hr = CComObject<CBrowserLockDown>::CreateInstance (&pUIH);
-    if (SUCCEEDED(hr))
-    {
-        // Make our custom DocHostUIHandler the window.external handler
-        CComQIPtr<IDocHostUIHandlerDispatch> pIUIH = pUIH;
-        hr = m_view.SetExternalUIHandler(pIUIH) ;
-    }
-    ATLASSERT(SUCCEEDED(hr)) ;
-
    if((GetSettingText(L"SOFTWARE\\Paralint.com\\Shellie\\Shell", L"URL", resurl, sizeof resurl / sizeof *resurl) != S_OK)
 	   || !*resurl)
 	{
@@ -58,6 +48,16 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	ATLASSERT(pLoop != NULL);
 	pLoop->AddMessageFilter(this);
 	pLoop->AddIdleHandler(this);
+
+    CComObject<CBrowserLockDown> *pUIH = NULL;
+    HRESULT hr = CComObject<CBrowserLockDown>::CreateInstance (&pUIH);
+    if (SUCCEEDED(hr))
+    {
+        // Make our custom DocHostUIHandler the window.external handler
+        CComQIPtr<IDocHostUIHandlerDispatch> pIUIH = pUIH;
+        hr = m_view.SetExternalUIHandler(pIUIH) ;
+    }
+    ATLASSERT(SUCCEEDED(hr)) ;
 
 	SetWindowPos(0, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), SWP_NOZORDER|SWP_SHOWWINDOW);
 
