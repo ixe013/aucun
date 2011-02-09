@@ -22,7 +22,7 @@ echo.
 findstr /s /n DebugBreak *.c *.cpp *.h 
 if ERRORLEVEL 1 (
 echo Building...
-vcbuild /nologo
+msbuild AnyUserUnlockGina.sln
 
 echo Creating binary zip
 zip -j -q ..\%PROJECT_NAME%.zip README.txt release\%PROJECT_NAME%.dll x64\release\%PROJECT_NAME%64.dll sample.reg
