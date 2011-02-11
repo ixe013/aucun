@@ -83,8 +83,8 @@
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</EmbedManifest>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Aucun</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Aucun</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Aucun</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Aucun</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Aucun64</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Aucun64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
