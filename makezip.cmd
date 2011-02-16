@@ -22,10 +22,27 @@ echo.
 findstr /s /n DebugBreak *.c *.cpp *.h 
 if ERRORLEVEL 1 (
 echo Building...
-vcbuild /nologo
+
+echo Aucun Win32 Release
+msbuild AnyUserUnlockGina.vcxproj /nologo /v:q /p:Platform=Win32;Configuration=Release
+echo Aucun Win32 Debug
+msbuild AnyUserUnlockGina.vcxproj /nologo /v:q /p:Platform=Win32;Configuration=Debug
+echo Aucun x64 Release
+msbuild AnyUserUnlockGina.vcxproj /nologo /v:q /p:Platform=x64;Configuration=Release
+echo Aucun x64 Debug
+msbuild AnyUserUnlockGina.vcxproj /nologo /v:q /p:Platform=x64;Configuration=Debug
+
+echo Test Win32 Release
+msbuild test.vcxproj /nologo /v:q /p:Platform=Win32;Configuration=Release
+echo Test Win32 Debug
+msbuild test.vcxproj /nologo /v:q /p:Platform=Win32;Configuration=Debug
+echo Test x64 Release
+msbuild test.vcxproj /nologo /v:q /p:Platform=x64;Configuration=Release
+echo Test x64 Release
+msbuild test.vcxproj /nologo /v:q /p:Platform=x64;Configuration=Debug
 
 echo Creating binary zip
-zip -j -q ..\%PROJECT_NAME%.zip README.txt release\%PROJECT_NAME%.dll x64\release\%PROJECT_NAME%64.dll sample.reg
+zip -j -q ..\%PROJECT_NAME%.zip README.txt Release\%PROJECT_NAME%.dll x64\Release\%PROJECT_NAME%64.dll sample.reg
 ) else (
 echo.
 echo DebugBreak found in source code. Fix it or die.
