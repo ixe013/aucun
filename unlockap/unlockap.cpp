@@ -7,7 +7,7 @@
 #include "trace.h"
 
 //Function pointers back into LSASS
-PLSA_DISPATCH_TABLE g_pSec = 0;
+PLSA_SECPKG_FUNCTION_TABLE g_pSec = 0;
 
 
 NTSTATUS NTAPI LsaApCallPackage(
@@ -58,7 +58,7 @@ NTSTATUS NTAPI LsaApInitializePackage(
 )
 {
    /* The cast isn't documented, but it's really the same structure */
-   g_pSec = LsaDispatchTable;
+   g_pSec = (PLSA_SECPKG_FUNCTION_TABLE)LsaDispatchTable;
 
    (*AuthenticationPackageName) = AllocateLsaStringLsa(UNLOCK_PACKAGENAME);
    return STATUS_SUCCESS;

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "lsahelper.h"
 
-extern PLSA_DISPATCH_TABLE g_pSec;
+extern PLSA_SECPKG_FUNCTION_TABLE g_pSec;
 
 LPVOID LsaAllocateLsa(ULONG size)
 {
@@ -25,7 +25,7 @@ LSA_STRING *AllocateLsaStringLsa(LPCSTR szString)
    s->Buffer = (char *) LsaAllocateLsa((ULONG) len+1);
    s->Length = (USHORT)len;
    s->MaximumLength = (USHORT)len+1;
-   strcpy_s(s->Buffer, len,  szString);
+   strcpy_s(s->Buffer, len+1,  szString);
 }
    return s;
 }
