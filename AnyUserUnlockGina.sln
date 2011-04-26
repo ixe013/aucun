@@ -1,13 +1,13 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gina", ".\GINA\AnyUserUnlockGina.vcproj", "{D818D87C-2DFB-47CE-8944-49A220F2F365}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnyUserCanUnlockNowGina", "GINA\AnyUserUnlockGina.vcxproj", "{D818D87C-2DFB-47CE-8944-49A220F2F365}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcproj", "{F1F2E1B6-B42F-46C9-A778-47E77EFA8A6C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{F1F2E1B6-B42F-46C9-A778-47E77EFA8A6C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unlockap", "unlockap\unlockap.vcproj", "{222774C2-2A9E-4CAB-A0D3-B2588EA2E076}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unlockap", "unlockap\unlockap.vcxproj", "{222774C2-2A9E-4CAB-A0D3-B2588EA2E076}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shellie", "shellie\shellie.vcproj", "{E6A575D7-5211-416B-B5FF-7E99D37FB97E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shellie", "shellie\shellie.vcxproj", "{E6A575D7-5211-416B-B5FF-7E99D37FB97E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

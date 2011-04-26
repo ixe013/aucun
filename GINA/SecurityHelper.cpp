@@ -12,6 +12,8 @@
 #include <lm.h>
 #include "randpasswd.h"
 
+#include <stdlib.h>
+
 // excerpt from a DDK header file that we can't easily include here
 #define STATUS_PASSWORD_EXPIRED         ((NTSTATUS)0xC0000071L)
 
@@ -103,7 +105,7 @@ BOOL _newLsaString(LSA_STRING* target, const char* source)
 
 void _deleteLsaString(LSA_STRING* target)
 {
-   delete target->Buffer;
+   delete[] target->Buffer;
    target->Buffer = 0;
 }
 
@@ -128,7 +130,7 @@ BOOL RegisterLogonProcess(const char* logonProcessName, HANDLE* phLsa)
    return TRUE;
 }
 
-BOOL CallLsaLogonUser(HANDLE hLsa, const wchar_t* domain, const wchar_t* user, const wchar_t* pass,
+BOOL CallLsaLogonUser(HANDLE hLsa, const wchar_t* domain, const wchar_t* user, const wchar_t* pass, const wchar_t* authenticationPackageName,
                       SECURITY_LOGON_TYPE logonType, LUID* pLogonSessionId, HANDLE* phToken, MSV1_0_INTERACTIVE_PROFILE** ppProfile, DWORD* pWin32Error)
 {
 
@@ -166,12 +168,32 @@ BOOL CallLsaLogonUser(HANDLE hLsa, const wchar_t* domain, const wchar_t* user, c
       goto cleanup;
    }
 
+   ULONG authenticationPackage = LOGON32_PROVIDER_DEFAULT;
+
+    if(authenticationPackageName && *authenticationPackageName) {
+       LSA_STRING customAuthenticationPackage            = { 0 };
+       size_t n;
+       char authenticationPackageAnsiName[127];
+
+       wcstombs_s(&n, authenticationPackageAnsiName, sizeof(authenticationPackageAnsiName), authenticationPackageName, _TRUNCATE);
+
+       if(_newLsaString(&customAuthenticationPackage, authenticationPackageAnsiName))
+       {
+            if(!LsaLookupAuthenticationPackage(hLsa, &customAuthenticationPackage, &authenticationPackage))
+            {
+                authenticationPackage = LOGON32_PROVIDER_DEFAULT; //safety
+            }
+        
+            _deleteLsaString(&customAuthenticationPackage);
+       }
+    }
+
    // LsaLogonUser - the function from hell
    NTSTATUS status = LsaLogonUser(
                         hLsa,
                         &logonProcessName,  // we use our logon process name for the "origin name"
                         logonType,
-                        LOGON32_PROVIDER_DEFAULT, // we use MSV1_0 or Kerb, whichever is supported
+                        authenticationPackage, // we use MSV1_0 or Kerb, whichever is supported
                         pLogonRequest,
                         cbLogonRequest,
                         0,                  // we do not add any group SIDs

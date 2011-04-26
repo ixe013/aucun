@@ -81,7 +81,7 @@ EXTERN int ShouldUnlockForUser(HANDLE lsa, HANDLE current_user, const wchar_t *d
 		//Let's see if we can authenticate the user (this will generate a event log entry if the policy requires it)
 		if(lsa)
 		{
-			logged_on = CallLsaLogonUser(lsa, domain, username, password, Unlock, 0, &token, 0, &win32Error);
+			logged_on = CallLsaLogonUser(lsa, domain, username, password, L"unlockap", Unlock, 0, &token, 0, &win32Error);
 		}
 		else
 		{

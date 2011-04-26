@@ -378,8 +378,6 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
       //The first winlogon process will set the password for the other processes
       SerializeEnter();
 
-      DebugBreak();
-
       /*
            * The password is saved, encrypted, to the registry. Only a process in the SYSTEM logon session that was
            * started with the system can read it. When we get here, we read the password and try to decrypt it.
