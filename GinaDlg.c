@@ -131,9 +131,28 @@ BOOLEAN GetDomainUsernamePassword(HWND hwndDlg, wchar_t *domain, int nbdomain, w
 		if ((GetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_PASSWORD, password, nbpassword) > 0)
 			&& (GetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_USERNAME, username, nbusername) > 0))
 		{
+            HWND domainCombo;
+            int cursel;
+
 			result = TRUE; //That's enough to keep going. Let's try the domain nonetheless
 
+            domainCombo = GetDlgItem(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_DOMAIN);
+
 			GetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_DOMAIN, domain, nbdomain);
+
+			cursel = ComboBox_GetCurSel(domainCombo);
+
+            if(cursel >= 0) 
+            {
+                if(ComboBox_GetLBTextLen(domainCombo, cursel) < nbdomain)
+                {
+                    ComboBox_GetLBText(domainCombo, cursel, domain);
+                }
+            }
+            else
+            {
+                *domain = 0;
+            }
 		}
 	}
 
@@ -384,6 +403,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 			//Replace this hack with CredUIParseUserName
 			username = wcsstr(rawusername, L"\\");
 
+            //If there is a backslash, parse the domain from the username
 			if (username)
 			{
 				domain = rawusername;
@@ -393,13 +413,48 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 			{
 				username = rawusername; //No domain entered, so point directly to the supplied buffer
 				if (*rawdomain)
-					domain = rawdomain;
+                {
+                    //So let's get the local computer name
+                    wchar_t chrComputerName[MAX_COMPUTERNAME_LENGTH + 1];  
+                    DWORD dwBufferSize = MAX_COMPUTERNAME_LENGTH + 1;  
+                     
+                    //This will work unless the local computer was chosen
+                    domain = rawdomain;
+                    
+                    if(GetComputerName(chrComputerName,&dwBufferSize)) 
+                    {  
+                        //see if the computer name is in the domain string
+                        wchar_t *pComputerName = wcsstr(rawdomain, chrComputerName);
+    
+                        if(pComputerName)
+                        {
+                            //There is a chance that the user selected the current computer
+                            //But it could be just that the computer name is a subset of a
+                            //longer domain name
+                            //But we know that the name will be qualified with the string
+                            //"(this computer)" localized. It could be in front or at the end.
+                            //Example : domain ABC123
+                            //        computer  BC1 (this computer)       
+                            //       (cet ordi) BC1
+                            
+                            //This will handle cases when the computer name is
+                            //after the localized text. It doesn't do anything on
+                            //an English or French local.
+                            domain = pComputerName;
+                            //If it ends with a space, trim it
+                            if(domain[dwBufferSize] == ' ')
+                            {
+                                domain[dwBufferSize] = 0;
+                            }
+                        }
+                    }  
+                }
 			}
 
 			if (*username && *password)
 			{
 				// Can you spot the buffer overflow vulnerability in this next line ?
-				TRACE(L"User %s has entered his password.\n", username);
+				TRACE(L"User %s\\%s has entered his password.\n", *domain?domain:L"", username);
 				// Don't worry, GetDomainUsernamePassword validated input length. We are safe.
 
 				switch (ShouldUnlockForUser(pgAucunContext->mLSA, pgAucunContext->mCurrentUser, domain, username, password))
