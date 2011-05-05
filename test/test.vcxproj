@@ -78,6 +78,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\common;..\gina;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;SECURITY_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -126,6 +127,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\common;..\gina;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;SECURITY_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -172,20 +174,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="debug.c" />
-    <ClCompile Include="SecurityHelper.cpp" />
-    <ClCompile Include="Settings.c" />
+    <ClCompile Include="..\GINA\debug.c" />
+    <ClCompile Include="..\GINA\SecurityHelper.cpp" />
+    <ClCompile Include="..\common\Settings.c" />
     <ClCompile Include="test.cpp" />
-    <ClCompile Include="Trace.c" />
-    <ClCompile Include="UnlockPolicy.c" />
+    <ClCompile Include="..\common\Trace.c" />
+    <ClCompile Include="..\GINA\UnlockPolicy.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="debug.h" />
+    <ClInclude Include="..\GINA\debug.h" />
     <ClInclude Include="extern.h" />
-    <ClInclude Include="SecurityHelper.h" />
-    <ClInclude Include="Settings.h" />
-    <ClInclude Include="Trace.h" />
-    <ClInclude Include="UnlockPolicy.h" />
+    <ClInclude Include="..\GINA\SecurityHelper.h" />
+    <ClInclude Include="..\common\Settings.h" />
+    <ClInclude Include="..\common\Trace.h" />
+    <ClInclude Include="..\GINA\UnlockPolicy.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="AnyUserUnlockGina.vcxproj">

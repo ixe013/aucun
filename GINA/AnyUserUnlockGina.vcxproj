@@ -89,6 +89,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\common;..\gina;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0501;_DEBUG;_WINDOWS;_USRDLL;REMOTEUNLOCKGINA_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;SECURITY_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -101,7 +102,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>Advapi32.lib;user32.lib;netapi32.lib;Secur32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>$(SolutionDir)\GinaHook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)\GINA\GinaHook.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -129,7 +130,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>Advapi32.lib;user32.lib;netapi32.lib;Secur32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>$(SolutionDir)\GinaHook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)\GINA\GinaHook.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -150,7 +151,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>Advapi32.lib;user32.lib;netapi32.lib;Secur32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>$(SolutionDir)\GinaHook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)\GINA\GinaHook.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -176,7 +177,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>Advapi32.lib;user32.lib;netapi32.lib;Secur32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>$(SolutionDir)\GinaHook.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(SolutionDir)\GINA\GinaHook.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -193,8 +194,8 @@
     <ClCompile Include="GinaDlg.c" />
     <ClCompile Include="GinaHook.c" />
     <ClCompile Include="SecurityHelper.cpp" />
-    <ClCompile Include="Settings.c" />
-    <ClCompile Include="Trace.c" />
+    <ClCompile Include="..\common\Settings.c" />
+    <ClCompile Include="..\common\Trace.c" />
     <ClCompile Include="UnlockPolicy.c" />
   </ItemGroup>
   <ItemGroup>
@@ -208,8 +209,8 @@
     <ClInclude Include="global.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SecurityHelper.h" />
-    <ClInclude Include="Settings.h" />
-    <ClInclude Include="Trace.h" />
+    <ClInclude Include="..\common\Settings.h" />
+    <ClInclude Include="..\common\Trace.h" />
     <ClInclude Include="UnlockPolicy.h" />
   </ItemGroup>
   <ItemGroup>
