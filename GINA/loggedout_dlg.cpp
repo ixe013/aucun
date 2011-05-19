@@ -230,13 +230,15 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             
 				if(*gEncryptedRandomSelfservePassword)
 				{
-				   CryptUnprotectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
+                    //TODO : Decrypt password
+				   //CryptUnprotectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
 
 					TRACE(eINFO, L"Password is %s", gEncryptedRandomSelfservePassword+gEncryptedTag_len-1);
 
                SetDlgItemText(hwndDlg, 1503, gEncryptedRandomSelfservePassword+gEncryptedTag_len-1);
 
-				   CryptProtectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
+                    //TODO : Encrypt memory
+				   //CryptProtectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
 				}
             //*/
 

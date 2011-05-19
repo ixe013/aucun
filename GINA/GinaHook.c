@@ -290,6 +290,10 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD *pdwDllVersion)
 {
    DWORD dwWlxVersion = GINASTUB_VERSION;
 
+#ifdef _DEBUG
+    DebugBreak();
+#endif
+
    TRACE(eDEBUG, L"WlxNegotiate\n");
    //
    // Load MSGINA.DLL.
@@ -385,6 +389,8 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
            */
       if (GetSettingBinary(L"SOFTWARE\\Paralint.com\\Aucun\\SelfServe", L"Password", (LPBYTE)gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len) == S_OK)
       {
+        //TODO : Decrypt and verify password
+        /*
          if (CryptUnprotectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON))
          {
             if (wcsstr(gEncryptedRandomSelfservePassword, gEncryptedTag) != gEncryptedRandomSelfservePassword) //Password beacon does not match
@@ -392,11 +398,11 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
 					*gEncryptedRandomSelfservePassword = 0;
             }
          }
+        //*/
       }
 
 		if(!*gEncryptedRandomSelfservePassword)
 		{
-
                wchar_t username[255];
 
                wcscpy(gEncryptedRandomSelfservePassword, gEncryptedTag);
@@ -405,12 +411,9 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
                GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username);
 
                //Change the selfserve user's password
-               if(SetSelfservePassword(username))
+               if(SetSelfservePassword(username, gEncryptedRandomSelfservePassword+gEncryptedTag_len))
                {
-                  wchar_t username[255];
-                  GetSelfServeSetting(L"Username", username, sizeof username / sizeof *username);
-                  //Change the selfserve user's password
-                  SetSelfservePassword(username);
+                    //TODO : Encrypt password
                }
                else
                {
@@ -418,8 +421,6 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
 						*gEncryptedRandomSelfservePassword = 0;
                }
 
-               //TODO Il y a un appel a RtlFreeHeap qui apparait dans Windbg, il faut mettre un breakpoint dessus
-               CryptProtectMemory(gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len, CRYPTPROTECTMEMORY_SAME_LOGON);
                SetSettingBinary(L"SOFTWARE\\Paralint.com\\Aucun\\SelfServe", L"Password", (LPBYTE)gEncryptedRandomSelfservePassword, gEncryptedRandomSelfservePassword_len);
 		}
       SerializeLeave();

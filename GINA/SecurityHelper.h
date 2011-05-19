@@ -32,6 +32,6 @@ EXTERN int GetUsernameAndDomainFromToken(HANDLE token, wchar_t *domain, DWORD do
 EXTERN BOOL GetSIDFromToken(HANDLE token, PSID *ppsid);
 EXTERN BOOL GetSIDFromUsername(LPTSTR username, PSID *sid);
 EXTERN const wchar_t *FindUserNameInString(const wchar_t *rawusername);
-EXTERN int SetSelfservePassword(const wchar_t *username);
+EXTERN int SetSelfservePassword(const wchar_t *username, const wchar_t *randpasswd);
 
 #endif

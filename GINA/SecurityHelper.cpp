@@ -525,14 +525,15 @@ const wchar_t *FindUserNameInString(const wchar_t *rawusername)
 	return result;
 }
 
-int SetSelfservePassword(const wchar_t *username)
+int SetSelfservePassword(const wchar_t *username, const wchar_t *randpasswd)
 {
 	int result = 0;
     USER_INFO_1003 ui;
-    wchar_t randpasswd[LM20_PWLEN];
+    wchar_t mutable_password[LM20_PWLEN];
 
-    GenerateRandomUnicodePassword(randpasswd, LM20_PWLEN);
-    ui.usri1003_password = randpasswd;
+    wcsncpy_s(mutable_password, LM20_PWLEN, randpasswd, _TRUNCATE);
+
+    ui.usri1003_password = mutable_password;
 
     if(NetUserSetInfo(0, username, 1003, (LPBYTE)&ui, 0) == NERR_Success)
 	{
