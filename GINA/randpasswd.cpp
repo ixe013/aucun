@@ -6,44 +6,47 @@
 
 
 //Taken from http://www.microsoft.com/smallbusiness/support/articles/select_sec_passwords.mspx
-static wchar_t SuggestedUnicodePasswordChars[] = 
-		  L"abcdefghijklmnopqrstuvwxyz"
-		  L"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		  L"0123456789"
-		  //L"+-=_@#$%^&;:,.<>/~\\[](){}?!|"
-;
- 
-static int nSuggestedUnicodePasswordChars = sizeof  SuggestedUnicodePasswordChars / sizeof *SuggestedUnicodePasswordChars;
+static wchar_t SuggestedUnicodePasswordChars[] =
+    L"abcdefghijklmnopqrstuvwxyz"
+    L"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    L"0123456789"
+    //L"+-=_@#$%^&;:,.<>/~\\[](){}?!|"
+    ;
+
+static int nSuggestedUnicodePasswordChars = sizeof  SuggestedUnicodePasswordChars / sizeof * SuggestedUnicodePasswordChars;
 
 
-int GenerateRandomUnicodePassword(wchar_t *buffer, size_t size)
+int GenerateRandomUnicodePassword(wchar_t* buffer, size_t size)
 {
-   HCRYPTPROV   hCryptProv;
-   int result = 0;
-	--size; //Save room for the terminating character
+    HCRYPTPROV   hCryptProv;
+    int result = 0;
+    --size; //Save room for the terminating character
 
-//-------------------------------------------------------------------
-// Acquire a cryptographic provider context handle.
+    //-------------------------------------------------------------------
+    // Acquire a cryptographic provider context handle.
 
-   if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_MACHINE_KEYSET|CRYPT_VERIFYCONTEXT))
-   {
-      if (CryptGenRandom(hCryptProv, (DWORD)sizeof(wchar_t)*size, (BYTE*)buffer))
-      {
-			for(size_t i=0; i<size; ++i)
-			{
-				//I reuse the buffer for two purpose : on the right hand side, buffer contains a 
-				//random number. I use it as an index to the suggested char table and replace the
-				//random by a random, valid password char.
-				buffer[i] = SuggestedUnicodePasswordChars[buffer[i]%(nSuggestedUnicodePasswordChars-1)];
-			}
-         result = (int)size;
-		 buffer[size] = 0;
-         CryptReleaseContext(hCryptProv, 0);
-      }
-   }
+    if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_MACHINE_KEYSET | CRYPT_VERIFYCONTEXT))
+    {
+        if (CryptGenRandom(hCryptProv, (DWORD)sizeof(wchar_t)*size, (BYTE*)buffer))
+        {
+            for(size_t i = 0; i < size; ++i)
+            {
+                //I reuse the buffer for two purpose : on the right hand side, buffer contains a
+                //random number. I use it as an index to the suggested char table and replace the
+                //random by a random, valid password char.
+                buffer[i] = SuggestedUnicodePasswordChars[buffer[i] % (nSuggestedUnicodePasswordChars - 1)];
+            }
 
-   if (!result)
-      TRACE(eERROR, L"Unable to generate a random password\n");
+            result = (int)size;
+            buffer[size] = 0;
+            CryptReleaseContext(hCryptProv, 0);
+        }
+    }
 
-	return result;
-} 
+    if (!result)
+    {
+        TRACE(eERROR, L"Unable to generate a random password\n");
+    }
+
+    return result;
+}

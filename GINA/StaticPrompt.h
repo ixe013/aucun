@@ -43,189 +43,206 @@
 template< class T, class TBase = CStatic, class TWinTraits = CControlWinTraits >
 class ATL_NO_VTABLE CStaticPromptImpl : public CWindowImpl< T, TBase, TWinTraits >
 {
-public:
-	typedef CStaticPromptImpl< T, TBase, TWinTraits > thisClass;
+    public:
+        typedef CStaticPromptImpl< T, TBase, TWinTraits > thisClass;
 
-	CFont m_font;
-	int m_margin;
-	HCURSOR m_hand;
+        CFont m_font;
+        int m_margin;
+        HCURSOR m_hand;
 
-	CStaticPromptImpl() 
-		: m_margin(DEFAULT_MARGIN_PIXEL)
-		, m_hand(0)
-	{
-	}
+        CStaticPromptImpl()
+            : m_margin(DEFAULT_MARGIN_PIXEL)
+            , m_hand(0)
+        {
+        }
 
-	// Operations
-	BOOL SubclassWindow(HWND hWnd)
-	{
-		ATLASSERT(m_hWnd==NULL);
-		ATLASSERT(::IsWindow(hWnd));
-		BOOL bRet = CWindowImpl< T, TBase, TWinTraits >::SubclassWindow(hWnd);
-		if (bRet) _Init();
-		return bRet;
-	}
+        // Operations
+        BOOL SubclassWindow(HWND hWnd)
+        {
+            ATLASSERT(m_hWnd == NULL);
+            ATLASSERT(::IsWindow(hWnd));
+            BOOL bRet = CWindowImpl< T, TBase, TWinTraits >::SubclassWindow(hWnd);
 
-	// Implementation
-	void _Init()
-	{
-		ATLASSERT(::IsWindow(m_hWnd));
+            if (bRet)
+            {
+                _Init();
+            }
 
-		// Check if we should paint a label
-		TCHAR lpszBuffer[10] = { 0 };
-		if (::GetClassName(m_hWnd, lpszBuffer, 9))
-		{
-			if (::lstrcmpi(lpszBuffer, TBase::GetWndClassName()) == 0)
-			{
-				ModifyStyle(0, SS_NOTIFY);  // We need this
-				DWORD dwStyle = GetStyle() & 0x000000FF;
-				if (dwStyle == SS_ICON || dwStyle == SS_BLACKRECT || dwStyle == SS_GRAYRECT ||
-					dwStyle == SS_WHITERECT || dwStyle == SS_BLACKFRAME || dwStyle == SS_GRAYFRAME ||
-					dwStyle == SS_WHITEFRAME || dwStyle == SS_OWNERDRAW ||
-					dwStyle == SS_BITMAP || dwStyle == SS_ENHMETAFILE)
-					ATLASSERT("Invalid static style for gradient label"==NULL);
-			}
-		}
-		// Set font
-		CWindow wnd = GetParent();
-		CFontHandle font = wnd.GetFont();
-		if( !font.IsNull() ) {
-			SetFont(font);
-		}
-	}
+            return bRet;
+        }
 
-	//Returns the amount of space not covered by text, in pixels
-   int TotalPadding()
-	{
-      // Let the compiler optimise this. The 0 is the widht of the text,
-		// the rest is taken up by margins and the icon
-		return m_margin+DEFAULT_ICON_SIZE+m_margin+0+m_margin; 
-	}
+        // Implementation
+        void _Init()
+        {
+            ATLASSERT(::IsWindow(m_hWnd));
+            // Check if we should paint a label
+            TCHAR lpszBuffer[10] = { 0 };
 
-	//Return the static control height that can hold all the text
-	int ComputeRequiredHeight(int margin = -1)
-	{
-		if(margin < 0) margin = m_margin;
+            if (::GetClassName(m_hWnd, lpszBuffer, 9))
+            {
+                if (::lstrcmpi(lpszBuffer, TBase::GetWndClassName()) == 0)
+                {
+                    ModifyStyle(0, SS_NOTIFY);  // We need this
+                    DWORD dwStyle = GetStyle() & 0x000000FF;
 
-		wchar_t prompt[2048];
-		RECT rect;
+                    if (dwStyle == SS_ICON || dwStyle == SS_BLACKRECT || dwStyle == SS_GRAYRECT ||
+                            dwStyle == SS_WHITERECT || dwStyle == SS_BLACKFRAME || dwStyle == SS_GRAYFRAME ||
+                            dwStyle == SS_WHITEFRAME || dwStyle == SS_OWNERDRAW ||
+                            dwStyle == SS_BITMAP || dwStyle == SS_ENHMETAFILE)
+                    {
+                        ATLASSERT("Invalid static style for gradient label" == NULL);
+                    }
+                }
+            }
 
-		GetClientRect(&rect);
+            // Set font
+            CWindow wnd = GetParent();
+            CFontHandle font = wnd.GetFont();
 
-      // Let the compiler optimise this. The 0 is the widht of the text,
-		// the rest is taken up by margins and the icon
-		rect.left = TotalPadding();
+            if( !font.IsNull() )
+            {
+                SetFont(font);
+            }
+        }
 
-		GetWindowText(prompt, sizeof prompt / sizeof *prompt);
+        //Returns the amount of space not covered by text, in pixels
+        int TotalPadding()
+        {
+            // Let the compiler optimise this. The 0 is the widht of the text,
+            // the rest is taken up by margins and the icon
+            return m_margin + DEFAULT_ICON_SIZE + m_margin + 0 + m_margin;
+        }
 
-		CPaintDC dc(*this);
+        //Return the static control height that can hold all the text
+        int ComputeRequiredHeight(int margin = -1)
+        {
+            if(margin < 0)
+            {
+                margin = m_margin;
+            }
 
-		// Set font
-		CWindow wnd = GetParent();
-		CFontHandle font = wnd.GetFont();
-		if( !font.IsNull()) 
-		{
-			dc.SelectFont(font);
-		}
+            wchar_t prompt[2048];
+            RECT rect;
+            GetClientRect(&rect);
+            // Let the compiler optimise this. The 0 is the widht of the text,
+            // the rest is taken up by margins and the icon
+            rect.left = TotalPadding();
+            GetWindowText(prompt, sizeof prompt / sizeof * prompt);
+            CPaintDC dc(*this);
+            // Set font
+            CWindow wnd = GetParent();
+            CFontHandle font = wnd.GetFont();
 
-		dc.DrawText(prompt, -1, &rect, DT_CALCRECT|DT_WORDBREAK); //Compute the height
+            if( !font.IsNull())
+            {
+                dc.SelectFont(font);
+            }
 
-		//Room for the text and a top and bottom margin
-		return max(rect.bottom-rect.top, DEFAULT_ICON_SIZE) + 2*margin;
-	}
+            dc.DrawText(prompt, -1, &rect, DT_CALCRECT | DT_WORDBREAK); //Compute the height
+            //Room for the text and a top and bottom margin
+            return max(rect.bottom - rect.top, DEFAULT_ICON_SIZE) + 2 * margin;
+        }
 
-	// Message map and handlers
-	BEGIN_MSG_MAP(thisClass)
-		MESSAGE_HANDLER(WM_CREATE, OnCreate)
-		MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
-		MESSAGE_HANDLER(WM_PAINT, OnPaint)
-		MESSAGE_HANDLER(WM_PRINTCLIENT, OnPaint)
-		MESSAGE_HANDLER(WM_SETCURSOR, OnSetCursor)
-	END_MSG_MAP()
+        // Message map and handlers
+        BEGIN_MSG_MAP(thisClass)
+        MESSAGE_HANDLER(WM_CREATE, OnCreate)
+        MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
+        MESSAGE_HANDLER(WM_PAINT, OnPaint)
+        MESSAGE_HANDLER(WM_PRINTCLIENT, OnPaint)
+        MESSAGE_HANDLER(WM_SETCURSOR, OnSetCursor)
+        END_MSG_MAP()
 
-	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-	{
-		_Init();
-		return 0;
-	}
-	LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-	{
-		return 1; // We're painting it all
-	}
+        LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+        {
+            _Init();
+            return 0;
+        }
+        LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+        {
+            return 1; // We're painting it all
+        }
 
-	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-	{
-		T* pT = static_cast<T*>(this);
-		if (wParam != NULL)
-		{
-			pT->DoPaint((HDC) wParam);
-		}
-		else
-		{
-			CPaintDC dc(m_hWnd);
-			pT->DoPaint((HDC) dc);
-		}
-		return 0;
-	}
+        LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+        {
+            T* pT = static_cast<T*>(this);
 
-	// Paint methods
-	void DoPaint(CDCHandle dc)
-	{
-		RECT rcClient;
-		GetClientRect(&rcClient);
+            if (wParam != NULL)
+            {
+                pT->DoPaint((HDC) wParam);
+            }
+            else
+            {
+                CPaintDC dc(m_hWnd);
+                pT->DoPaint((HDC) dc);
+            }
 
-		//Tooltip color background
-		dc.FillRect(&rcClient, GetSysColorBrush(COLOR_INFOBK));
+            return 0;
+        }
 
-		HICON question = (HICON)LoadImage(0, IDI_QUESTION, IMAGE_ICON, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE, LR_SHARED);
-		dc.DrawIconEx(m_margin, m_margin, question, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE, DI_NORMAL);
+        // Paint methods
+        void DoPaint(CDCHandle dc)
+        {
+            RECT rcClient;
+            GetClientRect(&rcClient);
+            //Tooltip color background
+            dc.FillRect(&rcClient, GetSysColorBrush(COLOR_INFOBK));
+            HICON question = (HICON)LoadImage(0, IDI_QUESTION, IMAGE_ICON, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE, LR_SHARED);
+            dc.DrawIconEx(m_margin, m_margin, question, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE, DI_NORMAL);
+            rcClient.left = TotalPadding() - m_margin;
+            rcClient.right -= m_margin;
+            rcClient.bottom -= m_margin;
+            rcClient.top = m_margin;
+            dc.SetBkMode(TRANSPARENT);
+            dc.SetTextColor(GetSysColor(COLOR_INFOTEXT));
+            HFONT hOldFont = dc.SelectFont(GetFont());
+            int nLen = GetWindowTextLength();
 
-		rcClient.left = TotalPadding()-m_margin;
-		rcClient.right -= m_margin;
-		rcClient.bottom -= m_margin;
-		rcClient.top = m_margin;
+            if (nLen > 0)
+            {
+                LPTSTR lpszText = (LPTSTR) _alloca((nLen + 1) * sizeof(TCHAR));
 
-		dc.SetBkMode(TRANSPARENT);
-		dc.SetTextColor(GetSysColor(COLOR_INFOTEXT));
-		HFONT hOldFont = dc.SelectFont(GetFont());
+                if (GetWindowText(lpszText, nLen + 1))
+                {
+                    DWORD dwStyle = GetStyle();
+                    int nDrawStyle = DT_LEFT;
 
-		int nLen = GetWindowTextLength();
-		if (nLen > 0)
-		{
-			LPTSTR lpszText = (LPTSTR) _alloca((nLen + 1) * sizeof(TCHAR));
-			if (GetWindowText(lpszText, nLen + 1))
-			{
-				DWORD dwStyle = GetStyle();
-				int nDrawStyle = DT_LEFT;
-				if (dwStyle & SS_CENTER) nDrawStyle = DT_CENTER;
-				else if (dwStyle & SS_RIGHT) nDrawStyle = DT_RIGHT;
-				if (dwStyle & SS_SIMPLE) nDrawStyle = DT_VCENTER | DT_SINGLELINE;
-				dc.DrawText(lpszText, -1, &rcClient, nDrawStyle | DT_WORDBREAK);
-			}
-		}
+                    if (dwStyle & SS_CENTER)
+                    {
+                        nDrawStyle = DT_CENTER;
+                    }
+                    else if (dwStyle & SS_RIGHT)
+                    {
+                        nDrawStyle = DT_RIGHT;
+                    }
 
-		GetClientRect(&rcClient);
+                    if (dwStyle & SS_SIMPLE)
+                    {
+                        nDrawStyle = DT_VCENTER | DT_SINGLELINE;
+                    }
 
-		dc.FrameRect(&rcClient, GetSysColorBrush(COLOR_3DSHADOW));
+                    dc.DrawText(lpszText, -1, &rcClient, nDrawStyle | DT_WORDBREAK);
+                }
+            }
 
-		dc.SelectFont(hOldFont);
-	}
+            GetClientRect(&rcClient);
+            dc.FrameRect(&rcClient, GetSysColorBrush(COLOR_3DSHADOW));
+            dc.SelectFont(hOldFont);
+        }
 
-	LRESULT OnSetCursor(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
-	{
-		//TODO: Set cursor code does not work, fix it or destroy it
-		SetCursor(LoadCursor(0, IDC_HAND));
-		bHandled = TRUE;
-
-		return 1;
-	}
+        LRESULT OnSetCursor(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+        {
+            //TODO: Set cursor code does not work, fix it or destroy it
+            SetCursor(LoadCursor(0, IDC_HAND));
+            bHandled = TRUE;
+            return 1;
+        }
 };
 
 
 class CStaticPromptCtrl : public CStaticPromptImpl<CStaticPromptCtrl>
 {
-public:
-	DECLARE_WND_CLASS(_T("WTL_StaticPrompt"))
+    public:
+        DECLARE_WND_CLASS(_T("WTL_StaticPrompt"))
 };
 
 

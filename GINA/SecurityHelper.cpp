@@ -19,270 +19,291 @@
 
 int _stringLenInBytes(const wchar_t* s)
 {
-   if (!s) return 0;
-   return (lstrlen(s)+1) * sizeof *s;
+    if (!s)
+    {
+        return 0;
+    }
+
+    return (lstrlen(s) + 1) * sizeof * s;
 }
 
 void _initUnicodeString(UNICODE_STRING* target, wchar_t* source, USHORT cbMax)
 {
-   target->Length        = cbMax - sizeof *source;
-   target->MaximumLength = cbMax;
-   target->Buffer        = source;
+    target->Length        = cbMax - sizeof * source;
+    target->MaximumLength = cbMax;
+    target->Buffer        = source;
 }
 
 MSV1_0_INTERACTIVE_LOGON* _allocLogonRequest(
-   const wchar_t* domain,
-   const wchar_t* user,
-   const wchar_t* pass,
-   DWORD* pcbRequest)
+    const wchar_t* domain,
+    const wchar_t* user,
+    const wchar_t* pass,
+    DWORD* pcbRequest)
 {
+    const DWORD cbHeader = sizeof(MSV1_0_INTERACTIVE_LOGON);
+    const DWORD cbDom    = _stringLenInBytes(domain);
+    const DWORD cbUser   = _stringLenInBytes(user);
+    const DWORD cbPass   = _stringLenInBytes(pass);
 
-   const DWORD cbHeader = sizeof(MSV1_0_INTERACTIVE_LOGON);
-   const DWORD cbDom    = _stringLenInBytes(domain);
-   const DWORD cbUser   = _stringLenInBytes(user);
-   const DWORD cbPass   = _stringLenInBytes(pass);
+    // sanity check string lengths
+    if (cbDom > USHRT_MAX || cbUser > USHRT_MAX || cbPass > USHRT_MAX)
+    {
+        TRACE(eERROR, L"Input string was too long.\n");
+        return 0;
+    }
 
-   // sanity check string lengths
-   if (cbDom > USHRT_MAX || cbUser > USHRT_MAX || cbPass > USHRT_MAX)
-   {
-      TRACE(eERROR, L"Input string was too long.\n");
-      return 0;
-   }
+    *pcbRequest = cbHeader + cbDom + cbUser + cbPass;
+    MSV1_0_INTERACTIVE_LOGON* pRequest = (MSV1_0_INTERACTIVE_LOGON*)new char[*pcbRequest];
 
-   *pcbRequest = cbHeader + cbDom + cbUser + cbPass;
+    if (!pRequest)
+    {
+        TRACE(eERROR, L"Out of memory, wtf?.\n");
+        return 0;
+    }
 
-   MSV1_0_INTERACTIVE_LOGON* pRequest = (MSV1_0_INTERACTIVE_LOGON*)new char[*pcbRequest];
-   if (!pRequest)
-   {
-      TRACE(eERROR, L"Out of memory, wtf?.\n");
-      return 0;
-   }
-
-   pRequest->MessageType = MsV1_0InteractiveLogon;
-
-   char* p = (char*)(pRequest + 1); // point past MSV1_0_INTERACTIVE_LOGON header
-
-   wchar_t* pDom  = (wchar_t*)(p);
-   wchar_t* pUser = (wchar_t*)(p + cbDom);
-   wchar_t* pPass = (wchar_t*)(p + cbDom + cbUser);
-
-   CopyMemory(pDom,  domain, cbDom);
-   CopyMemory(pUser, user,   cbUser);
-   CopyMemory(pPass, pass,   cbPass);
-
-   _initUnicodeString(&pRequest->LogonDomainName, pDom, (USHORT)cbDom);
-   _initUnicodeString(&pRequest->UserName,        pUser, (USHORT)cbUser);
-   _initUnicodeString(&pRequest->Password,        pPass, (USHORT)cbPass);
-
-   return pRequest;
+    pRequest->MessageType = MsV1_0InteractiveLogon;
+    char* p = (char*)(pRequest + 1); // point past MSV1_0_INTERACTIVE_LOGON header
+    wchar_t* pDom  = (wchar_t*)(p);
+    wchar_t* pUser = (wchar_t*)(p + cbDom);
+    wchar_t* pPass = (wchar_t*)(p + cbDom + cbUser);
+    CopyMemory(pDom,  domain, cbDom);
+    CopyMemory(pUser, user,   cbUser);
+    CopyMemory(pPass, pass,   cbPass);
+    _initUnicodeString(&pRequest->LogonDomainName, pDom, (USHORT)cbDom);
+    _initUnicodeString(&pRequest->UserName,        pUser, (USHORT)cbUser);
+    _initUnicodeString(&pRequest->Password,        pPass, (USHORT)cbPass);
+    return pRequest;
 }
 
 BOOL _newLsaString(LSA_STRING* target, const char* source)
 {
-   if (0 == source) return FALSE;
+    if (0 == source)
+    {
+        return FALSE;
+    }
 
-   const int cch = lstrlenA(source);
-   const int cchWithNullTerminator = cch + 1;
+    const int cch = lstrlenA(source);
 
-   // UNICODE_STRINGs have a size limit
-   if (cchWithNullTerminator * sizeof(*source) > USHRT_MAX) return FALSE;
+    const int cchWithNullTerminator = cch + 1;
 
-   char* newStr = new char[cchWithNullTerminator];
-   if (!newStr)
-   {
-      TRACE(eERROR, L"Out of memory, wtf?.\n");
-      return FALSE;
-   }
+    // UNICODE_STRINGs have a size limit
+    if (cchWithNullTerminator * sizeof(*source) > USHRT_MAX)
+    {
+        return FALSE;
+    }
 
-   CopyMemory(newStr, source, cchWithNullTerminator * sizeof *newStr);
+    char* newStr = new char[cchWithNullTerminator];
 
-   target->Length        = (USHORT)cch                   * sizeof *newStr;
-   target->MaximumLength = (USHORT)cchWithNullTerminator * sizeof *newStr;
-   target->Buffer        = newStr;
+    if (!newStr)
+    {
+        TRACE(eERROR, L"Out of memory, wtf?.\n");
+        return FALSE;
+    }
 
-   return TRUE;
+    CopyMemory(newStr, source, cchWithNullTerminator * sizeof * newStr);
+    target->Length        = (USHORT)cch                   * sizeof * newStr;
+    target->MaximumLength = (USHORT)cchWithNullTerminator * sizeof * newStr;
+    target->Buffer        = newStr;
+    return TRUE;
 }
 
 void _deleteLsaString(LSA_STRING* target)
 {
-   delete[] target->Buffer;
-   target->Buffer = 0;
+    delete[] target->Buffer;
+    target->Buffer = 0;
 }
 
 BOOL RegisterLogonProcess(const char* logonProcessName, HANDLE* phLsa)
 {
-   *phLsa = 0;
+    *phLsa = 0;
+    LSA_STRING name;
 
-   LSA_STRING name;
-   if (!_newLsaString(&name, logonProcessName)) return FALSE;
+    if (!_newLsaString(&name, logonProcessName))
+    {
+        return FALSE;
+    }
 
-   LSA_OPERATIONAL_MODE unused;
-   NTSTATUS status = LsaRegisterLogonProcess(&name, phLsa, &unused);
+    LSA_OPERATIONAL_MODE unused;
+    NTSTATUS status = LsaRegisterLogonProcess(&name, phLsa, &unused);
+    _deleteLsaString(&name);
 
-   _deleteLsaString(&name);
+    if (status)
+    {
+        *phLsa = 0;
+        TRACE(eERROR, L"LsaRegisterLogonProcess failed: %d\n", LsaNtStatusToWinError(status));
+        return FALSE;
+    }
 
-   if (status)
-   {
-      *phLsa = 0;
-      TRACE(eERROR, L"LsaRegisterLogonProcess failed: %d\n", LsaNtStatusToWinError(status));
-      return FALSE;
-   }
-   return TRUE;
+    return TRUE;
 }
 
 BOOL CallLsaLogonUser(HANDLE hLsa, const wchar_t* domain, const wchar_t* user, const wchar_t* pass, const wchar_t* authenticationPackageName,
                       SECURITY_LOGON_TYPE logonType, LUID* pLogonSessionId, HANDLE* phToken, MSV1_0_INTERACTIVE_PROFILE** ppProfile, DWORD* pWin32Error)
 {
+    BOOL result      = FALSE;
+    DWORD win32Error = 0;
+    *phToken         = 0;
+    LUID ignoredLogonSessionId;
 
-   BOOL result      = FALSE;
-   DWORD win32Error = 0;
-   *phToken         = 0;
+    // optional arguments
+    if (ppProfile)
+    {
+        *ppProfile   = 0;
+    }
 
-   LUID ignoredLogonSessionId;
+    if (pWin32Error)
+    {
+        *pWin32Error = 0;
+    }
 
-   // optional arguments
-   if (ppProfile)        *ppProfile   = 0;
-   if (pWin32Error)      *pWin32Error = 0;
-   if (!pLogonSessionId) pLogonSessionId = &ignoredLogonSessionId;
+    if (!pLogonSessionId)
+    {
+        pLogonSessionId = &ignoredLogonSessionId;
+    }
 
-   LSA_STRING logonProcessName            = { 0 };
-   TOKEN_SOURCE sourceContext             = { 'P', 'a', 'r', 'a', 'l', 'i', 'n', 't' };
+    LSA_STRING logonProcessName            = { 0 };
+    TOKEN_SOURCE sourceContext             = { 'P', 'a', 'r', 'a', 'l', 'i', 'n', 't' };
+    MSV1_0_INTERACTIVE_PROFILE* pProfile = 0;
+    ULONG cbProfile = 0;
+    QUOTA_LIMITS quotaLimits;
+    NTSTATUS substatus;
+    DWORD cbLogonRequest;
+    MSV1_0_INTERACTIVE_LOGON* pLogonRequest =
+        _allocLogonRequest(domain, user, pass, &cbLogonRequest);
 
-   MSV1_0_INTERACTIVE_PROFILE* pProfile = 0;
-   ULONG cbProfile = 0;
-   QUOTA_LIMITS quotaLimits;
-   NTSTATUS substatus;
-   DWORD cbLogonRequest;
+    if (!pLogonRequest)
+    {
+        win32Error = ERROR_NOT_ENOUGH_MEMORY;
+        goto cleanup;
+    }
 
-   MSV1_0_INTERACTIVE_LOGON* pLogonRequest =
-      _allocLogonRequest(domain, user, pass, &cbLogonRequest);
-   if (!pLogonRequest)
-   {
-      win32Error = ERROR_NOT_ENOUGH_MEMORY;
-      goto cleanup;
-   }
+    if (!_newLsaString(&logonProcessName, LOGON_PROCESS_NAME))
+    {
+        win32Error = ERROR_NOT_ENOUGH_MEMORY;
+        goto cleanup;
+    }
 
-   if (!_newLsaString(&logonProcessName, LOGON_PROCESS_NAME))
-   {
-      win32Error = ERROR_NOT_ENOUGH_MEMORY;
-      goto cleanup;
-   }
+    ULONG authenticationPackage = LOGON32_PROVIDER_DEFAULT;
 
-   ULONG authenticationPackage = LOGON32_PROVIDER_DEFAULT;
+    if(authenticationPackageName && *authenticationPackageName)
+    {
+        LSA_STRING customAuthenticationPackage            = { 0 };
+        size_t n;
+        char authenticationPackageAnsiName[127];
+        wcstombs_s(&n, authenticationPackageAnsiName, sizeof(authenticationPackageAnsiName), authenticationPackageName, _TRUNCATE);
 
-    if(authenticationPackageName && *authenticationPackageName) {
-       LSA_STRING customAuthenticationPackage            = { 0 };
-       size_t n;
-       char authenticationPackageAnsiName[127];
-
-       wcstombs_s(&n, authenticationPackageAnsiName, sizeof(authenticationPackageAnsiName), authenticationPackageName, _TRUNCATE);
-
-       if(_newLsaString(&customAuthenticationPackage, authenticationPackageAnsiName))
-       {
+        if(_newLsaString(&customAuthenticationPackage, authenticationPackageAnsiName))
+        {
             if(!LsaLookupAuthenticationPackage(hLsa, &customAuthenticationPackage, &authenticationPackage))
             {
                 authenticationPackage = LOGON32_PROVIDER_DEFAULT; //safety
             }
-        
+
             _deleteLsaString(&customAuthenticationPackage);
-       }
+        }
     }
 
-   // LsaLogonUser - the function from hell
-   NTSTATUS status = LsaLogonUser(
-                        hLsa,
-                        &logonProcessName,  // we use our logon process name for the "origin name"
-                        logonType,
-                        authenticationPackage, // we use MSV1_0 or Kerb, whichever is supported
-                        pLogonRequest,
-                        cbLogonRequest,
-                        0,                  // we do not add any group SIDs
-                        &sourceContext,
-                        (void**)&pProfile,  // caller must free this via LsaFreeReturnBuffer
-                        &cbProfile,
-                        pLogonSessionId,
-                        phToken,
-                        &quotaLimits,       // we ignore this, but must pass in anyway
-                        &substatus);
+    // LsaLogonUser - the function from hell
+    NTSTATUS status = LsaLogonUser(
+                          hLsa,
+                          &logonProcessName,  // we use our logon process name for the "origin name"
+                          logonType,
+                          authenticationPackage, // we use MSV1_0 or Kerb, whichever is supported
+                          pLogonRequest,
+                          cbLogonRequest,
+                          0,                  // we do not add any group SIDs
+                          &sourceContext,
+                          (void**)&pProfile,  // caller must free this via LsaFreeReturnBuffer
+                          &cbProfile,
+                          pLogonSessionId,
+                          phToken,
+                          &quotaLimits,       // we ignore this, but must pass in anyway
+                          &substatus);
 
-   if (status)
-   {
-      win32Error = LsaNtStatusToWinError(status);
+    if (status)
+    {
+        win32Error = LsaNtStatusToWinError(status);
 
-      if ((ERROR_ACCOUNT_RESTRICTION == win32Error && STATUS_PASSWORD_EXPIRED == substatus))
-      {
-         win32Error = ERROR_PASSWORD_EXPIRED;
-      }
+        if ((ERROR_ACCOUNT_RESTRICTION == win32Error && STATUS_PASSWORD_EXPIRED == substatus))
+        {
+            win32Error = ERROR_PASSWORD_EXPIRED;
+        }
 
-      *phToken = 0;
-      pProfile = 0;
-      TRACEMSG(win32Error);
+        *phToken = 0;
+        pProfile = 0;
+        TRACEMSG(win32Error);
+        goto cleanup;
+    }
 
-      goto cleanup;
-   }
+    if (ppProfile)
+    {
+        *ppProfile = (MSV1_0_INTERACTIVE_PROFILE*)pProfile;
+        pProfile = 0;
+    }
 
-   if (ppProfile)
-   {
-      *ppProfile = (MSV1_0_INTERACTIVE_PROFILE*)pProfile;
-      pProfile = 0;
-   }
-   result = TRUE;
-
+    result = TRUE;
 cleanup:
-   // if caller cares about the details, pass them on
-   if (pWin32Error) *pWin32Error = win32Error;
 
-   if (pLogonRequest)
-   {
-      SecureZeroMemory(pLogonRequest, cbLogonRequest);
-      delete pLogonRequest;
-   }
-   if (pProfile) LsaFreeReturnBuffer(pProfile);
-   _deleteLsaString(&logonProcessName);
+    // if caller cares about the details, pass them on
+    if (pWin32Error)
+    {
+        *pWin32Error = win32Error;
+    }
 
-   return result;
+    if (pLogonRequest)
+    {
+        SecureZeroMemory(pLogonRequest, cbLogonRequest);
+        delete pLogonRequest;
+    }
+
+    if (pProfile)
+    {
+        LsaFreeReturnBuffer(pProfile);
+    }
+
+    _deleteLsaString(&logonProcessName);
+    return result;
 }
 
-BOOL GetSIDFromToken(HANDLE token, PSID *ppsid) 
+BOOL GetSIDFromToken(HANDLE token, PSID* ppsid)
 {
-	BOOL result = false;
-   DWORD infolen = 0;
+    BOOL result = false;
+    DWORD infolen = 0;
 
-   if(GetTokenInformation(token, TokenUser, 0, 0, &infolen) == FALSE)
-   {
-      if(GetLastError() == ERROR_INSUFFICIENT_BUFFER)
-      {
-          void *buf = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, infolen);
-          GetTokenInformation(token, TokenUser, buf, infolen, &infolen);
-          *ppsid = ((TOKEN_USER*)buf)->User.Sid;
-			result = true;
-      }
-   }
-	return result;
+    if(GetTokenInformation(token, TokenUser, 0, 0, &infolen) == FALSE)
+    {
+        if(GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+        {
+            void* buf = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, infolen);
+            GetTokenInformation(token, TokenUser, buf, infolen, &infolen);
+            *ppsid = ((TOKEN_USER*)buf)->User.Sid;
+            result = true;
+        }
+    }
+
+    return result;
 }
 
-BOOL GetSIDFromUsername(LPTSTR username, PSID *sid)
+BOOL GetSIDFromUsername(LPTSTR username, PSID* sid)
 {
-   BOOL result = FALSE;
-	DWORD sidsize = 0;
-   TCHAR domain[1024];
-	DWORD domainsize = sizeof domain / sizeof *domain;
-   SID_NAME_USE snu = SidTypeUser ;
-   *sid = 0;
-   PSID mysid = 0;
+    BOOL result = FALSE;
+    DWORD sidsize = 0;
+    TCHAR domain[1024];
+    DWORD domainsize = sizeof domain / sizeof * domain;
+    SID_NAME_USE snu = SidTypeUser ;
+    *sid = 0;
+    PSID mysid = 0;
+    //This is done just to know the buffer size for SID as well as Domain name
+    result = LookupAccountName(0, username, mysid, &sidsize, domain, &domainsize, &snu);
 
-//This is done just to know the buffer size for SID as well as Domain name
-   result = LookupAccountName(0, username, mysid, &sidsize, domain, &domainsize, &snu);
+    if (sidsize)
+    {
+        mysid = (PSID) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sidsize);
+        result = LookupAccountName(0, username, mysid, &sidsize, domain, &domainsize, &snu);
+    }
 
-   if (sidsize)
-   {
-	   mysid = (PSID) HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sidsize);
-      result = LookupAccountName(0, username, mysid, &sidsize, domain, &domainsize, &snu);
-   }
-
-   *sid = mysid;
-   
-   return result;
+    *sid = mysid;
+    return result;
 }
 
 /*
@@ -370,72 +391,83 @@ BOOL AllocWinLogonProfile(WLX_PROFILE_V1_0** ppWinLogonProfile, const wchar_t* p
 
 BOOL ImpersonateAndGetUserName(HANDLE hToken, wchar_t* name, int cch)
 {
-   BOOL result = FALSE;
-   if (ImpersonateLoggedOnUser(hToken))
-   {
-      DWORD cchName = cch;
-      if (GetUserNameEx(NameSamCompatible, name, &cchName))
-         result = TRUE;
-      else TRACE(eERROR, L"GetUserNameEx failed: %d", GetLastError());
-      RevertToSelf();
-   }
-   else TRACE(eERROR, L"ImpersonateLoggedOnUser failed: %d\n", GetLastError());
+    BOOL result = FALSE;
 
-   return result;
+    if (ImpersonateLoggedOnUser(hToken))
+    {
+        DWORD cchName = cch;
+
+        if (GetUserNameEx(NameSamCompatible, name, &cchName))
+        {
+            result = TRUE;
+        }
+        else
+        {
+            TRACE(eERROR, L"GetUserNameEx failed: %d", GetLastError());
+        }
+
+        RevertToSelf();
+    }
+    else
+    {
+        TRACE(eERROR, L"ImpersonateLoggedOnUser failed: %d\n", GetLastError());
+    }
+
+    return result;
 }
 
 BOOL CreateProcessAsUserOnDesktop(HANDLE hToken, wchar_t* programImage, wchar_t* desktop, void* env)
 {
-   // impersonate the user to ensure that they are allowed
-   // to execute the program in the first place
-   if (!ImpersonateLoggedOnUser(hToken))
-   {
-      TRACE(eERROR, L"ImpersonateLoggedOnUser failed: %d\n", GetLastError());
-      return FALSE;
-   }
+    // impersonate the user to ensure that they are allowed
+    // to execute the program in the first place
+    if (!ImpersonateLoggedOnUser(hToken))
+    {
+        TRACE(eERROR, L"ImpersonateLoggedOnUser failed: %d\n", GetLastError());
+        return FALSE;
+    }
 
-   TCHAR path[MAX_PATH];
+    TCHAR path[MAX_PATH];
+    ExpandEnvironmentStrings(programImage, path, MAX_PATH);
+    STARTUPINFO si = { sizeof si, 0, desktop };
+    PROCESS_INFORMATION pi;
 
-   ExpandEnvironmentStrings(programImage, path, MAX_PATH);
+    if (!CreateProcessAsUser(hToken, path, path, 0, 0, FALSE,
+                             CREATE_UNICODE_ENVIRONMENT, env, 0, &si, &pi))
+    {
+        RevertToSelf();
+        TRACE(eERROR, L"CreateProcessAsUser failed for image %s with error code %d\n", programImage, GetLastError());
+        return FALSE;
+    }
 
-   STARTUPINFO si = { sizeof si, 0, desktop };
-   PROCESS_INFORMATION pi;
-   if (!CreateProcessAsUser(hToken, path, path, 0, 0, FALSE,
-                            CREATE_UNICODE_ENVIRONMENT, env, 0, &si, &pi))
-   {
-      RevertToSelf();
-      TRACE(eERROR, L"CreateProcessAsUser failed for image %s with error code %d\n", programImage, GetLastError());
-      return FALSE;
-   }
-   CloseHandle(pi.hProcess);
-   CloseHandle(pi.hThread);
-
-   RevertToSelf();
-
-   TRACE(eERROR, L"Successfully launched %s\n", programImage);
-   return TRUE;
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    RevertToSelf();
+    TRACE(eERROR, L"Successfully launched %s\n", programImage);
+    return TRUE;
 }
 
 // checks user SID in both tokens for equality
 BOOL IsSameUser(HANDLE hToken1, HANDLE hToken2, BOOL* pbIsSameUser)
 {
-   *pbIsSameUser = FALSE;
-   BOOL result = FALSE;
+    *pbIsSameUser = FALSE;
+    BOOL result = FALSE;
+    const DWORD bufSize = sizeof(TOKEN_USER) + SECURITY_MAX_SID_SIZE;
+    char buf1[bufSize];
+    char buf2[bufSize];
+    DWORD cb;
 
-   const DWORD bufSize = sizeof(TOKEN_USER) + SECURITY_MAX_SID_SIZE;
-   char buf1[bufSize];
-   char buf2[bufSize];
+    if (GetTokenInformation(hToken1, TokenUser, buf1, bufSize, &cb) &&
+            GetTokenInformation(hToken2, TokenUser, buf2, bufSize, &cb))
+    {
+        *pbIsSameUser = EqualSid(((TOKEN_USER*)buf1)->User.Sid, ((TOKEN_USER*)buf2)->User.Sid) ? TRUE : FALSE;
+        result = TRUE;
+    }
+    else
+    {
+        TRACE(eERROR, L"GetTokenInformation failed: %d\n", GetLastError());
+    }
 
-   DWORD cb;
-   if (GetTokenInformation(hToken1, TokenUser, buf1, bufSize, &cb) &&
-         GetTokenInformation(hToken2, TokenUser, buf2, bufSize, &cb))
-   {
-      *pbIsSameUser = EqualSid(((TOKEN_USER*)buf1)->User.Sid, ((TOKEN_USER*)buf2)->User.Sid) ? TRUE : FALSE;
-      result = TRUE;
-   }
-   else TRACE(eERROR, L"GetTokenInformation failed: %d\n", GetLastError());
-
-   return result;
+    return result;
 }
 
 /*
@@ -481,66 +513,68 @@ BOOL IsAdmin(HANDLE hToken)
    return isAdmin;
 }
 */
-int GetUsernameAndDomainFromToken(HANDLE token, wchar_t *domain, DWORD domain_len, wchar_t *username, DWORD username_len)
+int GetUsernameAndDomainFromToken(HANDLE token, wchar_t* domain, DWORD domain_len, wchar_t* username, DWORD username_len)
 {
-   int result;
-   TOKEN_USER *user;
-   DWORD size = 0;
-   GetTokenInformation(token, TokenUser, NULL, 0, &size);
-   if (size)
-   {
-      user = (TOKEN_USER *)malloc(size);
-      if (user)
-      {
-         if (GetTokenInformation(token, TokenUser, user, size, &size))
-         {
-            if (IsValidSid(user->User.Sid))
+    int result;
+    TOKEN_USER* user;
+    DWORD size = 0;
+    GetTokenInformation(token, TokenUser, NULL, 0, &size);
+
+    if (size)
+    {
+        user = (TOKEN_USER*)malloc(size);
+
+        if (user)
+        {
+            if (GetTokenInformation(token, TokenUser, user, size, &size))
             {
-               SID_NAME_USE name_use;
-               *domain = *username = 0;
-               if (LookupAccountSid(0, user->User.Sid, username, &username_len, domain, &domain_len, &name_use))
-               {
-                  result = (*username != 0) + (*domain != 0);
-               }
+                if (IsValidSid(user->User.Sid))
+                {
+                    SID_NAME_USE name_use;
+                    *domain = *username = 0;
+
+                    if (LookupAccountSid(0, user->User.Sid, username, &username_len, domain, &domain_len, &name_use))
+                    {
+                        result = (*username != 0) + (*domain != 0);
+                    }
+                }
             }
-         }
-         free(user);
-      }
-   }
-   return result;
+
+            free(user);
+        }
+    }
+
+    return result;
 }
 
-const wchar_t *FindUserNameInString(const wchar_t *rawusername)
+const wchar_t* FindUserNameInString(const wchar_t* rawusername)
 {
-	const wchar_t *result = 0;
+    const wchar_t* result = 0;
+    //TODO : Replace this hack with CredUIParseUserName
+    result = wcsstr(rawusername, L"\\");
 
-			//TODO : Replace this hack with CredUIParseUserName
-			result = wcsstr(rawusername, L"\\");
+    if (!result)
+    {
+        result = rawusername; //No domain entered, so point directly to the supplied buffer
+    }
 
-			if (!result)
-			{
-				result = rawusername; //No domain entered, so point directly to the supplied buffer
-			}
-
-	return result;
+    return result;
 }
 
-int SetSelfservePassword(const wchar_t *username, const wchar_t *randpasswd)
+int SetSelfservePassword(const wchar_t* username, const wchar_t* randpasswd)
 {
-	int result = 0;
+    int result = 0;
     USER_INFO_1003 ui;
     wchar_t mutable_password[LM20_PWLEN];
-
     wcsncpy_s(mutable_password, LM20_PWLEN, randpasswd, _TRUNCATE);
-
     ui.usri1003_password = mutable_password;
 
     if(NetUserSetInfo(0, username, 1003, (LPBYTE)&ui, 0) == NERR_Success)
-	{
-		result = 1;
-	}
+    {
+        result = 1;
+    }
 
-	return result;
+    return result;
 }
 
 

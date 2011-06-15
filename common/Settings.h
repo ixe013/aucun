@@ -42,18 +42,18 @@
 #define MAX_PASSWORD 512
 #define MAX_GROUPNAME 512
 
-EXTERN HRESULT GetGroupName(const wchar_t *key, wchar_t *group, DWORD size);
-EXTERN HRESULT GetNoticeText(const wchar_t *name, wchar_t *text, DWORD size);
-EXTERN HRESULT GetDebugSetting(const wchar_t *name, wchar_t *text, DWORD size);
-EXTERN HRESULT GetSelfServeSetting(const wchar_t *name, wchar_t *text, DWORD size);
-EXTERN HRESULT SetSelfServeSetting(const wchar_t *name, wchar_t *text);
+EXTERN HRESULT GetGroupName(const wchar_t* key, wchar_t* group, DWORD size);
+EXTERN HRESULT GetNoticeText(const wchar_t* name, wchar_t* text, DWORD size);
+EXTERN HRESULT GetDebugSetting(const wchar_t* name, wchar_t* text, DWORD size);
+EXTERN HRESULT GetSelfServeSetting(const wchar_t* name, wchar_t* text, DWORD size);
+EXTERN HRESULT SetSelfServeSetting(const wchar_t* name, wchar_t* text);
 
-EXTERN HRESULT GetSettingText(const wchar_t *key, const wchar_t *name, wchar_t *text, DWORD size);
-EXTERN HRESULT SetSettingText(const wchar_t *key, const wchar_t *name, const wchar_t *text);
-EXTERN HRESULT GetSettingBinary(const wchar_t *key, const wchar_t *name, LPBYTE text, DWORD size);
-EXTERN HRESULT SetSettingBinary(const wchar_t *key, const wchar_t *name, LPBYTE data, DWORD len);
+EXTERN HRESULT GetSettingText(const wchar_t* key, const wchar_t* name, wchar_t* text, DWORD size);
+EXTERN HRESULT SetSettingText(const wchar_t* key, const wchar_t* name, const wchar_t* text);
+EXTERN HRESULT GetSettingBinary(const wchar_t* key, const wchar_t* name, LPBYTE text, DWORD size);
+EXTERN HRESULT SetSettingBinary(const wchar_t* key, const wchar_t* name, LPBYTE data, DWORD len);
 
-EXTERN wchar_t *InterpretCarriageReturn(wchar_t *text);
+EXTERN wchar_t* InterpretCarriageReturn(wchar_t* text);
 
 EXTERN const wchar_t* gUnlockGroupName;
 EXTERN const wchar_t* gForceLogoffGroupName;

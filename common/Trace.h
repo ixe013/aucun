@@ -7,11 +7,11 @@
 
 enum
 {
-	eNONE,
-	eDEBUG,
-	eINFO,
-	eWARN,
-	eERROR,
+    eNONE,
+    eDEBUG,
+    eINFO,
+    eWARN,
+    eERROR,
 };
 
 #define TRACE(l,s, ...) Trace(l, __WFILE__, __FUNCTION__, __LINE__, s, __VA_ARGS__)
@@ -22,9 +22,9 @@ enum
 
 #include "extern.h"
 
-EXTERN void Trace(int level, const wchar_t* file, const char *function, int line, const wchar_t *format, ...);
+EXTERN void Trace(int level, const wchar_t* file, const char* function, int line, const wchar_t* format, ...);
 EXTERN void TraceMessage(const wchar_t* file, const char* function, int line, DWORD dw);
 
 
 #endif
-	
+

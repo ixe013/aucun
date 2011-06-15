@@ -34,16 +34,24 @@
 
 typedef struct
 {
-	HANDLE mCurrentUser;
-	HANDLE Winlogon;
-	HANDLE mLSA;
-   BOOL mSelfServeLogon;
-	PVOID mHookedContext;
+    HANDLE mCurrentUser;
+    HANDLE Winlogon;
+    HANDLE mLSA;
+    BOOL mLogonScenario;
+    PVOID mHookedContext;
 } MyGinaContext;
+
+enum
+{
+    eRegularLogon,
+    eAutoLogon,
+    eSelfServeLogon,
+    eSelfServeLogonTimeout,
+};
 
 
 EXTERN PVOID g_pWinlogon;
-EXTERN MyGinaContext *pgAucunContext;
+EXTERN MyGinaContext* pgAucunContext;
 EXTERN HINSTANCE hAucunDll;
 EXTERN HINSTANCE hMsginaDll;
 EXTERN wchar_t gUsername[];

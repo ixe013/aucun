@@ -55,9 +55,9 @@ int WINAPI MyWlxDialogBoxParam(HANDLE, HANDLE, LPWSTR, HWND, DLGPROC, LPARAM);
 //
 void HookWlxDialogBoxParam(PVOID pWinlogonFunctions, DWORD dwWlxVersion)
 {
-	//WlxDialogBoxParam
-	pfWlxDialogBoxParam = ((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxDialogBoxParam;
-	((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxDialogBoxParam = MyWlxDialogBoxParam;
+    //WlxDialogBoxParam
+    pfWlxDialogBoxParam = ((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxDialogBoxParam;
+    ((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxDialogBoxParam = MyWlxDialogBoxParam;
 }
 
 
@@ -66,40 +66,38 @@ void HookWlxDialogBoxParam(PVOID pWinlogonFunctions, DWORD dwWlxVersion)
 //
 int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, HWND hwndOwner, DLGPROC dlgprc, LPARAM dwInitParam)
 {
-	DLGPROC proc2use = dlgprc;
-	DWORD dlgid = 0;
+    DLGPROC proc2use = dlgprc;
+    DWORD dlgid = 0;
+    TRACE(eERROR, L"About to create the dialog");
 
-	TRACE(eERROR, L"About to create the dialog");
-	//
-	// We only know MSGINA dialogs by identifiers.
-	//
-	if (!HIWORD(lpszTemplate))
-	{
-		// Hook appropriate dialog boxes as necessary.
-		int i;
-		dlgid = LOWORD(lpszTemplate);    //Cast to remove warning C4311
+    //
+    // We only know MSGINA dialogs by identifiers.
+    //
+    if (!HIWORD(lpszTemplate))
+    {
+        // Hook appropriate dialog boxes as necessary.
+        int i;
+        dlgid = LOWORD(lpszTemplate);    //Cast to remove warning C4311
 
-		//Try to find the dialog
-		for (i=0; i<nbDialogsAndProcs; ++i)
-		{
-			//Is it one of the ID we know ?
-			if (gDialogsProc[i].IDD == dlgid)
-			{
-				//The dialog that asks if you would like to change password, lock, taskmgr, etc.
-				TRACEMORE(eERROR, L" IDD %d (index %d)\n", dlgid, i);
+        //Try to find the dialog
+        for (i = 0; i < nbDialogsAndProcs; ++i)
+        {
+            //Is it one of the ID we know ?
+            if (gDialogsProc[i].IDD == dlgid)
+            {
+                //The dialog that asks if you would like to change password, lock, taskmgr, etc.
+                TRACEMORE(eERROR, L" IDD %d (index %d)\n", dlgid, i);
+                proc2use = gDialogsProc[i].dlgproc;
+                gDialogsProc[i].originalproc = dlgprc;
+                break;
+            }
+        }
+    }
 
-				proc2use = gDialogsProc[i].dlgproc;
-				gDialogsProc[i].originalproc = dlgprc;
+    if (proc2use == dlgprc)
+    {
+        TRACE(eERROR, L" (%d). it was not hooked.\n", dlgid);
+    }
 
-				break;
-			}
-		}
-	}
-
-	if (proc2use == dlgprc)
-	{
-		TRACE(eERROR, L" (%d). it was not hooked.\n", dlgid);
-	}
-
-	return pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, dwInitParam);
+    return pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, dwInitParam);
 }

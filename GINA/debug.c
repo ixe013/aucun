@@ -95,13 +95,13 @@ static const MessageListEntry g_mlTable[] =
     { L"WM_QUERYDRAGICON",      55,             0,      L"Minimized iconic window is about to be dragged by user", 0, 0, 0 },
     { L"WM_COMPAREITEM",                57,             0,      L"Report the relative item position in a sorted list of an owner-draw combo or list box", 0, 0, 0 },
     { L"WM_COMPACTING",         65,             0,      L"System memory is low", 0, 0, 0 },
-    { L"WM_WINDOWPOSCHANGING",70,       0,      L"Size, position, or Z order is about to change", 0, 0, 0 },
-    { L"WM_WINDOWPOSCHANGED",71,                0,      L"Size, position, or Z order has changed", 0, 0, 0 },
+    { L"WM_WINDOWPOSCHANGING", 70,       0,      L"Size, position, or Z order is about to change", 0, 0, 0 },
+    { L"WM_WINDOWPOSCHANGED", 71,                0,      L"Size, position, or Z order has changed", 0, 0, 0 },
     { L"WM_POWER",                      72,             0,      L"System is about to enter suspended mode", 0, 0, 0 },
     { L"WM_COPYDATA",           74,             0,      L"Data has be passed to application ", 0, 0, 0 },
     { L"WM_CANCELJOURNAL",      75,             0,      L"User cancelled journaling activities", 0, 0, 0 },
     { L"WM_NOTIFY",                     78,             0,      L"Control event occurred or requires information", 0, 0, 0 },
-    { L"WM_INPUTLANGCHANGEREQUEST",80,0,        L"User requests to change the current input language", 0, 0, 0 },
+    { L"WM_INPUTLANGCHANGEREQUEST", 80, 0,        L"User requests to change the current input language", 0, 0, 0 },
     { L"WM_INPUTLANGCHANGE",    81,             0,      L"Input language has changed", 0, 0, 0 },
     { L"WM_TCARD",                      82,             0,      L"User clicked an authorable button on a WinHelp Training Card", 0, 0, 0 },
     { L"WM_HELP",                       83,             0,      L"User pressed F1", 0, 0, 0 },
@@ -138,8 +138,8 @@ static const MessageListEntry g_mlTable[] =
     { L"WM_SYSKEYUP",           261,    0,      L"System key has been released (F10 or ALT-key)", 0, 0, 0 },
     { L"WM_SYSCHAR",                    262,    0,      L"System ALT key has been translated", 0, 0, 0 },
     { L"WM_SYSDEADCHAR",                263,    0,      L"Dead system character code translated", 0, 0, 0 },
-    { L"WM_IME_STARTCOMPOSITION",269,0, L"IME is about to generate a composition string due to a keystroke", 0, 0, 0 },
-    { L"WM_IME_ENDCOMPOSITION",270,     0,      L"IME ended composition", 0, 0, 0 },
+    { L"WM_IME_STARTCOMPOSITION", 269, 0, L"IME is about to generate a composition string due to a keystroke", 0, 0, 0 },
+    { L"WM_IME_ENDCOMPOSITION", 270,     0,      L"IME ended composition", 0, 0, 0 },
     { L"WM_IME_COMPOSITION",    271,    0,      L"IME changed composition status as a result of a key stroke", 0, 0, 0 },
     { L"WM_INITDIALOG",         272,    0,      L"Dialog box is about to be displayed", 0, 0, 0 },
     { L"WM_COMMAND",                    273,    0,      L"Window received a command notification", 0, 0, 0 },
@@ -157,7 +157,7 @@ static const MessageListEntry g_mlTable[] =
     { L"WM_CTLCOLORLISTBOX",    308,    0,      L"List box is about to be drawn", 0, 0, 0 },
     { L"WM_CTLCOLORBTN",                309,    0,      L"Button is about to be drawn", 0, 0, 0 },
     { L"WM_CTLCOLORDLG",                310,    0,      L"Dialog box is about to be drawn", 0, 0, 0 },
-    { L"WM_CTLCOLORSCROLLBAR",311,      0,      L"Scroll bar is about to be drawn", 0, 0, 0 },
+    { L"WM_CTLCOLORSCROLLBAR", 311,      0,      L"Scroll bar is about to be drawn", 0, 0, 0 },
     { L"WM_CTLCOLORSTATIC",     312,    0,      L"Static control is about to be drawn", 0, 0, 0 },
     { L"WM_MOUSEMOVE",          512,    0,      L"Mouse cursor moved", 0, 0, 0 },
     { L"WM_LBUTTONDOWN",                513,    0,      L"User pressed left mouse button in client area", 0, 0, 0 },
@@ -197,30 +197,30 @@ static const MessageListEntry g_mlTable[] =
     { L"WM_IME_SETCONTEXT",     641,    0,      L"IME window is about to be activated", 0, 0, 0 },
     { L"WM_IME_NOTIFY",         642,    0,      L"IME window change notification", 0, 0, 0 },
     { L"WM_IME_CONTROL",                643,    0,      L"IME window must carry out requested command", 0, 0, 0 },
-    { L"WM_IME_COMPOSITIONFULL",644,    0,      L"IME cannot extend the area of the composition window", 0, 0, 0 },
+    { L"WM_IME_COMPOSITIONFULL", 644,    0,      L"IME cannot extend the area of the composition window", 0, 0, 0 },
     { L"WM_IME_SELECT",         645,    0,      L"System is about to change the current IME", 0, 0, 0 },
     { L"WM_IME_CHAR",           646,    0,      L"IME got a character of the conversion result", 0, 0, 0 },
     { L"WM_IME_KEYDOWN",                656,    0,      L"IME key press notification", 0, 0, 0 },
     { L"WM_IME_KEYUP",          657,    0,      L"IME key release notification", 0, 0, 0 },
     { L"WM_MOUSEHOVER",         673,    0,      L"Mouse cursor is hovering", 0, 0, 0 },
-    { L"WM_MOUSELEAVE",         675,    0,      L"Mouse cursor moved out of window", 0, 0 ,0 },
+    { L"WM_MOUSELEAVE",         675,    0,      L"Mouse cursor moved out of window", 0, 0 , 0 },
     { L"WM_CUT",                                768,    0,      L"Delete current selection", 0, 0, 0 },
     { L"WM_COPY",                       769,    0,      L"Copy current selection into the clipboard in text format", 0, 0, 0 },
     { L"WM_PASTE",                      770,    0,      L"Copy current content of the clipboard to control", 0, 0, 0 },
     { L"WM_CLEAR",                      771,    0,      L"Clear the current selection, if any, from the edit control", 0, 0, 0 },
     { L"WM_UNDO",                       772,    0,      L"Undo last operation", 0, 0, 0 },
     { L"WM_RENDERFORMAT",       773,    0,      L"Render data in the specified clipboard format", 0, 0, 0 },
-    { L"WM_RENDERALLFORMATS",774,       0,      L"Render data in all clipboard formats", 0, 0, 0 },
-    { L"WM_DESTROYCLIPBOARD",775,       0,      L"Clipboard has been emptied", 0, 0, 0 },
+    { L"WM_RENDERALLFORMATS", 774,       0,      L"Render data in all clipboard formats", 0, 0, 0 },
+    { L"WM_DESTROYCLIPBOARD", 775,       0,      L"Clipboard has been emptied", 0, 0, 0 },
     { L"WM_DRAWCLIPBOARD",      776,    0,      L"Content of the clipboard changed", 0, 0, 0 },
     { L"WM_PAINTCLIPBOARD",     777,    0,      L"Clipboard viewer's client area needs repainting", 0, 0, 0 },
-    { L"WM_VSCROLLCLIPBOARD",778,       0,      L"Event occurred in the clipboard viewer's vertical scroll bar", 0, 0, 0 },
+    { L"WM_VSCROLLCLIPBOARD", 778,       0,      L"Event occurred in the clipboard viewer's vertical scroll bar", 0, 0, 0 },
     { L"WM_SIZECLIPBOARD",      779,    0,      L"Clipboard viewer's client area has changed size", 0, 0, 0 },
     { L"WM_ASKCBFORMATNAME",    780,    0,      L"Request of an owner displayed clipboard format", 0, 0, 0 },
     { L"WM_CHANGECBCHAIN",      781,    0,      L"A window is being removed from the clipboard viewer chain", 0, 0, 0 },
-    { L"WM_HSCROLLCLIPBOARD",782,       0,      L"Event occurred in the clipboard viewer's horizontal scroll bar", 0, 0, 0 },
+    { L"WM_HSCROLLCLIPBOARD", 782,       0,      L"Event occurred in the clipboard viewer's horizontal scroll bar", 0, 0, 0 },
     { L"WM_QUERYNEWPALETTE",    783,    0,      L"Window may realize its logical palette what focus is received", 0, 0, 0 },
-    { L"WM_PALETTEISCHANGING",784,      0,      L"A window is about to realize its logical palette", 0, 0, 0 },
+    { L"WM_PALETTEISCHANGING", 784,      0,      L"A window is about to realize its logical palette", 0, 0, 0 },
     { L"WM_PALETTECHANGED",     785,    0,      L"A window has realized its logical palette", 0, 0, 0 },
     { L"WM_HOTKEY",                     786,    0,      L"User pressed registered hotkey", 0, 0, 0 },
     { L"WM_PRINT",                      791,    0,      L"Render image in current device context request", 0, 0, 0 },
@@ -237,31 +237,29 @@ static const MessageListEntry g_mlTable[] =
     { L"Unknown",                       -1,             0,      L"Unknown message", 0, 0, 0 }
 };
 
-static const int nbMessages = sizeof g_mlTable / sizeof *g_mlTable;
+static const int nbMessages = sizeof g_mlTable / sizeof * g_mlTable;
 
-int MessageCompare(const void *arg1, const void *arg2 )
+int MessageCompare(const void* arg1, const void* arg2 )
 {
-// Return 1 if arg1 > arg2
-// Rturun  -1 if arg1 < arg2
-// return 0 if equal
-   return ((const MessageListEntry*) arg2)->dMessageNo - ((const MessageListEntry *)arg1)->dMessageNo;
+    // Return 1 if arg1 > arg2
+    // Rturun  -1 if arg1 < arg2
+    // return 0 if equal
+    return ((const MessageListEntry*) arg2)->dMessageNo - ((const MessageListEntry*)arg1)->dMessageNo;
 }
 
 
 LPCWSTR GetWindowsMessageName(UINT msg)
 {
-	//Defaults to unknown message
-    LPCWSTR result = g_mlTable[nbMessages-1].pMessageID;
-	MessageListEntry m, *found;
+    //Defaults to unknown message
+    LPCWSTR result = g_mlTable[nbMessages - 1].pMessageID;
+    MessageListEntry m, *found;
+    m.dMessageNo = msg;
+    found = (MessageListEntry*)bsearch(&m, g_mlTable, nbMessages, sizeof (MessageListEntry), MessageCompare);
 
-	m.dMessageNo = msg;
-
-	found = (MessageListEntry*)bsearch(&m, g_mlTable, nbMessages, sizeof (MessageListEntry), MessageCompare);
-
-	if(found)
-{
-	result = found->pMessageID;
-}
+    if(found)
+    {
+        result = found->pMessageID;
+    }
 
     return result;
 }
@@ -272,9 +270,7 @@ BOOLEAN GetLUIDFromToken(HANDLE token, PLUID session)
     TOKEN_STATISTICS stats = {0};
     DWORD nbstats = sizeof stats;
     GetTokenInformation(token, TokenStatistics, &stats, sizeof stats, &nbstats);
-
     *session = stats.AuthenticationId;
-
     return result;
 }
 
@@ -284,29 +280,39 @@ void OutputGetSessionUserName(PLUID session)
     NTSTATUS retval;
 
     // Check for a valid session.
-    if (!session ) {
+    if (!session )
+    {
         OutputDebugString(L"Error - Invalid logon session identifier.\n");
         return;
     }
+
     // Get the session information.
     retval = LsaGetLogonSessionData (session, &sessionData);
+
     if (!retval)
     {
         // Determine whether there is session data to parse.
         if (!sessionData)
-        { // no data for session
+        {
+            // no data for session
             OutputDebugString(L"Invalid logon session data. \n");
         }
+
         if (sessionData->UserName.Buffer != NULL)
         {
             OutputDebugString(L"User from LUID is ");
             OutputDebugString((sessionData->UserName).Buffer);
             OutputDebugString(L"\n");
         }
+
         // Free the memory returned by the LSA.
     }
+
     if (sessionData)
+    {
         LsaFreeReturnBuffer(sessionData);
+    }
+
     return;
 }
 

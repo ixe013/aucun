@@ -3,6 +3,6 @@
 
 #include "extern.h"
 
-EXTERN int GenerateRandomUnicodePassword(wchar_t *buffer, size_t size);
+EXTERN int GenerateRandomUnicodePassword(wchar_t* buffer, size_t size);
 
 #endif
