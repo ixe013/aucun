@@ -11,3 +11,4 @@ DialogAndProcs gDialogsProc[NUMBER_OF_DIALOGS] =
 };
 
 const int nbDialogsAndProcs = sizeof gDialogsProc / sizeof * gDialogsProc;
+

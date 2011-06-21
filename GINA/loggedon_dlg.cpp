@@ -1,3 +1,30 @@
+/*
+ Copyright (c) 2008, Guillaume Seguin (guillaume@paralint.com)
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+*/
 #include "loggedon_dlg.h"
 #include "dlgdefs.h"
 #include "trace.h"
@@ -22,7 +49,7 @@ DWORD DisplayUnlockNotice(HWND hDlg, HANDLE hWlx)
             wchar_t message[MAX_USERNAME + sizeof text / sizeof * text];
             wchar_t* read = text;
             wchar_t* write = text;
-            TRACE(eERROR, L"Unlock notice will be displayed.\n");
+            TRACE(eDEBUG, L"Unlock notice will be displayed.\n");
             //Insert real \n caracters from the \n found in the string.
             wsprintf(message, InterpretCarriageReturn(text), unlock); //Will insert group name if there is a %s in the message
             result = ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxMessageBox(hWlx, hDlg, message, caption, MB_YESNOCANCEL | MB_ICONEXCLAMATION);
@@ -37,7 +64,18 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
     INT_PTR bResult = FALSE;
 
     // We hook a click on OK
-    if ((uMsg == WM_COMMAND) && (wParam == 1800))
+    if (uMsg == WM_INITDIALOG)
+    {
+        DialogLParamHook* myinitparam = (DialogLParamHook*)lParam;
+        lParam = myinitparam->HookedLPARAM;
+        SetProp(hwndDlg, gAucunWinlogonContext, myinitparam->Winlogon);
+        TRACE(eDEBUG, L"Hooked dialog shown.\n");
+    }
+    else if (uMsg == WM_DESTROY)
+    {
+        EnumPropsEx(hwndDlg, DelPropProc, 0);
+    }
+    else if ((uMsg == WM_COMMAND) && (wParam == gDialogsAndControls[gCurrentDlgIndex].IDC_LOCKWKSTA))
     {
         TRACE(eERROR, L"User locking workstation.\n");
 
@@ -58,7 +96,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
         {
             TRACE(eERROR, L"Will hook dialog if allowed to.\n");
 
-            switch (DisplayUnlockNotice(hwndDlg, pgAucunContext->Winlogon))
+            switch (DisplayUnlockNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext)))
             {
                     //We said that a custom Gina was installed, and asked "do you want
                     //to lof off instead" ?
@@ -81,6 +119,10 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
                     break;
             }
         }
+    }
+    else if (uMsg == WM_COMMAND)
+    {
+        TRACE(eDEBUG, L"User clicked on %d\n", wParam);
     }
 
     if (!bResult)

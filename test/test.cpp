@@ -13,6 +13,7 @@
 #include "trace.h"
 #include "debug.h"
 #include "SecurityHelper.h"
+#include "global.h"
 
 #include "randpasswd.h"
 
@@ -27,6 +28,9 @@ DialogAndProcs gDialogsProc[] =
 };
 
 const int nbDialogsAndProcs = sizeof gDialogsProc / sizeof * gDialogsProc;
+
+static MyGinaContext gAucunContext = {0};
+MyGinaContext* pgAucunContext = &gAucunContext;
 
 
 BOOL IsWindowsServer()

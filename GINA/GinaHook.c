@@ -53,7 +53,8 @@
 #define GINASTUB_VERSION   (WLX_VERSION_1_4)
 
 //Hooked instance of MSGINA
-HINSTANCE hMsginaDll;
+HINSTANCE hDll;
+HINSTANCE hResourceDll;
 
 //
 // Winlogon function dispatch table.
@@ -294,6 +295,7 @@ BOOL MyInitialize(HINSTANCE hMsginaDll, DWORD dwWlxVersion)
 
 BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD* pdwDllVersion)
 {
+    wchar_t original_gina[MAX_PATH];
     DWORD dwWlxVersion = GINASTUB_VERSION;
     //SAFEDEBUGBREAK();
     TRACE(eDEBUG, L"WlxNegotiate\n");
@@ -301,15 +303,23 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD* pdwDllVersion)
     //
     // Load MSGINA.DLL.
     //
-    if (!(hMsginaDll = LoadLibrary(REALGINA_PATH)))
+    if(GetSettingText(L"SOFTWARE\\Paralint.com\\Aucun", L"Original Gina", original_gina, MAX_PATH) != S_OK)
+    {
+        wcscpy(original_gina, REALGINA_PATH);
+    }
+
+    if (!(hDll = LoadLibrary(original_gina)))
     {
         return FALSE;
     }
 
+    //Chances are this call will not result in a module load, because either aucun or a third party Gina chained
+    //to us will have already loaded it.
+    hResourceDll = LoadLibraryEx(REALGINA_PATH, 0, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE | LOAD_LIBRARY_AS_IMAGE_RESOURCE);
     //
     // Get pointers to WlxNegotiate function in the real MSGINA.
     //
-    pfWlxNegotiate = (PFWLXNEGOTIATE) GetProcAddress(hMsginaDll, "WlxNegotiate");
+    pfWlxNegotiate = (PFWLXNEGOTIATE) GetProcAddress(hDll, "WlxNegotiate");
 
     if (!pfWlxNegotiate)
     {
@@ -335,7 +345,7 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD* pdwDllVersion)
     //
     // Load the rest of the WLX functions from the real MSGINA.
     //
-    if (!MyInitialize(hMsginaDll, dwWlxVersion))
+    if (!MyInitialize(hDll, dwWlxVersion))
     {
         return FALSE;
     }
@@ -638,7 +648,13 @@ VOID WINAPI WlxShutdown(PVOID pWlxContext, DWORD ShutdownType)
     TRACE(eDEBUG, L"WlxShutdown\n");
     pfWlxShutdown(GetHookedContext(pWlxContext), ShutdownType);
     LsaDeregisterLogonProcess(GetMyContext(pWlxContext)->mLSA);
-    //FreeLibrary(hMsginaDll);
+    //The original Ginahook sample didn't release the DLL before shutting down.
+    //A user noticed a crash when the machine was shutdown. Turns out that WlxShutdown
+    //is not the last function called by Winlogon. WlxDisplayStatusMessage might be
+    //called a few more times.
+    //Since we are shutting down anyway, cleaning up is more trouble than its worth.
+    //FreeLibrary(hDll);
+    //FreeLibrary(hResourceDll);
 }
 
 
@@ -653,8 +669,10 @@ BOOL WINAPI WlxScreenSaverNotify(PVOID  pWlxContext, BOOL* pSecure)
 
 BOOL WINAPI WlxStartApplication(PVOID pWlxContext, PWSTR pszDesktopName, PVOID pEnvironment, PWSTR pszCmdLine)
 {
-    TRACE(eDEBUG, L"WlxStartApplication\n");
-    return pfWlxStartApplication(GetHookedContext(pWlxContext), pszDesktopName, pEnvironment, pszCmdLine);
+    BOOL result;
+    result = pfWlxStartApplication(GetHookedContext(pWlxContext), pszDesktopName, pEnvironment, pszCmdLine);
+    TRACE(eDEBUG, L"WlxStartApplication %s returned %d\n", pszCmdLine, result);
+    return result;
 }
 
 

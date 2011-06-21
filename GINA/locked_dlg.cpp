@@ -27,6 +27,7 @@
 */
 
 #include <windows.h>
+#include <windowsx.h>
 #include "locked_dlg.h"
 #include "dlgdefs.h"
 #include "trace.h"
@@ -34,6 +35,39 @@
 #include "unlockpolicy.h"
 #include "global.h"
 #include "securityhelper.h"
+
+BOOLEAN GetDomainUsernamePassword(HWND hwndDlg, wchar_t* domain, int nbdomain, wchar_t* username, int nbusername, wchar_t* password, int nbpassword)
+{
+    BOOLEAN result = FALSE;
+
+    if ((gCurrentDlgIndex >= 0) && (gCurrentDlgIndex < nbDialogsAndControlsID)) //sanity
+    {
+        if ((GetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_PASSWORD, password, nbpassword) > 0)
+                && (GetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_USERNAME, username, nbusername) > 0))
+        {
+            HWND domainCombo;
+            int cursel;
+            result = TRUE; //That's enough to keep going. Let's try the domain nonetheless
+            domainCombo = GetDlgItem(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_DOMAIN);
+            GetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_DOMAIN, domain, nbdomain);
+            cursel = ComboBox_GetCurSel(domainCombo);
+
+            if(cursel >= 0)
+            {
+                if(ComboBox_GetLBTextLen(domainCombo, cursel) < nbdomain)
+                {
+                    ComboBox_GetLBText(domainCombo, cursel, domain);
+                }
+            }
+            else
+            {
+                *domain = 0;
+            }
+        }
+    }
+
+    return result;
+}
 
 BOOL IsWindowsServer()
 {
@@ -54,14 +88,15 @@ BOOL IsWindowsServer()
 DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx, HANDLE current_user)
 {
     DWORD result = IDCANCEL;
-    TRACE(eERROR, L"About to display a force logoff notice\n");
+    TRACE(eDEBUG, L"About to display a notice for dialog index %d\n", gCurrentDlgIndex);
+    if ((gCurrentDlgIndex >= 0) && (gCurrentDlgIndex < nbDialogsAndControlsID)) //sanity
     {
         wchar_t buf[2048];
         wchar_t caption[512];
         //Start with the caption
-        LoadString(hMsginaDll, 1501, caption, sizeof caption / sizeof * caption);
+        LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_CAPTION, caption, sizeof caption / sizeof * caption);
         //Windows XP has a plain vanilla message, no insert. Let's start with that
-        LoadString(hMsginaDll, 1528, buf, sizeof buf / sizeof * buf);
+        LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_GENERIC_UNLOCK, buf, sizeof buf / sizeof * buf);
 
         //The format of the message is different on Windows Server. This test is somewhat short sighted,
         //but we know that in the future versions there is no Gina at all ! That's why we shortcut
@@ -78,13 +113,13 @@ DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx, HANDLE current_user)
             {
                 case 2:
                     {
-                        LoadString(hMsginaDll, 1528, format, sizeof format / sizeof * format);
+                        LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_DOMAIN_USERNAME, format, sizeof format / sizeof * format);
                         wsprintf(buf, format, domain, username, L"some time");
                     }
                     break;
                 case 1:
                     {
-                        LoadString(hMsginaDll, 1561, format, sizeof format / sizeof * format);
+                        LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_USERNAME, format, sizeof format / sizeof * format);
                         wsprintf(buf, format, username, L"some time");
                     }
                     break;
@@ -108,7 +143,18 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
     INT_PTR bResult = FALSE;
 
     // We hook a click on OK
-    if ((uMsg == WM_COMMAND) && (wParam == IDOK))
+    if (uMsg == WM_INITDIALOG)
+    {
+        DialogLParamHook* myinitparam = (DialogLParamHook*)lParam;
+        lParam = myinitparam->HookedLPARAM;
+        SetProp(hwndDlg, gAucunWinlogonContext, myinitparam->Winlogon);
+        TRACE(eDEBUG, L"Hooked dialog shown.\n");
+    }
+    else if (uMsg == WM_DESTROY)
+    {
+        EnumPropsEx(hwndDlg, DelPropProc, 0);
+    }
+    else if ((uMsg == WM_COMMAND) && (wParam == IDOK))
     {
         wchar_t rawdomain[MAX_DOMAIN];
         wchar_t rawusername[MAX_USERNAME];
@@ -116,8 +162,9 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
         TRACE(eERROR, L"Unlock or logoff attemp\n");
 
         //Get the username and password for this particular Dialog template
-        if((GetDlgItemText(hwndDlg, 1954, password, sizeof password / sizeof * password) > 0)
-                && (GetDlgItemText(hwndDlg, 1953, rawusername, sizeof rawusername / sizeof * rawusername) > 0))
+        if (GetDomainUsernamePassword(hwndDlg, rawdomain, sizeof rawdomain / sizeof * rawdomain,
+                                      rawusername, sizeof rawusername / sizeof * rawusername,
+                                      password, sizeof password / sizeof * password))
         {
             //We have enough to keep going, let's get the domain if it's there
             GetDlgItemText(hwndDlg, 1956, rawdomain, sizeof rawdomain / sizeof * rawdomain);
@@ -137,14 +184,46 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 
                 if (*rawdomain)
                 {
+                    //So let's get the local computer name
+                    wchar_t chrComputerName[MAX_COMPUTERNAME_LENGTH + 1];
+                    DWORD dwBufferSize = MAX_COMPUTERNAME_LENGTH + 1;
+                    //This will work unless the local computer was chosen
                     domain = rawdomain;
+
+                    if(GetComputerName(chrComputerName, &dwBufferSize))
+                    {
+                        //see if the computer name is in the domain string
+                        wchar_t* pComputerName = wcsstr(rawdomain, chrComputerName);
+
+                        if(pComputerName)
+                        {
+                            //There is a chance that the user selected the current computer
+                            //But it could be just that the computer name is a subset of a
+                            //longer domain name
+                            //But we know that the name will be qualified with the string
+                            //"(this computer)" localized. It could be in front or at the end.
+                            //Example : domain ABC123
+                            //        computer  BC1 (this computer)
+                            //       (cet ordi) BC1
+                            //This will handle cases when the computer name is
+                            //after the localized text. It doesn't do anything on
+                            //an English or French local.
+                            domain = pComputerName;
+
+                            //If it ends with a space, trim it
+                            if(domain[dwBufferSize] == ' ')
+                            {
+                                domain[dwBufferSize] = 0;
+                            }
+                        }
+                    }
                 }
             }
 
             if (*username && *password)
             {
                 // Can you spot the buffer overflow vulnerability in this next line ?
-                TRACE(eERROR, L"User %s has entered his password.\n", username);
+                TRACE(eERROR, L"User %s\\%s has entered his password.\n", *domain ? domain : L"", username);
                 // Don't worry, GetDomainUsernamePassword validated input length. We are safe.
 
                 switch (ShouldUnlockForUser(pgAucunContext->mLSA, pgAucunContext->mCurrentUser, domain, username, password))
@@ -152,7 +231,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
                     case eForceLogoff:
 
                         //Warn the user that they are killing active programs
-                        if (DisplayForceLogoffNotice(hwndDlg, pgAucunContext->Winlogon, pgAucunContext->mCurrentUser) == IDOK)
+                        if (DisplayForceLogoffNotice(hwndDlg, GetProp(hwndDlg, gAucunWinlogonContext), pgAucunContext->mCurrentUser) == IDOK)
                         {
                             TRACE(eERROR, L"User was allowed (and agreed) to forcing a logoff.\n");
                             //Might help with house keeping, instead of directly calling EndDialog
@@ -166,7 +245,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
                         else
                         {
                             //mimic MSGINA behavior
-                            SetDlgItemText(hwndDlg, 1954, L"");
+                            SetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_PASSWORD, L"");
                         }
 
                         bResult = TRUE;

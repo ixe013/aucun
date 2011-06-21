@@ -53,13 +53,16 @@ enum
 EXTERN PVOID g_pWinlogon;
 EXTERN MyGinaContext* pgAucunContext;
 EXTERN HINSTANCE hAucunDll;
-EXTERN HINSTANCE hMsginaDll;
+EXTERN HINSTANCE hDll;
+EXTERN HINSTANCE hResourceDll;
 EXTERN wchar_t gUsername[];
 EXTERN size_t gUsername_len;
 EXTERN const wchar_t gEncryptedTag[];
 EXTERN const size_t gEncryptedTag_len;
 EXTERN wchar_t gEncryptedRandomSelfservePassword[];
 EXTERN const size_t gEncryptedRandomSelfservePassword_len;
+
+EXTERN const wchar_t gAucunWinlogonContext[];
 
 #define AUCUN_PWLEN (16)
 

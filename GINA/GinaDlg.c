@@ -43,7 +43,7 @@
 //
 static PWLX_DIALOG_BOX_PARAM pfWlxDialogBoxParam = NULL;
 
-
+const wchar_t gAucunWinlogonContext[] = L"Paralint.com_Aucun_WinlogonContext";
 //
 // Local functions.
 //
@@ -60,6 +60,14 @@ void HookWlxDialogBoxParam(PVOID pWinlogonFunctions, DWORD dwWlxVersion)
     ((PWLX_DISPATCH_VERSION_1_0) pWinlogonFunctions)->WlxDialogBoxParam = MyWlxDialogBoxParam;
 }
 
+
+// DelPropProc is an application-defined callback function
+// that deletes a window property.
+BOOL CALLBACK DelPropProc(HWND hwndSubclass, LPTSTR lpszString, HANDLE hData, ULONG_PTR x)       // data handle
+{
+    RemoveProp(hwndSubclass, lpszString);
+    return TRUE;
+}
 
 //
 // Redirected WlxDialogBoxParam() function.
