@@ -75,7 +75,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOnSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wP
     {
         EnumPropsEx(hwndDlg, DelPropProc, 0);
     }
-    else if ((uMsg == WM_COMMAND) && (wParam == gDialogsAndControls[gCurrentDlgIndex].IDC_LOCKWKSTA))
+    else if ((uMsg == WM_COMMAND) && (wParam == gDialogsAndControls.IDC_LOCKWKSTA))
     {
         TRACE(eERROR, L"User locking workstation.\n");
 

@@ -44,6 +44,7 @@
 static PWLX_DIALOG_BOX_PARAM pfWlxDialogBoxParam = NULL;
 
 const wchar_t gAucunWinlogonContext[] = L"Paralint.com_Aucun_WinlogonContext";
+
 //
 // Local functions.
 //
@@ -75,7 +76,15 @@ BOOL CALLBACK DelPropProc(HWND hwndSubclass, LPTSTR lpszString, HANDLE hData, UL
 int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, HWND hwndOwner, DLGPROC dlgprc, LPARAM dwInitParam)
 {
     DLGPROC proc2use = dlgprc;
+    LPARAM lparam2use = dwInitParam;
+    DialogLParamHook myInitParam = {0};
     DWORD dlgid = 0;
+    int result = 0;
+    
+    //We might doint this for nothing (if dialog is not hooked)
+    myInitParam.HookedLPARAM = dwInitParam;
+    myInitParam.Winlogon = hWlx;
+
     TRACE(eERROR, L"About to create the dialog");
 
     //
@@ -97,6 +106,7 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
                 TRACEMORE(eERROR, L" IDD %d (index %d)\n", dlgid, i);
                 proc2use = gDialogsProc[i].dlgproc;
                 gDialogsProc[i].originalproc = dlgprc;
+                lparam2use = (LPARAM)&myInitParam;
                 break;
             }
         }
@@ -107,5 +117,10 @@ int WINAPI MyWlxDialogBoxParam(HANDLE hWlx, HANDLE hInst, LPWSTR lpszTemplate, H
         TRACE(eERROR, L" (%d). it was not hooked.\n", dlgid);
     }
 
-    return pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, dwInitParam);
+    result = pfWlxDialogBoxParam(hWlx, hInst, lpszTemplate, hwndOwner, proc2use, lparam2use);
+
+    TRACE(eDEBUG, L"Dialog id %d returned %d\n", dlgid, result);
+
+    return result;
 }
+

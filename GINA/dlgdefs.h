@@ -24,7 +24,6 @@ enum
     LOGGED_OUT_SAS_dlg,
     LOGGED_ON_SAS_dlg,
     LOCKED_SAS_dlg,
-    NUMBER_OF_DIALOGS //Always keep last
 };
 
 
@@ -57,26 +56,21 @@ typedef struct
 }
 DialogAndControlsID;
 
-static const DialogAndControlsID gDialogsAndControls[] =
+static const DialogAndControlsID gDialogsAndControls =
 {
     //Windows Server 2003
     //XP SP3 (and probably previeus versions also, never tested)
-    {
-        1800,    // IDD_SAS
-        1800,    // IDC_LOCKWKSTA
-        1801,    // IDC_LOGOFF
-        1950,    // IDD_UNLOCKPASSWORD
-        1953,    // IDC_USERNAME
-        1954,    // IDC_PASSWORD
-        1956,    // IDC_DOMAIN
-        1501,    // IDS_CAPTION
-        1528,    // IDS_DOMAIN_USERNAME
-        1561,    // IDS_USERNAME
-        1528     // IDS_GENERIC_UNLOCK //1607
-    },
+    1800,    // IDD_SAS
+    1800,    // IDC_LOCKWKSTA
+    1801,    // IDC_LOGOFF
+    1950,    // IDD_UNLOCKPASSWORD
+    1953,    // IDC_USERNAME
+    1954,    // IDC_PASSWORD
+    1956,    // IDC_DOMAIN
+    1501,    // IDS_CAPTION
+    1528,    // IDS_DOMAIN_USERNAME
+    1561,    // IDS_USERNAME
+    1528     // IDS_GENERIC_UNLOCK //1607
 };
-
-static const int nbDialogsAndControlsID = sizeof gDialogsAndControls / sizeof * gDialogsAndControls;
-static int gCurrentDlgIndex = -1;
 
 #endif

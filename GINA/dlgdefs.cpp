@@ -3,7 +3,7 @@
 #include "loggedon_dlg.h"
 #include "locked_dlg.h"
 
-DialogAndProcs gDialogsProc[NUMBER_OF_DIALOGS] =
+DialogAndProcs gDialogsProc[] =
 {
     { IDD_LOGGED_OUT_SAS,  MyWlxWkstaLoggedOutSASDlgProc, 0},
     { IDD_LOGGED_ON_SAS, MyWlxWkstaLoggedOnSASDlgProc, 0 },

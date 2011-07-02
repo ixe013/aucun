@@ -154,7 +154,11 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
         case WM_INITDIALOG :
             {
                 wchar_t buf[32];
-                result = gDialogsProc[LOGGED_OUT_SAS_dlg].originalproc(hwndDlg, uMsg, wParam, lParam);;
+
+                DialogLParamHook* myinitparam = (DialogLParamHook*)lParam;
+                lParam = myinitparam->HookedLPARAM;
+
+                result = gDialogsProc[LOGGED_OUT_SAS_dlg].originalproc(hwndDlg, uMsg, wParam, lParam);
                 handled = true;
 
                 if(pgAucunContext->mLogonScenario == eAutoLogon)

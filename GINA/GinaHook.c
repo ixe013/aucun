@@ -297,9 +297,10 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD* pdwDllVersion)
 {
     wchar_t original_gina[MAX_PATH];
     DWORD dwWlxVersion = GINASTUB_VERSION;
-    //SAFEDEBUGBREAK();
+
     TRACE(eDEBUG, L"WlxNegotiate\n");
 
+    SAFEDEBUGBREAK();
     //
     // Load MSGINA.DLL.
     //

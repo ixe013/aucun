@@ -111,6 +111,8 @@ void TraceMessage(const wchar_t* file, const char* function, int line, DWORD dw)
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
         (LPTSTR) &lpMsgBuf,
         0, NULL);
+    
+    //TODO : Do not hardcode eERROR here
     Trace(eERROR, file, function, line, L"0x%08X: %s", dw, lpMsgBuf);
     LocalFree(lpMsgBuf);
 }

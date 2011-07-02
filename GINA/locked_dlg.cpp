@@ -40,29 +40,26 @@ BOOLEAN GetDomainUsernamePassword(HWND hwndDlg, wchar_t* domain, int nbdomain, w
 {
     BOOLEAN result = FALSE;
 
-    if ((gCurrentDlgIndex >= 0) && (gCurrentDlgIndex < nbDialogsAndControlsID)) //sanity
+    if ((GetDlgItemText(hwndDlg, gDialogsAndControls.IDC_PASSWORD, password, nbpassword) > 0)
+            && (GetDlgItemText(hwndDlg, gDialogsAndControls.IDC_USERNAME, username, nbusername) > 0))
     {
-        if ((GetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_PASSWORD, password, nbpassword) > 0)
-                && (GetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_USERNAME, username, nbusername) > 0))
-        {
-            HWND domainCombo;
-            int cursel;
-            result = TRUE; //That's enough to keep going. Let's try the domain nonetheless
-            domainCombo = GetDlgItem(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_DOMAIN);
-            GetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_DOMAIN, domain, nbdomain);
-            cursel = ComboBox_GetCurSel(domainCombo);
+        HWND domainCombo;
+        int cursel;
+        result = TRUE; //That's enough to keep going. Let's try the domain nonetheless
+        domainCombo = GetDlgItem(hwndDlg, gDialogsAndControls.IDC_DOMAIN);
+        GetDlgItemText(hwndDlg, gDialogsAndControls.IDC_DOMAIN, domain, nbdomain);
+        cursel = ComboBox_GetCurSel(domainCombo);
 
-            if(cursel >= 0)
+        if(cursel >= 0)
+        {
+            if(ComboBox_GetLBTextLen(domainCombo, cursel) < nbdomain)
             {
-                if(ComboBox_GetLBTextLen(domainCombo, cursel) < nbdomain)
-                {
-                    ComboBox_GetLBText(domainCombo, cursel, domain);
-                }
+                ComboBox_GetLBText(domainCombo, cursel, domain);
             }
-            else
-            {
-                *domain = 0;
-            }
+        }
+        else
+        {
+            *domain = 0;
         }
     }
 
@@ -88,49 +85,47 @@ BOOL IsWindowsServer()
 DWORD DisplayForceLogoffNotice(HWND hDlg, HANDLE hWlx, HANDLE current_user)
 {
     DWORD result = IDCANCEL;
-    TRACE(eDEBUG, L"About to display a notice for dialog index %d\n", gCurrentDlgIndex);
-    if ((gCurrentDlgIndex >= 0) && (gCurrentDlgIndex < nbDialogsAndControlsID)) //sanity
+    TRACE(eDEBUG, L"About to display a notice for locked dialog\n");
+    
+    wchar_t buf[2048];
+    wchar_t caption[512];
+    //Start with the caption
+    LoadString(hResourceDll, gDialogsAndControls.IDS_CAPTION, caption, sizeof caption / sizeof * caption);
+    //Windows XP has a plain vanilla message, no insert. Let's start with that
+    LoadString(hResourceDll, gDialogsAndControls.IDS_GENERIC_UNLOCK, buf, sizeof buf / sizeof * buf);
+
+    //The format of the message is different on Windows Server. This test is somewhat short sighted,
+    //but we know that in the future versions there is no Gina at all ! That's why we shortcut
+    //the test to either Windows XP or Windows Server.
+    if (IsWindowsServer())
     {
-        wchar_t buf[2048];
-        wchar_t caption[512];
-        //Start with the caption
-        LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_CAPTION, caption, sizeof caption / sizeof * caption);
-        //Windows XP has a plain vanilla message, no insert. Let's start with that
-        LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_GENERIC_UNLOCK, buf, sizeof buf / sizeof * buf);
+        wchar_t format[1024];
+        wchar_t username[1024];
+        wchar_t domain[1024];
+        int howmany;
+        howmany = GetUsernameAndDomainFromToken(current_user, domain, sizeof domain / sizeof * domain, username, sizeof username /  sizeof * username);
 
-        //The format of the message is different on Windows Server. This test is somewhat short sighted,
-        //but we know that in the future versions there is no Gina at all ! That's why we shortcut
-        //the test to either Windows XP or Windows Server.
-        if (IsWindowsServer())
+        switch(howmany)
         {
-            wchar_t format[1024];
-            wchar_t username[1024];
-            wchar_t domain[1024];
-            int howmany;
-            howmany = GetUsernameAndDomainFromToken(current_user, domain, sizeof domain / sizeof * domain, username, sizeof username /  sizeof * username);
-
-            switch(howmany)
-            {
-                case 2:
-                    {
-                        LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_DOMAIN_USERNAME, format, sizeof format / sizeof * format);
-                        wsprintf(buf, format, domain, username, L"some time");
-                    }
-                    break;
-                case 1:
-                    {
-                        LoadString(hResourceDll, gDialogsAndControls[gCurrentDlgIndex].IDS_USERNAME, format, sizeof format / sizeof * format);
-                        wsprintf(buf, format, username, L"some time");
-                    }
-                    break;
-            }
+            case 2:
+                {
+                    LoadString(hResourceDll, gDialogsAndControls.IDS_DOMAIN_USERNAME, format, sizeof format / sizeof * format);
+                    wsprintf(buf, format, domain, username, L"some time");
+                }
+                break;
+            case 1:
+                {
+                    LoadString(hResourceDll, gDialogsAndControls.IDS_USERNAME, format, sizeof format / sizeof * format);
+                    wsprintf(buf, format, username, L"some time");
+                }
+                break;
         }
-
-        TRACE(eERROR, buf);
-        TRACEMORE(eERROR, L"\n");
-        result = ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxMessageBox(hWlx, hDlg, buf, caption, MB_OKCANCEL | MB_ICONEXCLAMATION);
     }
-    return result;
+
+    TRACE(eERROR, buf);
+    TRACEMORE(eERROR, L"\n");
+
+    return ((PWLX_DISPATCH_VERSION_1_0) g_pWinlogon)->WlxMessageBox(hWlx, hDlg, buf, caption, MB_OKCANCEL | MB_ICONEXCLAMATION);
 }
 
 
@@ -245,7 +240,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
                         else
                         {
                             //mimic MSGINA behavior
-                            SetDlgItemText(hwndDlg, gDialogsAndControls[gCurrentDlgIndex].IDC_PASSWORD, L"");
+                            SetDlgItemText(hwndDlg, gDialogsAndControls.IDC_PASSWORD, L"");
                         }
 
                         bResult = TRUE;
