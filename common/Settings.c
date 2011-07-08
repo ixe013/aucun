@@ -29,9 +29,9 @@
 #include <windows.h>
 #include "settings.h"
 
-const wchar_t* gUnlockGroupName = L"unlock";
-const wchar_t* gForceLogoffGroupName = L"force logoff";
-const wchar_t* gExcludedGroupName = L"excluded";
+const wchar_t* gUnlockGroupName = L"Unlock";
+const wchar_t* gForceLogoffGroupName = L"Force logoff";
+const wchar_t* gExcludedGroupName = L"Excluded";
 
 
 
@@ -81,6 +81,10 @@ HRESULT GetSettingText(const wchar_t* key, const wchar_t* name, wchar_t* text, D
         }
 
         RegCloseKey(reg);
+    } 
+    else 
+    {
+        result = GetLastError();
     }
 
     return result;

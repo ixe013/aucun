@@ -2,7 +2,8 @@
 
 setlocal
 
-set TEST_EXE=release\test.exe
+set TEST_EXE=debug\test.exe
+::set TEST_EXE=test\Release\test.exe
 set UNLOCK_GROUP=aucun-unlock
 set FORCE_LOGOFF_GROUP=aucun-logoff
 set EXCLUDED_GROUP=aucun-excluded
@@ -48,145 +49,176 @@ rem http://www.paralint.com/blog/2008/08/21/easy-test-coverage-with-constant-ham
 echo                %d   User  Registry
 echo                     U  F   U  F
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test :  0   0  0   0  0    Expected result : eLetMSGINAHandleIt
 rem *------------------------------------------------------------*
 echo  %TEST_EXE% %1
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eLetMSGINAHandleIt% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test :  1   0  0   0  1   Expected result : eLetMSGINAHandleIt
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Force logoff" /f /d %FORCE_LOGOFF_GROUP%  1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eLetMSGINAHandleIt% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test :  3   0  0   1  1   Expected result : eLetMSGINAHandleIt
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Unlock" /f /d %UNLOCK_GROUP%  1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eLetMSGINAHandleIt% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test :  2   0  0   1  0   Expected result : eLetMSGINAHandleIt
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Force logoff" /f 1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eLetMSGINAHandleIt% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test :  6   0  1   1  0   Expected result : eLetMSGINAHandleIt
 rem *------------------------------------------------------------*
 net localgroup %FORCE_LOGOFF_GROUP% %1 /add  1> nul
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eLetMSGINAHandleIt% goto TEST_FAILED
 echo.
 
-
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test :  7   0  1   1  1   Expected result : eForceLogoff
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Force logoff" /f /d %FORCE_LOGOFF_GROUP%  1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eForceLogoff% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test :  5   0  1   0  1   Expected result : eForceLogoff
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Unlock" /f 1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eForceLogoff% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test :  4   0  1   0  0   Expected result : eLetMSGINAHandleIt
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Force logoff" /f 1> nul
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eLetMSGINAHandleIt% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test : 12   1  1   0  0   Expected result : eLetMSGINAHandleIt
 rem *------------------------------------------------------------*
 net localgroup %UNLOCK_GROUP% %1 /add  1> nul
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eLetMSGINAHandleIt% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test : 13   1  1   0  1   Expected result : eForceLogoff
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Force logoff" /f /d %FORCE_LOGOFF_GROUP%  1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eForceLogoff% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test : 15   1  1   1  1   Expected result : eUnlock
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Unlock" /f /d %UNLOCK_GROUP%  1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eUnlock% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test : 14   1  1   1  0   Expected result : eUnlock
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Force logoff" /f 1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eUnlock% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test : 10   1  0   1  0   Expected result : eUnlock
 rem *------------------------------------------------------------*
 net localgroup %FORCE_LOGOFF_GROUP% %1 /delete  1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eUnlock% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test : 11   1  0   1  1   Expected result : eUnlock
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Force logoff" /f /d %FORCE_LOGOFF_GROUP%  1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eUnlock% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*                                                                                             
 echo Running test :  9   1  0   0  1   Expected result : eLetMSGINAHandleIt
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Unlock" /f 1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eLetMSGINAHandleIt% goto TEST_FAILED
 echo.
 
 
+pause & cls
 rem *------------------------------------------------------------*
 echo Running test :  8   1  0   0  0   Expected result : eLetMSGINAHandleIt
 rem *------------------------------------------------------------*
 reg add HKLM\Software\Paralint.com\Aucun\Groups /v "Force logoff" /f 1> nul 
+call:show_params
 echo %TEST_USER_PASSWORD%| %TEST_EXE% %1
 if NOT ERRORLEVEL %eLetMSGINAHandleIt% goto TEST_FAILED
 echo.
@@ -209,3 +241,11 @@ echo Pass the username to use for tests
 :END
 
 endlocal
+
+goto:eof
+
+:show_params
+net localgroup %UNLOCK_GROUP%
+net localgroup %FORCE_LOGOFF_GROUP%
+reg query HKLM\Software\Paralint.com\Aucun\Groups
+goto:eof

@@ -30,14 +30,14 @@ msbuild GINA\AnyUserUnlockGina.vcxproj /nologo /v:q /p:Platform=x64;Configuratio
 echo Aucun x64 Debug
 msbuild GINA\AnyUserUnlockGina.vcxproj /nologo /v:q /p:Platform=x64;Configuration=Debug
 
-echo unlockap Win32 Release
-msbuild unlockap\unlockap.vcxproj /nologo /v:q /p:Platform=Win32;Configuration=Release
-echo unlockap Win32 Debug
-msbuild unlockap\unlockap.vcxproj /nologo /v:q /p:Platform=Win32;Configuration=Debug
-echo unlockap x64 Release
-msbuild unlockap\unlockap.vcxproj /nologo /v:q /p:Platform=x64;Configuration=Release
-echo unlockap x64 Release
-msbuild unlockap\unlockap.vcxproj /nologo /v:q /p:Platform=x64;Configuration=Debug
+::echo unlockap Win32 Release
+::msbuild unlockap\unlockap.vcxproj /nologo /v:q /p:Platform=Win32;Configuration=Release
+::echo unlockap Win32 Debug
+::msbuild unlockap\unlockap.vcxproj /nologo /v:q /p:Platform=Win32;Configuration=Debug
+::echo unlockap x64 Release
+::msbuild unlockap\unlockap.vcxproj /nologo /v:q /p:Platform=x64;Configuration=Release
+::echo unlockap x64 Release
+::msbuild unlockap\unlockap.vcxproj /nologo /v:q /p:Platform=x64;Configuration=Debug
 
 echo Test Win32 Release
 msbuild test\test.vcxproj /nologo /v:q /p:Platform=Win32;Configuration=Release

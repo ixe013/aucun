@@ -265,7 +265,7 @@ cleanup:
     return result;
 }
 
-BOOL GetSIDFromToken(HANDLE token, PSID* ppsid)
+BOOL GetSIDFromToken(HANDLE token, TOKEN_USER** tu)
 {
     BOOL result = false;
     DWORD infolen = 0;
@@ -276,7 +276,7 @@ BOOL GetSIDFromToken(HANDLE token, PSID* ppsid)
         {
             void* buf = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, infolen);
             GetTokenInformation(token, TokenUser, buf, infolen, &infolen);
-            *ppsid = ((TOKEN_USER*)buf)->User.Sid;
+            *tu = (TOKEN_USER*)buf;
             result = true;
         }
     }

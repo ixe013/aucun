@@ -483,16 +483,19 @@ int WINAPI WlxLoggedOutSAS(PVOID pWlxContext, DWORD dwSasType, PLUID pAuthentica
 
             if (GetSIDFromUsername(username, &selfservesid))
             {
-                PSID tokensid = 0;
+                TOKEN_USER *tu = 0;
 
-                if (GetSIDFromToken(*phToken, &tokensid))
+                if (GetSIDFromToken(*phToken, &tu))
                 {
+                    PSID tokensid = 0;
+                    tokensid = tu->User.Sid;
+
                     if (EqualSid(selfservesid, tokensid))
                     {
                         GetMyContext(pWlxContext)->mLogonScenario = eSelfServeLogon;
                     }
 
-                    HeapFree(GetProcessHeap(), 0, tokensid);
+                    HeapFree(GetProcessHeap(), 0, tu);
                 }
 
                 HeapFree(GetProcessHeap(), 0, selfservesid);

@@ -76,15 +76,11 @@ int _tmain(int argc, _TCHAR* argv[])
 {
     int result = -1;
     HANDLE lsa = 0;
-    //wchar_t unlock[MAX_GROUPNAME] = L"";
-    TRACE(eERROR, L"-------------------------\n");
-    wprintf(L"Fonction %s\n", _T( __FUNCTION__ ) );
-    wprintf(L"Fonction %s\n", _T( __FUNCSIG__ ) );
 
     //EnablePrivilege(L"SeTcbPrivilege");
     if (!RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa))
     {
-        TRACEMSG(GetLastError());
+        TRACE(eERROR, L"Process not registered 0x%0X", GetLastError());
     }
 
     if (argc > 1) for (int i = 1; i < argc; ++i)
@@ -96,25 +92,27 @@ int _tmain(int argc, _TCHAR* argv[])
             wchar_t domain[512];
             HANDLE current_user = 0;
             OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &current_user);
-            GetUsernameAndDomainFromToken(current_user, username, sizeof username / sizeof * username, domain, sizeof domain / sizeof * domain);
+            GetUsernameAndDomainFromToken(current_user, domain, sizeof domain / sizeof * domain, username, sizeof username / sizeof * username);
+            TOKEN_USER *tu = 0;
             PSID sid1 = 0;
             PSID sid2 = 0;
-            GetSIDFromToken(current_user, &sid1);
+            GetSIDFromToken(current_user, &tu);
+            sid1 = tu->User.Sid;
             GetSIDFromUsername(argv[i], &sid2);
 
             if(sid1 && sid2 && EqualSid(sid1, sid2))
             {
-                TRACE(eINFO, L"Meme criss de SID\n");
+                TRACE(eINFO, L"Same SID\n");
             }
 
             LPTSTR tsid = 0;
             ConvertSidToStringSid(sid1, &tsid);
-            wprintf(L"LogonSID : %s\n", tsid);
+            wprintf(L"LogonSID : %s (%s)\n", tsid, username);
             LocalFree(tsid);
             ConvertSidToStringSid(sid2, &tsid);
-            wprintf(L"User SID : %s\n", tsid);
+            wprintf(L"User SID : %s (%s)\n", tsid, argv[i]);
             LocalFree(tsid);
-            HeapFree(GetProcessHeap(), 0, sid1);
+            HeapFree(GetProcessHeap(), 0, tu);
             HeapFree(GetProcessHeap(), 0, sid2);
 
             if (ShouldHookUnlockPasswordDialog(current_user))
