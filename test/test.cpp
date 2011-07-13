@@ -77,6 +77,8 @@ int _tmain(int argc, _TCHAR* argv[])
     int result = -1;
     HANDLE lsa = 0;
 
+    TRACE(eINFO, L"Started\n");
+
     //EnablePrivilege(L"SeTcbPrivilege");
     if (!RegisterLogonProcess(LOGON_PROCESS_NAME, &lsa))
     {

@@ -33,14 +33,13 @@ WriteBufferProc GetOutputWriter(int level)
 {
     WriteBufferProc result = 0;
     wchar_t buffer[512];
+    int reglevel = eNONE;
 
     if (GetDebugSetting(L"Level", buffer, sizeof buffer / sizeof * buffer) == S_OK)
     {
-        int reglevel;
-
-        if (_wcsicmp(L"None", buffer) == 0)
+        if (_wcsicmp(L"Debug", buffer) == 0)
         {
-            reglevel = eNONE;
+            reglevel = eDEBUG;
         }
         else if (_wcsicmp(L"Error", buffer) == 0)
         {
@@ -58,18 +57,23 @@ WriteBufferProc GetOutputWriter(int level)
         {
             reglevel = eDEBUG;
         }
+    }
 
-        if (level >= reglevel)
+    if (level >= reglevel)
+    {
+        //TODO put code back when multiple ouput proc will be available
+        /*
+        if (GetDebugSetting(L"Output", buffer, sizeof buffer / sizeof * buffer) == S_OK)
         {
-            if (GetDebugSetting(L"Output", buffer, sizeof buffer / sizeof * buffer) == S_OK)
+            //Is it output debug string ?
+            if (_wcsicmp(L"OutputDebugString", buffer) == 0)
             {
-                //Is it output debug string ?
-                if (_wcsicmp(L"OutputDebugString", buffer) == 0)
-                {
-                    result = &WriteBufferToOutputDebugString;
-                }
+                result = &WriteBufferToOutputDebugString;
             }
         }
+        /*/
+        result = &WriteBufferToOutputDebugString;
+        //*/
     }
 
     return result;
