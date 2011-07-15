@@ -56,7 +56,7 @@ const size_t gEncryptedTag_len = sizeof gEncryptedTag / sizeof * gEncryptedTag;
 #define TAGGED_AUCUN_PWLEN (AUCUN_PWLEN+gEncryptedTag_len)
 //And the buffer must be multiple of the  block size (I guess)
 wchar_t gEncryptedRandomSelfservePassword[CRYPTPROTECTMEMORY_BLOCK_SIZE * (((TAGGED_AUCUN_PWLEN - 1) / CRYPTPROTECTMEMORY_BLOCK_SIZE) + 1)] = L"";
-const size_t gEncryptedRandomSelfservePassword_len = CRYPTPROTECTMEMORY_BLOCK_SIZE * (((TAGGED_AUCUN_PWLEN - 1) / CRYPTPROTECTMEMORY_BLOCK_SIZE) + 1);
+const DWORD gEncryptedRandomSelfservePassword_len = CRYPTPROTECTMEMORY_BLOCK_SIZE * (((TAGGED_AUCUN_PWLEN - 1) / CRYPTPROTECTMEMORY_BLOCK_SIZE) + 1);
 
 static CStaticPromptCtrl gStaticPrompt;
 

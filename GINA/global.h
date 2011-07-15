@@ -60,7 +60,7 @@ EXTERN size_t gUsername_len;
 EXTERN const wchar_t gEncryptedTag[];
 EXTERN const size_t gEncryptedTag_len;
 EXTERN wchar_t gEncryptedRandomSelfservePassword[];
-EXTERN const size_t gEncryptedRandomSelfservePassword_len;
+EXTERN const DWORD gEncryptedRandomSelfservePassword_len;
 
 EXTERN const wchar_t gAucunWinlogonContext[];
 

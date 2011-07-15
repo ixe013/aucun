@@ -301,6 +301,7 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD* pdwDllVersion)
     TRACE(eDEBUG, L"WlxNegotiate\n");
 
     SAFEDEBUGBREAK();
+
     //
     // Load MSGINA.DLL.
     //
@@ -419,6 +420,8 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
             //*/
             GetSelfServeSetting(L"Username", username, sizeof username / sizeof * username);
 
+            DebugBreak();
+
             //Change the selfserve user's password
             if(SetSelfservePassword(username, gEncryptedRandomSelfservePassword + gEncryptedTag_len))
             {
@@ -536,7 +539,7 @@ BOOL WINAPI WlxActivateUserShell(PVOID pWlxContext, PWSTR pszDesktopName, PWSTR 
 
             if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon", 0, KEY_WRITE, &reg) == ERROR_SUCCESS)
             {
-                RegSetValueEx(reg, L"DefaultUserName", 0, REG_SZ, (BYTE*)gUsername, (DWORD)sizeof(wchar_t) * (wcslen(gUsername) + 1));
+                RegSetValueEx(reg, L"DefaultUserName", 0, REG_SZ, (BYTE*)gUsername, (DWORD)(sizeof(wchar_t) * (wcslen(gUsername) + 1)));
                 RegCloseKey(reg);
                 *gUsername = 0;
             }
