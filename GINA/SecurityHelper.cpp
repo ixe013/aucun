@@ -547,20 +547,6 @@ int GetUsernameAndDomainFromToken(HANDLE token, wchar_t* domain, DWORD domain_le
     return result;
 }
 
-const wchar_t* FindUserNameInString(const wchar_t* rawusername)
-{
-    const wchar_t* result = 0;
-    //TODO : Replace this hack with CredUIParseUserName
-    result = wcsstr(rawusername, L"\\");
-
-    if (!result)
-    {
-        result = rawusername; //No domain entered, so point directly to the supplied buffer
-    }
-
-    return result;
-}
-
 int SetSelfservePassword(const wchar_t* username, const wchar_t* randpasswd)
 {
     int result = 0;

@@ -2,7 +2,7 @@
 
 setlocal
 
-set TEST_EXE=%~dp0debug\test.exe
+set TEST_EXE=%~dp0x64\debug\test.exe
 ::set TEST_EXE=%~dp0test\Release\test.exe
 set UNLOCK_GROUP=aucun-unlock
 set FORCE_LOGOFF_GROUP=aucun-logoff
@@ -14,7 +14,7 @@ set eForceLogoff=3
 
 if "%1" == "" goto TESTS_HELP
 
-echo Setting up tests....
+echo Setting up tests (testing binary %TEST_EXE%)...
 echo.
 
 rem *------------------------------------------------------------*

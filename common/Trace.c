@@ -6,7 +6,7 @@
 #include "trace.h"
 #include "settings.h"
 
-#define MAX_TRACE_BUFFER 1024
+#define MAX_TRACE_BUFFER 2048
 
 typedef int (*WriteBufferProc)(LPCWSTR buffer);
 
@@ -87,7 +87,6 @@ void Trace(int level, const wchar_t* file, const char* function, int line, const
     if (output_proc)
     {
         wchar_t buffer[MAX_TRACE_BUFFER];
-        va_list args;
 
         if (file && line)
         {
@@ -95,11 +94,17 @@ void Trace(int level, const wchar_t* file, const char* function, int line, const
             output_proc(buffer);
         }
 
-        va_start(args, format);
-
-        if (format && vswprintf_s(buffer, sizeof buffer / sizeof * buffer, format, args) >= 0)
+        if(format && *format)
         {
-            output_proc(buffer);
+            va_list args;
+            va_start(args, format);
+
+            if (vswprintf_s(buffer, sizeof buffer / sizeof * buffer, format, args) >= 0)
+            {
+                output_proc(buffer);
+            }
+
+            va_end(args);
         }
     }
 }

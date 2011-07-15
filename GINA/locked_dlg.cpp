@@ -165,6 +165,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
             GetDlgItemText(hwndDlg, 1956, rawdomain, sizeof rawdomain / sizeof * rawdomain);
             wchar_t* username = 0;
             wchar_t* domain = 0;
+            
             //Replace this hack with CredUIParseUserName
             username = wcsstr(rawusername, L"\\");
 
@@ -202,7 +203,7 @@ INT_PTR CALLBACK MyWlxWkstaLockedSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
                             //       (cet ordi) BC1
                             //This will handle cases when the computer name is
                             //after the localized text. It doesn't do anything on
-                            //an English or French local.
+                            //an English or French locale.
                             domain = pComputerName;
 
                             //If it ends with a space, trim it

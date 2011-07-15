@@ -86,21 +86,35 @@ int _tmain(int argc, _TCHAR* argv[])
     }
 
     if (argc > 1) for (int i = 1; i < argc; ++i)
+    {
+        wchar_t* username = 0;
+        wchar_t* domain = 0;
+        
+        //Replace this hack with CredUIParseUserName
+        username = wcsstr(argv[i], L"\\");
+
+        if (username)
         {
-            //  wchar_t user[MAX_USERNAME];
-            //  wchar_t domain[MAX_DOMAIN];
+            domain = argv[i];
+            *username++ = 0; //Null terminate the domain name and skip the separator
+        }
+        else
+        {
+            username = argv[i]; //No domain entered, so point directly to the supplied buffer
+        }
+
+        if(username && *username) //Should always be true
+        {
             wchar_t passwd[MAX_PASSWORD];
-            wchar_t username[512];
-            wchar_t domain[512];
             HANDLE current_user = 0;
             OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &current_user);
-            GetUsernameAndDomainFromToken(current_user, domain, sizeof domain / sizeof * domain, username, sizeof username / sizeof * username);
+            /*
             TOKEN_USER *tu = 0;
             PSID sid1 = 0;
             PSID sid2 = 0;
             GetSIDFromToken(current_user, &tu);
             sid1 = tu->User.Sid;
-            GetSIDFromUsername(argv[i], &sid2);
+            GetSIDFromUsername(username, &sid2);
 
             if(sid1 && sid2 && EqualSid(sid1, sid2))
             {
@@ -116,6 +130,7 @@ int _tmain(int argc, _TCHAR* argv[])
             LocalFree(tsid);
             HeapFree(GetProcessHeap(), 0, tu);
             HeapFree(GetProcessHeap(), 0, sid2);
+            */
 
             if (ShouldHookUnlockPasswordDialog(current_user))
             {
@@ -147,9 +162,13 @@ int _tmain(int argc, _TCHAR* argv[])
                 TRACE(eERROR, L"Unable to read password\n");
                 break;
             }
-
             CloseHandle(current_user);
         }
+        else
+        {
+            TRACE(eERROR, L"Unable to parse username. Domain must be specified, and you can use . for local machine\n");
+        }
+    }
     else
     {
         /*
