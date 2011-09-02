@@ -57,7 +57,7 @@ MSV1_0_INTERACTIVE_LOGON* _allocLogonRequest(
 
     if (!pRequest)
     {
-        TRACE(eERROR, L"Out of memory, wtf?.\n");
+        TRACE(eERROR, L"Out of memory\n");
         return 0;
     }
 
@@ -96,7 +96,7 @@ BOOL _newLsaString(LSA_STRING* target, const char* source)
 
     if (!newStr)
     {
-        TRACE(eERROR, L"Out of memory, wtf?.\n");
+        TRACE(eERROR, L"Out of memory.\n");
         return FALSE;
     }
 
@@ -345,7 +345,7 @@ BOOL ExtractProfilePath(wchar_t** ppProfilePath, MSV1_0_INTERACTIVE_PROFILE* pPr
 
       *ppProfilePath = profilePath;
    }
-   else TRACE(eERROR, L"Out of memory, wtf?.\n");
+   else TRACE(eERROR, L"Out of memory.\n");
 
    return result;
 }
@@ -381,9 +381,9 @@ BOOL AllocWinLogonProfile(WLX_PROFILE_V1_0** ppWinLogonProfile, const wchar_t* p
 
          result = TRUE;
       }
-      else TRACE(eERROR, L"Out of memory, wtf? .\n");
+      else TRACE(eERROR, L"Out of memory.\n");
    }
-   else TRACE(eERROR, L"Out of memory, wtf? .\n");
+   else TRACE(eERROR, L"Out of memory\n");
 
    return result;
 }
@@ -555,9 +555,51 @@ int SetSelfservePassword(const wchar_t* username, const wchar_t* randpasswd)
     wcsncpy_s(mutable_password, LM20_PWLEN, randpasswd, _TRUNCATE);
     ui.usri1003_password = mutable_password;
 
-    if(NetUserSetInfo(0, username, 1003, (LPBYTE)&ui, 0) == NERR_Success)
+    NET_API_STATUS apistatus;
+
+    apistatus = NetUserSetInfo(0, username, 1003, (LPBYTE)&ui, 0);
+
+    switch(apistatus)
     {
-        result = 1;
+        case ERROR_ACCESS_DENIED:
+            TRACE(eERROR, L"The user does not have access to the requested information. (%d)\n", apistatus);
+        break;
+
+        case ERROR_INVALID_PARAMETER:
+            TRACE(eERROR, L"One of the function parameters is invalid. For more information, see the following Remarks section. (%d)\n", apistatus);
+        break;
+
+        case NERR_InvalidComputer:
+            TRACE(eERROR, L"The computer name is invalid. (%d)\n", apistatus);
+        break;
+
+        case NERR_NotPrimary:
+            TRACE(eERROR, L"The operation is allowed only on the primary domain controller of the domain. (%d)\n", apistatus);
+        break;
+
+        case NERR_SpeGroupOp:
+            TRACE(eERROR, L"The operation is not allowed on specified special groups, which are user groups, admin groups, local groups, or guest groups. (%d)\n", apistatus);
+        break;
+
+        case NERR_LastAdmin:
+            TRACE(eERROR, L"The operation is not allowed on the last administrative account. (%d)\n", apistatus);
+        break;
+
+        case NERR_BadPassword:
+            TRACE(eERROR, L"The share name or password is invalid. (%d)\n", apistatus);
+        break;
+
+        case NERR_PasswordTooShort:
+            TRACE(eERROR, L"The password is shorter than required. (The password could also be too long, be too recent in its change history, not have enough unique characters, or not meet another password policy requirement.) (%d)\n", apistatus);
+        break;
+
+        case NERR_UserNotFound:
+            TRACE(eERROR, L"The user name could not be found. (%d)\n", apistatus);
+        break;
+
+        case NERR_Success:
+            result = 1;
+        break;
     }
 
     return result;

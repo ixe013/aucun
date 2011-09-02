@@ -252,6 +252,10 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             {
                 TRACE(eINFO, L"Clicked OK but credential dialog is shown again.\n");
                 hwndPrompt = AddStaticPrompt(hwndDlg);
+            } else {
+                ShowWindow(GetDlgItem(hwndDlg, 1502), SW_SHOW); //Username
+                ShowWindow(GetDlgItem(hwndDlg, 1503), SW_SHOW); //Password
+                ShowWindow(GetDlgItem(hwndDlg, 1504), SW_SHOW); //Domain
             }
 
             break;

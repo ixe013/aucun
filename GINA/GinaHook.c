@@ -300,7 +300,7 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD* pdwDllVersion)
 
     TRACE(eDEBUG, L"WlxNegotiate\n");
 
-    SAFEDEBUGBREAK();
+    //SAFEDEBUGBREAK();
 
     //
     // Load MSGINA.DLL.
@@ -420,7 +420,7 @@ BOOL WINAPI WlxInitialize(LPWSTR lpWinsta, HANDLE hWlx, PVOID pvReserved, PVOID 
             //*/
             GetSelfServeSetting(L"Username", username, sizeof username / sizeof * username);
 
-            DebugBreak();
+            //DebugBreak();
 
             //Change the selfserve user's password
             if(SetSelfservePassword(username, gEncryptedRandomSelfservePassword + gEncryptedTag_len))
