@@ -147,6 +147,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
     static HWND hwndPrompt = 0;
     static int password_chances = -1;
     bool handled = false;
+    static bool domain_was_present = false;
     INT_PTR result = 0;
 
     switch (uMsg)
@@ -156,10 +157,12 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
                 wchar_t buf[32];
 
                 DialogLParamHook* myinitparam = (DialogLParamHook*)lParam;
-                lParam = myinitparam->HookedLPARAM;
+                lParam = myinitparam->HookedLPARAM;                          
 
                 result = gDialogsProc[LOGGED_OUT_SAS_dlg].originalproc(hwndDlg, uMsg, wParam, lParam);
                 handled = true;
+
+                domain_was_present = IsWindowVisible(GetDlgItem(hwndDlg, 1504)) == TRUE;
 
                 if(pgAucunContext->mLogonScenario == eAutoLogon)
                 {
@@ -193,7 +196,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             break;
         case WM_COMMAND :
 
-            if ((HIWORD(wParam) == STN_CLICKED) && (LOWORD(wParam == IDC_SELFSERVEPROMPT)))
+            if ((HIWORD(wParam) == STN_CLICKED) && (LOWORD(wParam) == IDC_SELFSERVEPROMPT))
             {
                 RECT rect;
                 wchar_t username[255];
@@ -255,7 +258,9 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             } else {
                 ShowWindow(GetDlgItem(hwndDlg, 1502), SW_SHOW); //Username
                 ShowWindow(GetDlgItem(hwndDlg, 1503), SW_SHOW); //Password
-                ShowWindow(GetDlgItem(hwndDlg, 1504), SW_SHOW); //Domain
+                //TODO : Maybe the domain was not there to begin with
+                if(domain_was_present)
+                    ShowWindow(GetDlgItem(hwndDlg, 1504), SW_SHOW); //Domain
             }
 
             break;

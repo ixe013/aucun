@@ -92,6 +92,8 @@ class ATL_NO_VTABLE CStaticPromptImpl : public CWindowImpl< T, TBase, TWinTraits
                     {
                         ATLASSERT("Invalid static style for gradient label" == NULL);
                     }
+
+                    SetClassLong(*this, GCL_HCURSOR, (LONG)LoadCursor(0, IDC_HAND));
                 }
             }
 
@@ -145,11 +147,11 @@ class ATL_NO_VTABLE CStaticPromptImpl : public CWindowImpl< T, TBase, TWinTraits
 
         // Message map and handlers
         BEGIN_MSG_MAP(thisClass)
-        MESSAGE_HANDLER(WM_CREATE, OnCreate)
-        MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
-        MESSAGE_HANDLER(WM_PAINT, OnPaint)
-        MESSAGE_HANDLER(WM_PRINTCLIENT, OnPaint)
-        MESSAGE_HANDLER(WM_SETCURSOR, OnSetCursor)
+            MESSAGE_HANDLER(WM_CREATE, OnCreate)
+            MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
+            MESSAGE_HANDLER(WM_PAINT, OnPaint)
+            MESSAGE_HANDLER(WM_PRINTCLIENT, OnPaint)
+            //MESSAGE_HANDLER(WM_SETCURSOR, OnSetCursor)
         END_MSG_MAP()
 
         LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -229,13 +231,14 @@ class ATL_NO_VTABLE CStaticPromptImpl : public CWindowImpl< T, TBase, TWinTraits
             dc.SelectFont(hOldFont);
         }
 
-        LRESULT OnSetCursor(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
-        {
-            //TODO: Set cursor code does not work, fix it or destroy it
-            SetCursor(LoadCursor(0, IDC_HAND));
-            bHandled = TRUE;
-            return 1;
-        }
+
+        //LRESULT OnSetCursor(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+        //{
+            ////TODO: Set cursor code does not work, fix it or destroy it
+            //SetCursor(LoadCursor(0, IDC_HAND));
+            //bHandled = TRUE;
+            //return 1;
+        //}
 };
 
 

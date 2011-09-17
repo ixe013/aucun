@@ -35,7 +35,7 @@ REGEDIT4
 ;* 
 ;****************************************************************************
 [HKEY_LOCAL_MACHINE\SOFTWARE\Paralint.com\Aucun\Selfserve]
-"Attemps"=3
+"Attemps"="3"
 "Text"="Click here to recover your password."
 "Shell"="%windir%\system32\shellie.exe"
 "Username"=".\selfserviceuser"
