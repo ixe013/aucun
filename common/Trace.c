@@ -125,3 +125,4 @@ void TraceMessage(const wchar_t* file, const char* function, int line, DWORD dw)
     Trace(eERROR, file, function, line, L"0x%08X: %s", dw, lpMsgBuf);
     LocalFree(lpMsgBuf);
 }
+

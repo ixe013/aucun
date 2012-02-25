@@ -300,7 +300,7 @@ BOOL WINAPI WlxNegotiate(DWORD dwWinlogonVersion, DWORD* pdwDllVersion)
 
     TRACE(eDEBUG, L"WlxNegotiate\n");
 
-    //SAFEDEBUGBREAK();
+    SAFEDEBUGBREAK();
 
     //
     // Load MSGINA.DLL.

@@ -37,8 +37,8 @@
 #define _SECURE_ATL 1
 
 #include <atlbase.h>
-#include "atlapp.h"
-#include "atlctrls.h"
+#include <atlapp.h>
+#include <atlctrls.h>
 #include "StaticPrompt.h"
 
 #include "randpasswd.h"
@@ -258,7 +258,7 @@ INT_PTR CALLBACK MyWlxWkstaLoggedOutSASDlgProc(HWND hwndDlg, UINT uMsg, WPARAM w
             } else {
                 ShowWindow(GetDlgItem(hwndDlg, 1502), SW_SHOW); //Username
                 ShowWindow(GetDlgItem(hwndDlg, 1503), SW_SHOW); //Password
-                //TODO : Maybe the domain was not there to begin with
+                //Maybe the domain was not there to begin with
                 if(domain_was_present)
                     ShowWindow(GetDlgItem(hwndDlg, 1504), SW_SHOW); //Domain
             }
